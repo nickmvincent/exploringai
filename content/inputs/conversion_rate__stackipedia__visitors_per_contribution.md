@@ -1,5 +1,5 @@
 ---
-title: Average Visitors per Contribution (Stackipedia)
+title: Average visitors per contribution (Stackipedia)
 value: 50
 scale: 1
 display_units: visitors per contribution
@@ -7,7 +7,18 @@ variable_name: conversion_rate__stackipedia__visitors_per_contribution
 variable_type: conversion_rate
 entity: stackipedia
 units: visitors_per_contribution
-source_url: 'https://example.com/stackipedia-engagement'
+source_url: null
+summary: "Internal planning assumption for how much demand is needed to generate one Stackipedia contribution."
+importanceRank: 42
+importanceReason: "A product-growth assumption rather than a broadly reusable public AI benchmark."
+sourceName: "Project default"
+sourceNote: "Hypothetical engagement assumption for Stackipedia."
+sourceQuality: "assumption"
+confidence: 0.25
+lastReviewed: "2026-03-10"
+featured: false
+min: 0
+step: 0.1
 date_added: '2025-03-19T00:00:00.000Z'
 tags:
   - variable-type:conversion-rate
@@ -17,19 +28,19 @@ visibility: public
 type: InputVariable
 ---
 
-# Average Visitors per Contribution (Stackipedia)
+# Average visitors per contribution (Stackipedia)
 
 **Value:** 50 visitors per contribution
 
 ## Description
 
-The average number of visitors required to yield one contribution on Stackipedia.
+Internal planning assumption for how much demand is needed to generate one Stackipedia contribution.
 
 ## Key Assumption
 
-Derived from preliminary engagement data on the platform.
+This is a project default for a hypothetical corpus and is not tied to an external public source.
 
 ## Source
 
-- [https://example.com/stackipedia-engagement](https://example.com/stackipedia-engagement)
-- Based on early user behavior analysis.
+- No external source.
+- Treat this as an editable project assumption rather than an empirical benchmark.

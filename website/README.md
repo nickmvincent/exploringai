@@ -37,7 +37,11 @@ This site loads content directly from:
 | `npm install`     | Install dependencies                        |
 | `npm run dev`     | Start dev server at `localhost:4321`        |
 | `npm run build`   | Build production site to `./dist/`          |
+| `npm run build:stable` | Build the stable GitHub Pages version      |
+| `SITE_URL=https://dev.exploringai.org npm run build:dev` | Build the Cloudflare dev version |
 | `npm run preview` | Preview production build locally            |
+| `npm run cf:dev`  | Serve the built site through Cloudflare Pages locally |
+| `npm run cf:deploy` | Deploy `./dist/` to Cloudflare Pages with Wrangler |
 
 ## How It Works
 
@@ -55,3 +59,11 @@ To add/edit inputs or scenarios, modify the markdown files in:
 ```
 
 See existing files for the expected frontmatter format.
+
+## Deploy Targets
+
+- GitHub Pages stable builds use `SITE_URL=https://exploringai.org`
+- Cloudflare dev builds should set `SITE_URL` to the dev domain and `PUBLIC_ALLOW_INDEXING=false`
+- Run `npm exec wrangler login` once before using Wrangler locally
+
+The repository root README documents the GitHub Actions workflows and required Cloudflare secrets.

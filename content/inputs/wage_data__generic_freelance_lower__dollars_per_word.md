@@ -1,13 +1,24 @@
 ---
-title: Freelance rate per word (low estimate)
-value: 0.1
+title: Paid writing rate per word (lower benchmark)
+value: 0.02
 scale: 1
 display_units: dollars per word
 variable_name: wage_data__generic_freelance_lower__dollars_per_word
 variable_type: wage_data
 entity: generic_freelance_lower
 units: dollars_per_word
-source_url: 'https://www.clearvoice.com/resources/how-much-to-pay-a-freelance-writer/'
+source_url: 'https://www.the-efa.org/rates/'
+summary: "A lower-bound professional benchmark for paid per-word labor."
+importanceRank: 18
+importanceReason: "Provides a lower-bound labor benchmark for commissioned text."
+sourceName: "Editorial Freelancers Association 2024 rate chart"
+sourceNote: "Uses a low-end professional editorial benchmark as a rough floor for paid per-word labor."
+sourceQuality: "industry"
+confidence: 0.6
+lastReviewed: "2026-03-10"
+featured: false
+min: 0
+step: 0.0001
 date_added: '2025-03-19T00:00:00.000Z'
 tags:
   - variable-type:wage-data
@@ -17,19 +28,19 @@ visibility: public
 type: InputVariable
 ---
 
-# Freelance rate per word (low estimate)
+# Paid writing rate per word (lower benchmark)
 
-**Value:** 0.10 dollars per word
+**Value:** 0.02 dollars per word
 
 ## Description
 
-Freelance rate per word (beginner)
+A lower-bound professional benchmark for paid per-word labor.
 
 ## Key Assumption
 
-Rate estimate based on market conditions
+Uses a low-end Editorial Freelancers Association benchmark as a rough floor for professional per-word compensation.
 
 ## Source
 
-- [https://www.clearvoice.com/resources/how-much-to-pay-a-freelance-writer/](https://www.clearvoice.com/resources/how-much-to-pay-a-freelance-writer/)
-- Survey by ClearVoice, a company
+- [https://www.the-efa.org/rates/](https://www.the-efa.org/rates/)
+- The Editorial Freelancers Association publishes professional benchmark ranges for editorial and writing-adjacent work.

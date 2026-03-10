@@ -1,5 +1,5 @@
 ---
-title: Average Contributions per Document (Stackipedia)
+title: Average contributions per document (Stackipedia)
 value: 2
 scale: 1
 display_units: contributions per document
@@ -7,7 +7,18 @@ variable_name: conversion_rate__stackipedia__contributions_per_document
 variable_type: conversion_rate
 entity: stackipedia
 units: contributions_per_document
-source_url: 'https://example.com/stackipedia-content-aggregation'
+source_url: null
+summary: "Internal planning assumption for how many contributions it takes to assemble one Stackipedia document."
+importanceRank: 41
+importanceReason: "Useful for scenario design, but this is an internal product assumption rather than a public literacy baseline."
+sourceName: "Project default"
+sourceNote: "Hypothetical productivity assumption for Stackipedia."
+sourceQuality: "assumption"
+confidence: 0.25
+lastReviewed: "2026-03-10"
+featured: false
+min: 0
+step: 0.01
 date_added: '2025-03-19T00:00:00.000Z'
 tags:
   - variable-type:conversion-rate
@@ -17,19 +28,19 @@ visibility: public
 type: InputVariable
 ---
 
-# Average Contributions per Document (Stackipedia)
+# Average contributions per document (Stackipedia)
 
 **Value:** 2 contributions per document
 
 ## Description
 
-Average number of contributions required to form one complete document on Stackipedia.
+Internal planning assumption for how many contributions it takes to assemble one Stackipedia document.
 
 ## Key Assumption
 
-Assumes that multiple contributions are aggregated to create a final document.
+This is a project default for a hypothetical corpus and is not tied to an external public source.
 
 ## Source
 
-- [https://example.com/stackipedia-content-aggregation](https://example.com/stackipedia-content-aggregation)
-- Based on current content creation models.
+- No external source.
+- Treat this as an editable project assumption rather than an empirical benchmark.

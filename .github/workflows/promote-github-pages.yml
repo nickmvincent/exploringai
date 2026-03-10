@@ -1,0 +1,82 @@
+name: Promote GitHub Pages
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Git ref to publish to gh-pages
+        required: true
+        default: main
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: github-pages-release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source ref
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: website/package-lock.json
+
+      - name: Install website dependencies
+        working-directory: website
+        run: npm ci
+
+      - name: Build stable site
+        working-directory: website
+        env:
+          SITE_URL: https://exploringai.org
+          PUBLIC_ALLOW_INDEXING: 'true'
+        run: npm run build
+
+      - name: Check out gh-pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Sync built site into gh-pages branch
+        shell: bash
+        run: rsync -av --delete --exclude='.git' website/dist/ gh-pages/
+
+      - name: Commit and push release
+        working-directory: gh-pages
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+
+          if git diff --staged --quiet; then
+            echo "No GitHub Pages changes to publish."
+            exit 0
+          fi
+
+          git commit -m "Publish ${{ inputs.ref }} to GitHub Pages"
+          git push origin HEAD:gh-pages
+
+      - name: Write promotion summary
+        shell: bash
+        run: |
+          {
+            echo "### GitHub Pages promotion"
+            echo
+            echo "- Published ref: \`${{ inputs.ref }}\`"
+            echo "- Target branch: \`gh-pages\`"
+            echo "- Stable URL: \`https://exploringai.org\`"
+          } >> "${GITHUB_STEP_SUMMARY}"

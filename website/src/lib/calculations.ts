@@ -13,6 +13,23 @@ export interface Input {
   units: string;
   source_url?: string;
   nice_name?: string;
+  importanceRank?: number;
+  importanceReason?: string;
+  sourceName?: string;
+  sourceNote?: string;
+  sourceQuality?: string;
+  summary?: string;
+  confidence?: number;
+  lastReviewed?: string;
+  featured?: boolean;
+  min?: number;
+  max?: number;
+  step?: number;
+  usedIn?: {
+    id: string;
+    title: string;
+    category: string;
+  }[];
 }
 
 export interface Scenario {
@@ -47,7 +64,13 @@ export interface Operation {
  */
 export function formatLabel(key: string): string {
   if (!key) return '';
-  return key.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase());
+  return key
+    .replace(/__/g, ' ')
+    .replace(/_/g, ' ')
+    .replace(/([A-Z])/g, ' $1')
+    .trim()
+    .replace(/\s+/g, ' ')
+    .replace(/\b\w/g, (str) => str.toUpperCase());
 }
 
 /**

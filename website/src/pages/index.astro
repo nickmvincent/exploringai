@@ -1,14 +1,37 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import NapkinApp from '../components/NapkinApp.vue';
 import { getCollection } from 'astro:content';
+import NapkinApp from '../components/NapkinApp.vue';
+import Layout from '../layouts/Layout.astro';
+import networkData from '../data/network.json';
+import type { Input, Scenario } from '../lib/calculations';
+import { createCalculationFunction, formatValue, humanReadable } from '../lib/calculations';
 
-// Load content from markdown files
 const inputEntries = await getCollection('inputs');
 const scenarioEntries = await getCollection('scenarios');
 
-// Transform inputs into the format expected by the app
-const inputs: Record<string, any> = {};
+const blogProject = networkData.allProjects.find((project) => project.name === 'data-leverage-blogs');
+
+const scenarioReferences = scenarioEntries.map((entry) => ({
+  id: entry.id,
+  title: entry.data.title,
+  category: entry.data.category,
+  inputVariables: entry.data.input_variables,
+}));
+
+const inputUsage = new Map<string, { id: string; title: string; category: string }[]>();
+for (const scenario of scenarioReferences) {
+  scenario.inputVariables.forEach((inputKey) => {
+    const existing = inputUsage.get(inputKey) ?? [];
+    existing.push({
+      id: scenario.id,
+      title: scenario.title,
+      category: scenario.category,
+    });
+    inputUsage.set(inputKey, existing);
+  });
+}
+
+const inputs: Record<string, Input> = {};
 for (const entry of inputEntries) {
   const { data } = entry;
   inputs[data.variable_name] = {
@@ -20,22 +43,34 @@ for (const entry of inputEntries) {
     display_units: data.display_units,
     variable_name: data.variable_name,
     variable_type: data.variable_type,
-    entity: data.entity,
+    entity: data.entity ?? undefined,
     units: data.units,
-    source_url: data.source_url,
+    source_url: data.source_url ?? undefined,
     nice_name: data.title,
+    summary: data.summary ?? undefined,
+    importanceRank: data.importanceRank ?? undefined,
+    importanceReason: data.importanceReason ?? undefined,
+    sourceName: data.sourceName ?? undefined,
+    sourceNote: data.sourceNote ?? undefined,
+    sourceQuality: data.sourceQuality ?? undefined,
+    confidence: data.confidence ?? undefined,
+    lastReviewed: data.lastReviewed ?? undefined,
+    featured: data.featured ?? false,
+    min: data.min ?? undefined,
+    max: data.max ?? undefined,
+    step: data.step ?? undefined,
+    usedIn: inputUsage.get(data.variable_name) ?? [],
   };
 }
 
-// Transform scenarios into the format expected by the app
-const scenarios = scenarioEntries.map(entry => {
+const scenarios: Scenario[] = scenarioEntries.map((entry) => {
   const { data } = entry;
   return {
     id: entry.id,
     title: data.title,
     description: data.description,
     input_variables: data.input_variables,
-    inputs: data.input_variables, // Initially same as input_variables
+    inputs: data.input_variables,
     calculation_type: data.calculation_type,
     operations: data.operations,
     result_label: data.result_label,
@@ -50,12 +85,584 @@ const scenarios = scenarioEntries.map(entry => {
     showCalcDetails: false,
   };
 });
+
+function getDecimalPlaces(step?: number) {
+  if (!step || step >= 1) return 0;
+  const decimalPart = String(step).split('.')[1] ?? '';
+  return Math.min(decimalPart.length, 6);
+}
+
+function formatInputNumber(input: Input) {
+  const displayedValue = formatValue(input.value, input.scale);
+  const formatter = new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: getDecimalPlaces(input.step),
+  });
+
+  return formatter.format(displayedValue);
+}
+
+const simpleInputIds = [
+  'dataset_size__llama3__tokens',
+  'dataset_size__olmo3__tokens',
+  'training_detail__openai__words_per_token',
+  'dataset_size__hle__questions',
+  'deal_group_size__reddit__daily_active_users',
+  'group_size__usa__people',
+  'group_size__world__people',
+  'post_training_size__tulu_3__sft_examples',
+];
+
+const simpleInputs = simpleInputIds
+  .map((id) => inputs[id])
+  .filter(Boolean)
+  .map((input) => ({
+    ...input,
+    displayValue: formatInputNumber(input),
+  }));
+
+const snapshotIntroById: Record<string, string> = {
+  'distributing-money-from-data-deals':
+    'A concrete licensing example: what happens when a disclosed platform deal gets spread across the people who made the platform valuable?',
+  'distributing-ai-company-revenue-broadly':
+    'A top-down framing of AI revenue at population scale. Useful when people talk about broad-based benefit sharing.',
+  'commissioning-new-datasets':
+    'A replacement-cost thought experiment for commissioning new pretraining data rather than scraping it.',
+  'producing-an-expert-evaluation-set':
+    'A labor-cost framing for expert benchmarks, using a public eval as the anchor point.',
+};
+
+const scenarioSnapshots = scenarios.map((scenario) => {
+  const calculate = createCalculationFunction(scenario);
+  const rawValue = calculate(...scenario.input_variables.map((inputKey) => inputs[inputKey]?.value ?? 0));
+
+  return {
+    id: scenario.id,
+    title: scenario.title,
+    category: scenario.category,
+    description:
+      snapshotIntroById[scenario.id] ??
+      'A default snapshot of the current calculation using the live input values published in this repository.',
+    resultLabel: scenario.result_label,
+    resultValue: humanReadable(rawValue),
+    resultUnits: scenario.result_units,
+  };
+});
+
+const paperHighlightIds = [
+  'dataset_size__hle__questions',
+  'pretraining_composition__dolma_v1_6__academic_percent',
+  'post_training_size__tulu_3__sft_examples',
+  'dataset_size__llama3__tokens',
+];
+
+const paperHighlights = paperHighlightIds
+  .map((id) => inputs[id])
+  .filter(Boolean)
+  .map((input) => ({
+    title: input.sourceName || input.title,
+    href: input.source_url,
+    blurb: input.sourceNote || input.summary || input.importanceReason || 'Reference source highlighted in the input library.',
+    anchor: input.title,
+    quality: input.sourceQuality,
+  }));
+
+const watchIndicators = [
+  'AI company earnings calls, SEC filings, and updated revenue run rates.',
+  'Publisher and platform licensing deals, especially renewals with disclosed terms.',
+  'Open-model releases that publish training mix, corpus size, or post-training composition.',
+  'Benchmark growth and contributor-compensation norms for expert evaluation work.',
+  'Inference price movement across flagship and mini model tiers.',
+];
+
+const ourAsks = [
+  'Publish deal values and renewal terms in ways researchers and journalists can cite.',
+  'Break out AI-specific revenue from total company revenue whenever possible.',
+  'Disclose pretraining size, post-training size, and mix composition as first-class metrics.',
+  'Make contributor compensation for benchmarks and labeling more legible.',
+  'Treat data access, licensing, and opt-out infrastructure as measurable public-interest indicators.',
+];
 ---
 
 <Layout title="Data Napkin Math">
-  <NapkinApp
-    client:load
-    initialInputs={inputs}
-    initialScenarios={scenarios}
-  />
+  <main class="home-shell">
+    <section class="landing-hero">
+      <div class="hero-copy">
+        <p class="section-kicker">Exploring AI in public numbers</p>
+        <h1>Five sections, one live calculator, and a clearer path through the data.</h1>
+        <p class="hero-text">
+          This homepage now moves from raw inputs, to calculations, to snapshot-style takeaways,
+          to outside reading, to the indicators and disclosures we still want to watch.
+        </p>
+        <div class="hero-actions">
+          <a class="hero-link hero-link-primary" href="/#inputs">Start with inputs</a>
+          <a class="hero-link" href="/#calculations">Jump to calculations</a>
+          <a class="hero-link" href="/#watch">See the watchlist</a>
+        </div>
+      </div>
+
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <strong>{simpleInputs.length}</strong>
+          <span>anchor inputs</span>
+        </div>
+        <div class="hero-stat">
+          <strong>{scenarioSnapshots.length}</strong>
+          <span>live calculations</span>
+        </div>
+        <div class="hero-stat">
+          <strong>{paperHighlights.length}</strong>
+          <span>highlighted sources</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="inputs" class="landing-section">
+      <div class="section-header">
+        <p class="section-kicker">Section 1</p>
+        <h2>Inputs</h2>
+        <p>
+          Start with plain numbers from public sources. These are the least interpretive pieces of the site:
+          counts, rates, sizes, and benchmark totals that anchor the rest of the math.
+        </p>
+      </div>
+
+      <div class="number-grid">
+        {simpleInputs.map((input) => (
+          <article class="number-card">
+            <div class="number-card-top">
+              <span class="mini-badge">{input.sourceQuality === 'primary' ? 'Primary' : 'Official'}</span>
+              {input.lastReviewed && <span class="number-meta">Reviewed {input.lastReviewed}</span>}
+            </div>
+            <h3>{input.title}</h3>
+            <div class="number-value">{input.displayValue}</div>
+            <div class="number-units">{input.display_units}</div>
+            <p class="number-summary">{input.summary || input.importanceReason}</p>
+            <div class="number-footer">
+              <span>Used in {input.usedIn?.length || 0} scenarios</span>
+              {input.source_url && (
+                <a href={input.source_url} target="_blank" rel="noreferrer">
+                  Source
+                </a>
+              )}
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section id="calculations" class="landing-section">
+      <div class="section-header">
+        <p class="section-kicker">Section 2</p>
+        <h2>Calculations</h2>
+        <p>
+          This is the interactive layer. Take the inputs above, swap comparable benchmarks, and see how
+          quickly the outputs move when the assumptions change.
+        </p>
+      </div>
+
+      <div class="calculator-shell">
+        <NapkinApp
+          client:load
+          initialInputs={inputs}
+          initialScenarios={scenarios}
+          initialView="scenarios"
+          showHeader={false}
+          showAbout={false}
+        />
+      </div>
+    </section>
+
+    <section id="blogs" class="landing-section">
+      <div class="section-header section-header-inline">
+        <div>
+          <p class="section-kicker">Section 3</p>
+          <h2>Blogs</h2>
+          <p>
+            Snapshot cards for the current default calculations. These are the kinds of numbers we can
+            quickly turn into short posts, explainers, or shareable references.
+          </p>
+        </div>
+
+        {blogProject && (
+          <a class="section-link" href={blogProject.website} target="_blank" rel="noreferrer">
+            Visit Data Leverage Blogs
+          </a>
+        )}
+      </div>
+
+      <div class="snapshot-grid">
+        {scenarioSnapshots.map((snapshot) => (
+          <article class="snapshot-card">
+            <div class="snapshot-header">
+              <span class="mini-badge">{snapshot.category}</span>
+              <a href="/#calculations">Open calculator</a>
+            </div>
+            <h3>{snapshot.title}</h3>
+            <p>{snapshot.description}</p>
+            <div class="snapshot-result-label">{snapshot.resultLabel}</div>
+            <div class="snapshot-result-value">{snapshot.resultValue}</div>
+            <div class="snapshot-result-units">{snapshot.resultUnits}</div>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section id="papers" class="landing-section">
+      <div class="section-header">
+        <p class="section-kicker">Section 4</p>
+        <h2>Highlighted other papers</h2>
+        <p>
+          A short reading list of outside sources that do real work for the numbers on this site:
+          benchmark papers, model cards, and dataset cards that add context beyond the calculator itself.
+        </p>
+      </div>
+
+      <div class="paper-grid">
+        {paperHighlights.map((paper) => (
+          <article class="paper-card">
+            <div class="paper-card-top">
+              <span class="mini-badge">{paper.quality ? paper.quality : 'Reference'}</span>
+              {paper.href && (
+                <a href={paper.href} target="_blank" rel="noreferrer">
+                  Read source
+                </a>
+              )}
+            </div>
+            <h3>{paper.title}</h3>
+            <p class="paper-anchor">{paper.anchor}</p>
+            <p>{paper.blurb}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section id="watch" class="landing-section">
+      <div class="section-header">
+        <p class="section-kicker">Section 5</p>
+        <h2>Indicators to watch and our asks</h2>
+        <p>
+          The calculator is only as good as the disclosures around it. This section keeps the emphasis on
+          what we still need from companies, publishers, and public reporting.
+        </p>
+      </div>
+
+      <div class="watch-grid">
+        <article class="watch-card">
+          <h3>Indicators we want to watch</h3>
+          <ul>
+            {watchIndicators.map((item) => <li>{item}</li>)}
+          </ul>
+        </article>
+
+        <article class="watch-card">
+          <h3>Our asks</h3>
+          <ul>
+            {ourAsks.map((item) => <li>{item}</li>)}
+          </ul>
+        </article>
+      </div>
+    </section>
+  </main>
 </Layout>
+
+<style>
+  .home-shell {
+    width: 100%;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  .landing-hero,
+  .landing-section {
+    border: 1px solid rgba(179, 90, 30, 0.18);
+    border-radius: 26px;
+    background: rgba(255, 250, 242, 0.92);
+    box-shadow: 0 12px 24px rgba(78, 56, 36, 0.12);
+  }
+
+  .landing-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(260px, 0.8fr);
+    gap: 1.5rem;
+    padding: 2rem;
+    background:
+      radial-gradient(circle at 10% 10%, rgba(255, 255, 255, 0.72), transparent 34%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.26), rgba(255, 255, 255, 0.04)),
+      rgba(255, 250, 242, 0.92);
+  }
+
+  .hero-copy h1 {
+    margin-bottom: 0.8rem;
+    color: var(--primary-color);
+    font-size: clamp(2.4rem, 5vw, 3.8rem);
+    line-height: 1.02;
+  }
+
+  .hero-text {
+    max-width: 720px;
+    color: var(--ink-soft);
+    font-size: 1.08rem;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    margin-top: 1.25rem;
+  }
+
+  .hero-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.6rem;
+    padding: 0.62rem 0.98rem;
+    border-radius: 999px;
+    border: 1px solid rgba(179, 90, 30, 0.22);
+    color: var(--ink-soft);
+    text-decoration: none;
+    background: rgba(255, 255, 255, 0.8);
+    transition: transform 0.18s ease, background-color 0.18s ease, color 0.18s ease;
+  }
+
+  .hero-link:hover {
+    transform: translateY(-1px);
+    color: var(--primary-color);
+  }
+
+  .hero-link-primary {
+    color: var(--white);
+    background: linear-gradient(135deg, var(--primary-color), #c56e31);
+  }
+
+  .hero-link-primary:hover {
+    color: var(--white);
+  }
+
+  .hero-stats {
+    display: grid;
+    gap: 0.9rem;
+    align-content: start;
+  }
+
+  .hero-stat {
+    padding: 1rem 1.1rem;
+    border-radius: 20px;
+    border: 1px solid rgba(179, 90, 30, 0.16);
+    background: rgba(255, 255, 255, 0.78);
+  }
+
+  .hero-stat strong {
+    display: block;
+    color: var(--primary-color);
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    line-height: 1;
+  }
+
+  .hero-stat span {
+    color: var(--dark-gray);
+    font-size: 0.92rem;
+  }
+
+  .landing-section {
+    margin-top: 1.5rem;
+    padding: 1.4rem;
+  }
+
+  .section-header {
+    max-width: 760px;
+    margin-bottom: 1.25rem;
+  }
+
+  .section-header-inline {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    max-width: none;
+  }
+
+  .section-kicker {
+    margin-bottom: 0.4rem;
+    color: var(--dark-gray);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+
+  .section-header h2 {
+    margin-bottom: 0.5rem;
+    color: var(--black);
+    font-size: clamp(1.8rem, 3vw, 2.6rem);
+  }
+
+  .section-header p {
+    margin-bottom: 0;
+    color: var(--ink-soft);
+  }
+
+  .section-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.5rem;
+    padding: 0.58rem 0.92rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid rgba(179, 90, 30, 0.18);
+    text-decoration: none;
+  }
+
+  .number-grid,
+  .snapshot-grid,
+  .paper-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+
+  .watch-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .number-card,
+  .snapshot-card,
+  .paper-card,
+  .watch-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    min-height: 100%;
+    padding: 1rem;
+    border: 1px solid rgba(179, 90, 30, 0.14);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.78);
+  }
+
+  .number-card-top,
+  .snapshot-header,
+  .paper-card-top,
+  .number-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+  }
+
+  .mini-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.8rem;
+    padding: 0.24rem 0.56rem;
+    border-radius: 999px;
+    color: var(--primary-color);
+    background: rgba(179, 90, 30, 0.1);
+    font-size: 0.8rem;
+    text-transform: capitalize;
+  }
+
+  .number-meta,
+  .number-footer,
+  .snapshot-result-label,
+  .snapshot-result-units,
+  .paper-anchor {
+    color: var(--dark-gray);
+    font-size: 0.9rem;
+  }
+
+  .number-card h3,
+  .snapshot-card h3,
+  .paper-card h3,
+  .watch-card h3 {
+    margin-bottom: 0;
+  }
+
+  .number-value,
+  .snapshot-result-value {
+    color: var(--primary-color);
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    line-height: 1;
+  }
+
+  .number-summary,
+  .snapshot-card p,
+  .paper-card p,
+  .watch-card li {
+    color: var(--ink-soft);
+  }
+
+  .number-footer a,
+  .snapshot-header a,
+  .paper-card-top a {
+    color: var(--primary-color);
+    text-decoration: none;
+  }
+
+  .number-footer a:hover,
+  .snapshot-header a:hover,
+  .paper-card-top a:hover {
+    text-decoration: underline;
+  }
+
+  .calculator-shell {
+    border-radius: 20px;
+    overflow: hidden;
+  }
+
+  .watch-card ul {
+    margin: 0;
+    padding-left: 1.2rem;
+  }
+
+  .watch-card li + li {
+    margin-top: 0.6rem;
+  }
+
+  #inputs,
+  #calculations,
+  #blogs,
+  #papers,
+  #watch {
+    scroll-margin-top: calc(var(--navbar-height) + 1rem);
+  }
+
+  @media (max-width: 920px) {
+    .landing-hero {
+      grid-template-columns: 1fr;
+    }
+
+    .section-header-inline,
+    .watch-grid {
+      grid-template-columns: 1fr;
+      display: grid;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .home-shell {
+      padding: 1.5rem 1rem 3rem;
+    }
+
+    .landing-hero,
+    .landing-section {
+      border-radius: 22px;
+      padding: 1.2rem;
+    }
+
+    .hero-actions,
+    .number-grid,
+    .snapshot-grid,
+    .paper-grid,
+    .watch-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

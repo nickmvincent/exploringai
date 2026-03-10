@@ -1,5 +1,5 @@
 ---
-title: Average Tokens per Document (Stackipedia)
+title: Average tokens per document (Stackipedia)
 value: 1500
 scale: 1
 display_units: tokens per document
@@ -7,7 +7,18 @@ variable_name: dataset_attribute__stackipedia__tokens_per_document
 variable_type: dataset_attribute
 entity: stackipedia
 units: tokens_per_document
-source_url: 'https://example.com/stackipedia-document-length'
+source_url: null
+summary: "Internal planning assumption for the typical size of a Stackipedia document."
+importanceRank: 40
+importanceReason: "Project-specific corpus assumptions matter, but only after the public reference points above."
+sourceName: "Project default"
+sourceNote: "Hypothetical default used for Stackipedia scenarios; no external public source is claimed."
+sourceQuality: "assumption"
+confidence: 0.25
+lastReviewed: "2026-03-10"
+featured: false
+min: 0
+step: 10
 date_added: '2025-03-19T00:00:00.000Z'
 tags:
   - variable-type:dataset-attribute
@@ -17,19 +28,19 @@ visibility: public
 type: InputVariable
 ---
 
-# Average Tokens per Document (Stackipedia)
+# Average tokens per document (Stackipedia)
 
 **Value:** 1,500 tokens per document
 
 ## Description
 
-Average number of tokens found in a high-quality document on Stackipedia.
+Internal planning assumption for the typical size of a Stackipedia document.
 
 ## Key Assumption
 
-Assumes a typical document length based on current platform content.
+This is a project default for a hypothetical corpus and is not tied to an external public source.
 
 ## Source
 
-- [https://example.com/stackipedia-document-length](https://example.com/stackipedia-document-length)
-- Estimated from current platform analytics.
+- No external source.
+- Treat this as an editable project assumption rather than an empirical benchmark.

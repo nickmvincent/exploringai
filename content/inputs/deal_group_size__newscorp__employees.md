@@ -1,13 +1,25 @@
 ---
 title: Number of News Corp employees
-value: 25000
+value: 23900
 scale: 1
 display_units: people
 variable_name: deal_group_size__newscorp__employees
 variable_type: deal_group_size
 entity: newscorp
 units: employees
-source_url: 'https://en.wikipedia.org/wiki/News_Corp'
+source_url: >-
+  https://newscorp.com/wp-content/uploads/2024/10/News-Corp-2024-Annual-Report_Bookmarked_sm-updated.pdf
+summary: "Approximate total employee count for News Corp."
+importanceRank: 36
+importanceReason: "A workforce-based denominator for thinking about who might share in publisher licensing proceeds."
+sourceName: "News Corp annual report"
+sourceNote: "News Corp reported about 23,900 employees as of June 30, 2024."
+sourceQuality: "official"
+confidence: 0.95
+lastReviewed: "2026-03-10"
+featured: false
+min: 0
+step: 100
 date_added: '2025-03-19T00:00:00.000Z'
 tags:
   - variable-type:deal-group-size
@@ -19,17 +31,17 @@ type: InputVariable
 
 # Number of News Corp employees
 
-**Value:** 25,000 people
+**Value:** 23,900 people
 
 ## Description
 
-Number of News Corp employees
+Approximate total employee count for News Corp.
 
 ## Key Assumption
 
-Not specified
+Uses the company's reported employee count as of June 30, 2024.
 
 ## Source
 
-- [https://en.wikipedia.org/wiki/News_Corp](https://en.wikipedia.org/wiki/News_Corp)
-- Wikipedia article (primary source is sec.gov)
+- [https://newscorp.com/wp-content/uploads/2024/10/News-Corp-2024-Annual-Report_Bookmarked_sm-updated.pdf](https://newscorp.com/wp-content/uploads/2024/10/News-Corp-2024-Annual-Report_Bookmarked_sm-updated.pdf)
+- News Corp reported roughly 23,900 employees in its 2024 annual report.

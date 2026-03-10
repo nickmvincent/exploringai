@@ -8,6 +8,8 @@ interface Props {
 
 const { title } = Astro.props;
 const networkLinks = networkData.allProjects.map(p => ({ href: p.website, label: p.title }));
+const allowIndexing = import.meta.env.PUBLIC_ALLOW_INDEXING !== 'false';
+const canonicalUrl = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString() : null;
 ---
 
 <!doctype html>
@@ -15,6 +17,12 @@ const networkLinks = networkData.allProjects.map(p => ({ href: p.website, label:
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Interactive napkin math for AI training-data value, compensation benchmarks, and distribution scenarios."
+    />
+    {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+    {!allowIndexing && <meta name="robots" content="noindex, nofollow" />}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title}</title>
   </head>
@@ -22,10 +30,13 @@ const networkLinks = networkData.allProjects.map(p => ({ href: p.website, label:
     <nav class="navbar">
       <a class="navbar-brand" href="/">Data Napkin Math</a>
       <ul class="navbar-nav">
-        <li><a class="nav-link" href="/#napkinMath">Scenarios</a></li>
-        <li><a class="nav-link" href="/#aboutContent">About</a></li>
+        <li><a class="nav-link" href="/#inputs">Inputs</a></li>
+        <li><a class="nav-link" href="/#calculations">Calculations</a></li>
+        <li><a class="nav-link" href="/#blogs">Blogs</a></li>
+        <li><a class="nav-link" href="/#papers">Papers</a></li>
+        <li><a class="nav-link" href="/#watch">Watch</a></li>
         <li><a class="nav-link" href="/discussions">Discussions</a></li>
-        <li><a class="nav-link" href="https://github.com/nickmvincent/data-napkin" target="_blank">GitHub</a></li>
+        <li><a class="nav-link" href="https://github.com/nickmvincent/exploringai" target="_blank" rel="noreferrer">GitHub</a></li>
       </ul>
     </nav>
     <slot />
@@ -38,7 +49,7 @@ const networkLinks = networkData.allProjects.map(p => ({ href: p.website, label:
 
   .network-footer {
     margin-top: 3rem;
-    padding: 1.5rem;
+    padding: 1.6rem 1.2rem 2.2rem;
     border-top: 1px dashed var(--border-color);
     background: var(--paper);
     text-align: center;

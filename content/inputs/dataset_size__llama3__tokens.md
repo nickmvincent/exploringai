@@ -8,6 +8,17 @@ variable_type: dataset_size
 entity: llama3
 units: tokens
 source_url: 'https://github.com/meta-llama/llama3/blob/main/MODEL_CARD.md'
+summary: "Total tokens used to pre-training a model"
+importanceRank: 1
+importanceReason: "Anchors the scale of a modern frontier pretraining corpus."
+sourceName: "Meta Llama 3 model card"
+sourceNote: "Meta reports that Llama 3 was pretrained on about 15 trillion multilingual tokens."
+sourceQuality: "official"
+confidence: 0.95
+lastReviewed: "2026-03-10"
+featured: true
+min: 0
+step: 100
 date_added: '2025-03-19T00:00:00.000Z'
 tags:
   - variable-type:dataset-size

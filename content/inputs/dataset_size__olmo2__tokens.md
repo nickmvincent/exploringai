@@ -8,6 +8,17 @@ variable_type: dataset_size
 entity: olmo2
 units: tokens
 source_url: 'https://huggingface.co/allenai/OLMo-2-1124-7B'
+summary: "Total tokens used to pre-training a model"
+importanceRank: 34
+importanceReason: "Adds an additional open-model comparison point so one recipe is not carrying all the weight."
+sourceName: "AllenAI OLMo 2 model card"
+sourceNote: "AllenAI reports 5 trillion training tokens for OLMo 2."
+sourceQuality: "official"
+confidence: 0.95
+lastReviewed: "2026-03-10"
+featured: false
+min: 0
+step: 10
 date_added: '2025-03-19T00:00:00.000Z'
 tags:
   - variable-type:dataset-size

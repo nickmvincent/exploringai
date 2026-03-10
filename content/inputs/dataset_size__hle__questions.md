@@ -1,13 +1,24 @@
 ---
-title: Total questions (HLE)
-value: 3000
+title: Total public questions (Humanity's Last Exam)
+value: 2500
 scale: 1
 display_units: questions
 variable_name: dataset_size__hle__questions
 variable_type: dataset_size
 entity: hle
 units: questions
-source_url: null
+source_url: 'https://lastexam.ai/'
+summary: "The number of public benchmark questions in Humanity's Last Exam."
+importanceRank: 15
+importanceReason: "Grounds the size of an expert-made evaluation benchmark in a public number."
+sourceName: "Humanity's Last Exam"
+sourceNote: "HLE's finalized public benchmark contains 2,500 questions."
+sourceQuality: "official"
+confidence: 0.95
+lastReviewed: "2026-03-10"
+featured: false
+min: 0
+step: 10
 date_added: '2025-03-19T00:00:00.000Z'
 tags:
   - variable-type:dataset-size
@@ -17,19 +28,19 @@ visibility: public
 type: InputVariable
 ---
 
-# Total questions (HLE)
+# Total public questions (Humanity's Last Exam)
 
-**Value:** 3,000 questions
+**Value:** 2,500 questions
 
 ## Description
 
-Total questions in Humanity's Last Exam
+The number of public benchmark questions in Humanity's Last Exam.
 
 ## Key Assumption
 
-...
+This uses the finalized public benchmark size rather than including private holdout questions.
 
 ## Source
 
-- [#todo](#todo)
-- #todo
+- [https://lastexam.ai/](https://lastexam.ai/)
+- The official project page describes Humanity's Last Exam as a 2,500-question public benchmark.

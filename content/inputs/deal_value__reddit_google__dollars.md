@@ -7,7 +7,18 @@ variable_name: deal_value__reddit_google__dollars
 variable_type: deal_value
 entity: reddit_google
 units: dollars
-source_url: 'https://www.cbsnews.com/news/google-reddit-60-million-deal-ai-training/'
+source_url: 'https://tech.yahoo.com/ai/articles/exclusive-reddit-ai-content-licensing-041012503.html'
+summary: "Reported yearly value of the Google-Reddit data licensing deal."
+importanceRank: 13
+importanceReason: "A concrete public example of how valuable user-generated training data can be."
+sourceName: "Reuters"
+sourceNote: "Reuters reported the Google-Reddit licensing contract was worth about $60M per year."
+sourceQuality: "reported"
+confidence: 0.72
+lastReviewed: "2026-03-10"
+featured: false
+min: 0
+step: 0.1
 date_added: '2025-03-19T00:00:00.000Z'
 tags:
   - variable-type:deal-value
@@ -23,13 +34,13 @@ type: InputVariable
 
 ## Description
 
-Payment made to Reddit by Google
+Reported yearly value of the Google-Reddit data licensing deal.
 
 ## Key Assumption
 
-None
+This input stores the widely reported annual contract value rather than a multi-year total.
 
 ## Source
 
-- [https://www.cbsnews.com/news/google-reddit-60-million-deal-ai-training/](https://www.cbsnews.com/news/google-reddit-60-million-deal-ai-training/)
-- CBS news coverage
+- [https://tech.yahoo.com/ai/articles/exclusive-reddit-ai-content-licensing-041012503.html](https://tech.yahoo.com/ai/articles/exclusive-reddit-ai-content-licensing-041012503.html)
+- Reuters reported that Google agreed to pay Reddit about $60 million per year for access to its content.

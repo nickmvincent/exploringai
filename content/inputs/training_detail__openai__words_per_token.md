@@ -7,7 +7,18 @@ variable_name: training_detail__openai__words_per_token
 variable_type: training_detail
 entity: openai
 units: words_per_token
-source_url: 'https://platform.openai.com/tokenizer'
+source_url: 'https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-do-i-count-them'
+summary: "A rule-of-thumb conversion between English words and tokens."
+importanceRank: 2
+importanceReason: "Lets readers translate abstract token counts into everyday language volume."
+sourceName: "OpenAI Help Center"
+sourceNote: "OpenAI's English rule of thumb is that one token is about three-quarters of a word."
+sourceQuality: "official"
+confidence: 0.95
+lastReviewed: "2026-03-10"
+featured: true
+min: 0
+step: 0.001
 date_added: '2025-03-19T00:00:00.000Z'
 tags:
   - variable-type:training-detail
@@ -23,13 +34,13 @@ type: InputVariable
 
 ## Description
 
-Average number of words per token
+A rule-of-thumb conversion between English words and tokens.
 
 ## Key Assumption
 
-Average across random queries
+This benchmark is language-dependent and is most appropriate for English text.
 
 ## Source
 
-- [https://platform.openai.com/tokenizer](https://platform.openai.com/tokenizer)
-- OpenAI Tokenizer
+- [https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-do-i-count-them](https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-do-i-count-them)
+- OpenAI explains that one token is commonly about three-quarters of an English word.

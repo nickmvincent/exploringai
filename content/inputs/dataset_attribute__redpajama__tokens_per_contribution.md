@@ -8,6 +8,17 @@ variable_type: dataset_attribute
 entity: redpajama
 units: tokens_per_contribution
 source_url: 'https://github.com/togethercomputer/RedPajama-Data'
+summary: "Average number of tokens in a single 'contribution'"
+importanceRank: 33
+importanceReason: "Provides a concrete \"tokens per document\" benchmark from a large open corpus."
+sourceName: "RedPajama-Data repository"
+sourceNote: "Derived from the English deduplicated counts reported by the project: 20.5T tokens over 14.5B documents."
+sourceQuality: "primary"
+confidence: 0.85
+lastReviewed: "2026-03-10"
+featured: false
+min: 0
+step: 10
 date_added: '2025-03-19T00:00:00.000Z'
 tags:
   - variable-type:dataset-attribute

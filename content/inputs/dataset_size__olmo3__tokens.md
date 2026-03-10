@@ -1,0 +1,46 @@
+---
+title: Total pretraining tokens (OLMo 3 7B)
+value: 5930000000000
+scale: 1000000000
+display_units: billions of tokens
+variable_name: dataset_size__olmo3__tokens
+variable_type: dataset_size
+entity: olmo3
+units: tokens
+source_url: 'https://huggingface.co/datasets/allenai/dolma3_mix-6T-1025-7B'
+summary: "Approximate number of tokens used in the released OLMo 3 7B pretraining mix."
+importanceRank: 3
+importanceReason: "Adds a current open-model benchmark for training-data scale."
+sourceName: "AllenAI Dolma 3 mix card"
+sourceNote: "AllenAI reports a 5.93T-token mix for the released OLMo 3 7B recipe."
+sourceQuality: "official"
+confidence: 0.95
+lastReviewed: "2026-03-10"
+featured: true
+min: 0
+step: 10
+date_added: '2026-03-10T00:00:00.000Z'
+tags:
+  - variable-type:dataset-size
+  - entity:olmo3
+  - unit:tokens
+visibility: public
+type: InputVariable
+---
+
+# Total pretraining tokens (OLMo 3 7B)
+
+**Value:** 5,930 billions of tokens
+
+## Description
+
+Approximate number of tokens used in the released OLMo 3 7B pretraining mix.
+
+## Key Assumption
+
+Uses the published 5.93T-token Dolma 3 mix as the best public proxy for OLMo 3's pretraining corpus.
+
+## Source
+
+- [https://huggingface.co/datasets/allenai/dolma3_mix-6T-1025-7B](https://huggingface.co/datasets/allenai/dolma3_mix-6T-1025-7B)
+- The Dolma 3 7B training mix card reports a total of 5.93 trillion tokens.
