@@ -2,7 +2,7 @@
   "projectName": "data-napkin-math",
   "projectTitle": "Data Napkin Math",
   "links": {
-    "github": "https://github.com/nickmvincent/data-napkin",
+    "github": "https://github.com/nickmvincent/exploringai",
     "website": "https://exploringai.org"
   },
   "relatedProjects": [],
@@ -72,5 +72,5 @@
       "description": "Long-form posts on the ATProto/Bluesky network."
     }
   ],
-  "generatedAt": "2026-03-08T15:50:17.072Z"
+  "generatedAt": "2026-03-10T19:42:22.357Z"
 }
