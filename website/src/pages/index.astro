@@ -2,14 +2,11 @@
 import { getCollection } from 'astro:content';
 import NapkinApp from '../components/NapkinApp.vue';
 import Layout from '../layouts/Layout.astro';
-import networkData from '../data/network.json';
 import type { Input, Scenario } from '../lib/calculations';
 import { createCalculationFunction, formatValue, humanReadable } from '../lib/calculations';
 
 const inputEntries = await getCollection('inputs');
 const scenarioEntries = await getCollection('scenarios');
-
-const blogProject = networkData.allProjects.find((project) => project.name === 'data-leverage-blogs');
 
 const scenarioReferences = scenarioEntries.map((entry) => ({
   id: entry.id,
@@ -59,6 +56,15 @@ for (const entry of inputEntries) {
     min: data.min ?? undefined,
     max: data.max ?? undefined,
     step: data.step ?? undefined,
+    comparisonImage: data.comparisonImage
+      ? {
+          src: data.comparisonImage.src,
+          alt: data.comparisonImage.alt,
+          caption: data.comparisonImage.caption ?? undefined,
+          href: data.comparisonImage.href ?? undefined,
+          label: data.comparisonImage.label ?? undefined,
+        }
+      : undefined,
     usedIn: inputUsage.get(data.variable_name) ?? [],
   };
 }
@@ -121,33 +127,69 @@ const simpleInputs = simpleInputIds
     displayValue: formatInputNumber(input),
   }));
 
-const snapshotIntroById: Record<string, string> = {
-  'distributing-money-from-data-deals':
-    'A concrete licensing example: what happens when a disclosed platform deal gets spread across the people who made the platform valuable?',
-  'distributing-ai-company-revenue-broadly':
-    'A top-down framing of AI revenue at population scale. Useful when people talk about broad-based benefit sharing.',
-  'commissioning-new-datasets':
-    'A replacement-cost thought experiment for commissioning new pretraining data rather than scraping it.',
-  'producing-an-expert-evaluation-set':
-    'A labor-cost framing for expert benchmarks, using a public eval as the anchor point.',
+function formatMultiple(value?: number | null) {
+  if (value === null || value === undefined || !Number.isFinite(value)) return null;
+  if (value >= 100) return `${Math.round(value).toLocaleString('en-US')}x`;
+  if (value >= 10) return `${value.toFixed(1)}x`;
+  return `${value.toFixed(2)}x`;
+}
+
+const commissioningScenario = scenarios.find((scenario) => scenario.id === 'commissioning-new-datasets');
+const commissioningScenarioRawValue = commissioningScenario
+  ? createCalculationFunction(commissioningScenario)(
+      ...commissioningScenario.input_variables.map((inputKey) => inputs[inputKey]?.value ?? 0)
+    )
+  : null;
+
+const openAiRevenue = inputs['yearly_revenue__openai__dollars']?.value;
+const anthropicRevenue = inputs['yearly_revenue__anthropic__dollars']?.value;
+const combinedAiRevenue =
+  [openAiRevenue, anthropicRevenue]
+    .filter((value): value is number => typeof value === 'number' && Number.isFinite(value))
+    .reduce((sum, value) => sum + value, 0) || null;
+
+const blogPlaceholder = {
+  commissioningCost:
+    commissioningScenarioRawValue !== null
+      ? `${humanReadable(commissioningScenarioRawValue)} ${commissioningScenario?.result_units ?? ''}`.trim()
+      : 'Unavailable',
+  openAiRevenue:
+    openAiRevenue !== undefined
+      ? `${humanReadable(openAiRevenue)} ${inputs['yearly_revenue__openai__dollars']?.units ?? ''}`.trim()
+      : 'Unavailable',
+  anthropicRevenue:
+    anthropicRevenue !== undefined
+      ? `${humanReadable(anthropicRevenue)} ${inputs['yearly_revenue__anthropic__dollars']?.units ?? ''}`.trim()
+      : 'Unavailable',
+  combinedRevenue:
+    combinedAiRevenue !== null
+      ? `${humanReadable(combinedAiRevenue)} dollars`
+      : 'Unavailable',
+  multipleVsCombined:
+    commissioningScenarioRawValue !== null && combinedAiRevenue !== null
+      ? formatMultiple(commissioningScenarioRawValue / combinedAiRevenue)
+      : null,
 };
 
-const scenarioSnapshots = scenarios.map((scenario) => {
-  const calculate = createCalculationFunction(scenario);
-  const rawValue = calculate(...scenario.input_variables.map((inputKey) => inputs[inputKey]?.value ?? 0));
-
-  return {
-    id: scenario.id,
-    title: scenario.title,
-    category: scenario.category,
-    description:
-      snapshotIntroById[scenario.id] ??
-      'A default snapshot of the current calculation using the live input values published in this repository.',
-    resultLabel: scenario.result_label,
-    resultValue: humanReadable(rawValue),
-    resultUnits: scenario.result_units,
-  };
-});
+const curatedPaperHighlights = [
+  {
+    title: 'A Sustainable AI Economy Needs Data Deals That Work for Generators',
+    anchor: 'Ruoxi Jia et al., NeurIPS 2025 position paper',
+    blurb:
+      'Position paper and companion explorer on 73 public AI data deals, useful for grounding questions about opacity, royalties, and bargaining power in the data market.',
+    quality: 'primary',
+    links: [
+      {
+        href: 'https://neurips.cc/virtual/2025/loc/san-diego/poster/121926',
+        label: 'NeurIPS poster',
+      },
+      {
+        href: 'https://research.brickroad.network/neurips2025-data-deals',
+        label: 'Data deals tracker',
+      },
+    ],
+  },
+];
 
 const paperHighlightIds = [
   'dataset_size__hle__questions',
@@ -161,11 +203,20 @@ const paperHighlights = paperHighlightIds
   .filter(Boolean)
   .map((input) => ({
     title: input.sourceName || input.title,
-    href: input.source_url,
     blurb: input.sourceNote || input.summary || input.importanceReason || 'Reference source highlighted in the input library.',
     anchor: input.title,
     quality: input.sourceQuality,
+    links: input.source_url
+      ? [
+          {
+            href: input.source_url,
+            label: 'Read source',
+          },
+        ]
+      : [],
   }));
+
+const allPaperHighlights = [...curatedPaperHighlights, ...paperHighlights];
 
 const watchIndicators = [
   'AI company earnings calls, SEC filings, and updated revenue run rates.',
@@ -188,16 +239,19 @@ const ourAsks = [
   <main class="home-shell">
     <section class="landing-hero">
       <div class="hero-copy">
-        <p class="section-kicker">Exploring AI in public numbers</p>
-        <h1>Five sections, one live calculator, and a clearer path through the data.</h1>
+        <p class="section-kicker">Interactive calculator</p>
+        <h1>Napkin Math for Training Data Value</h1>
         <p class="hero-text">
-          This homepage now moves from raw inputs, to calculations, to snapshot-style takeaways,
-          to outside reading, to the indicators and disclosures we still want to watch.
+          Napkin math, back-of-the-envelope estimates, and ballpark figures: this interactive page
+          explores order-of-magnitude estimates for important data value questions. How will the
+          proceeds and benefits of AI be distributed?
         </p>
         <div class="hero-actions">
-          <a class="hero-link hero-link-primary" href="/#inputs">Start with inputs</a>
-          <a class="hero-link" href="/#calculations">Jump to calculations</a>
-          <a class="hero-link" href="/#watch">See the watchlist</a>
+          <a class="hero-link hero-link-primary" href="/#calculations">Open calculator</a>
+          <a class="hero-link" href="/#inputs">Browse inputs</a>
+          <a class="hero-link" href="https://github.com/nickmvincent/exploringai" target="_blank" rel="noreferrer">
+            GitHub repository
+          </a>
         </div>
       </div>
 
@@ -207,11 +261,11 @@ const ourAsks = [
           <span>anchor inputs</span>
         </div>
         <div class="hero-stat">
-          <strong>{scenarioSnapshots.length}</strong>
-          <span>live calculations</span>
+          <strong>{scenarios.length}</strong>
+          <span>live scenarios</span>
         </div>
         <div class="hero-stat">
-          <strong>{paperHighlights.length}</strong>
+          <strong>{allPaperHighlights.length}</strong>
           <span>highlighted sources</span>
         </div>
       </div>
@@ -267,6 +321,7 @@ const ourAsks = [
           initialInputs={inputs}
           initialScenarios={scenarios}
           initialView="scenarios"
+          showInputLibrary={false}
           showHeader={false}
           showAbout={false}
         />
@@ -274,59 +329,81 @@ const ourAsks = [
     </section>
 
     <section id="blogs" class="landing-section">
-      <div class="section-header section-header-inline">
-        <div>
-          <p class="section-kicker">Section 3</p>
-          <h2>Blogs</h2>
-          <p>
-            Snapshot cards for the current default calculations. These are the kinds of numbers we can
-            quickly turn into short posts, explainers, or shareable references.
-          </p>
-        </div>
-
-        {blogProject && (
-          <a class="section-link" href={blogProject.website} target="_blank" rel="noreferrer">
-            Visit Data Leverage Blogs
-          </a>
-        )}
+      <div class="section-header">
+        <p class="section-kicker">Section 3</p>
+        <h2>Blogs</h2>
+        <p>
+          One placeholder lives here for now: a future post about the tension between the replacement cost
+          of commissioning new data and the scale of current AI revenue.
+        </p>
       </div>
 
-      <div class="snapshot-grid">
-        {scenarioSnapshots.map((snapshot) => (
-          <article class="snapshot-card">
-            <div class="snapshot-header">
-              <span class="mini-badge">{snapshot.category}</span>
-              <a href="/#calculations">Open calculator</a>
+      <div class="snapshot-grid snapshot-grid-single">
+        <article class="snapshot-card snapshot-card-placeholder">
+          <div class="snapshot-header">
+            <span class="mini-badge">Placeholder</span>
+            <a href="/#calculations">Open calculator</a>
+          </div>
+          <h3>Commissioning a new frontier dataset versus current AI revenue</h3>
+          <p>
+            This slot should become a walkthrough of one unresolved tension in the calculator. If we try to
+            pay to commission a new LLM-scale dataset from scratch, the replacement-cost estimate becomes
+            enormous very quickly, while the current public revenue anchors for frontier AI companies remain
+            far smaller.
+          </p>
+
+          <div class="placeholder-metric-grid">
+            <div class="placeholder-metric">
+              <span>Commissioning estimate</span>
+              <strong>{blogPlaceholder.commissioningCost}</strong>
             </div>
-            <h3>{snapshot.title}</h3>
-            <p>{snapshot.description}</p>
-            <div class="snapshot-result-label">{snapshot.resultLabel}</div>
-            <div class="snapshot-result-value">{snapshot.resultValue}</div>
-            <div class="snapshot-result-units">{snapshot.resultUnits}</div>
-          </article>
-        ))}
+            <div class="placeholder-metric">
+              <span>OpenAI annualized revenue</span>
+              <strong>{blogPlaceholder.openAiRevenue}</strong>
+            </div>
+            <div class="placeholder-metric">
+              <span>Anthropic annualized revenue</span>
+              <strong>{blogPlaceholder.anthropicRevenue}</strong>
+            </div>
+            <div class="placeholder-metric">
+              <span>Combined revenue anchor</span>
+              <strong>{blogPlaceholder.combinedRevenue}</strong>
+            </div>
+          </div>
+
+          <p>
+            At the current defaults, the commissioning estimate is roughly
+            {blogPlaceholder.multipleVsCombined ? ` ${blogPlaceholder.multipleVsCombined} ` : ' '}
+            the combined OpenAI-plus-Anthropic revenue anchor. That mismatch is the core tension this
+            placeholder post should unpack.
+          </p>
+        </article>
       </div>
     </section>
 
     <section id="papers" class="landing-section">
       <div class="section-header">
         <p class="section-kicker">Section 4</p>
-        <h2>Highlighted other papers</h2>
+        <h2>Highlighted papers and trackers</h2>
         <p>
           A short reading list of outside sources that do real work for the numbers on this site:
-          benchmark papers, model cards, and dataset cards that add context beyond the calculator itself.
+          benchmark papers, model cards, dataset cards, and live trackers that add context beyond the calculator itself.
         </p>
       </div>
 
       <div class="paper-grid">
-        {paperHighlights.map((paper) => (
+        {allPaperHighlights.map((paper) => (
           <article class="paper-card">
             <div class="paper-card-top">
               <span class="mini-badge">{paper.quality ? paper.quality : 'Reference'}</span>
-              {paper.href && (
-                <a href={paper.href} target="_blank" rel="noreferrer">
-                  Read source
-                </a>
+              {paper.links.length > 0 && (
+                <div class="paper-card-links">
+                  {paper.links.map((link) => (
+                    <a href={link.href} target="_blank" rel="noreferrer">
+                      {link.label}
+                    </a>
+                  ))}
+                </div>
               )}
             </div>
             <h3>{paper.title}</h3>
@@ -376,10 +453,10 @@ const ourAsks = [
 
   .landing-hero,
   .landing-section {
-    border: 1px solid rgba(179, 90, 30, 0.18);
+    border: 1px solid rgba(216, 222, 230, 0.92);
     border-radius: 26px;
-    background: rgba(255, 250, 242, 0.92);
-    box-shadow: 0 12px 24px rgba(78, 56, 36, 0.12);
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 16px 32px rgba(31, 39, 51, 0.08);
   }
 
   .landing-hero {
@@ -388,9 +465,9 @@ const ourAsks = [
     gap: 1.5rem;
     padding: 2rem;
     background:
-      radial-gradient(circle at 10% 10%, rgba(255, 255, 255, 0.72), transparent 34%),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.26), rgba(255, 255, 255, 0.04)),
-      rgba(255, 250, 242, 0.92);
+      radial-gradient(circle at 10% 10%, rgba(255, 255, 255, 0.82), transparent 34%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.76), rgba(247, 249, 252, 0.92)),
+      rgba(255, 255, 255, 0.84);
   }
 
   .hero-copy h1 {
@@ -420,10 +497,11 @@ const ourAsks = [
     min-height: 2.6rem;
     padding: 0.62rem 0.98rem;
     border-radius: 999px;
-    border: 1px solid rgba(179, 90, 30, 0.22);
+    border: 1px solid rgba(216, 222, 230, 0.92);
     color: var(--ink-soft);
+    font-family: var(--font-ui);
     text-decoration: none;
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.9);
     transition: transform 0.18s ease, background-color 0.18s ease, color 0.18s ease;
   }
 
@@ -434,7 +512,7 @@ const ourAsks = [
 
   .hero-link-primary {
     color: var(--white);
-    background: linear-gradient(135deg, var(--primary-color), #c56e31);
+    background: linear-gradient(135deg, var(--primary-color), #3a618c);
   }
 
   .hero-link-primary:hover {
@@ -450,8 +528,8 @@ const ourAsks = [
   .hero-stat {
     padding: 1rem 1.1rem;
     border-radius: 20px;
-    border: 1px solid rgba(179, 90, 30, 0.16);
-    background: rgba(255, 255, 255, 0.78);
+    border: 1px solid rgba(216, 222, 230, 0.92);
+    background: rgba(255, 255, 255, 0.9);
   }
 
   .hero-stat strong {
@@ -488,6 +566,7 @@ const ourAsks = [
   .section-kicker {
     margin-bottom: 0.4rem;
     color: var(--dark-gray);
+    font-family: var(--font-ui);
     text-transform: uppercase;
     letter-spacing: 0.08em;
     font-size: 0.78rem;
@@ -512,8 +591,9 @@ const ourAsks = [
     min-height: 2.5rem;
     padding: 0.58rem 0.92rem;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.82);
-    border: 1px solid rgba(179, 90, 30, 0.18);
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(216, 222, 230, 0.92);
+    font-family: var(--font-ui);
     text-decoration: none;
   }
 
@@ -523,6 +603,10 @@ const ourAsks = [
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 1rem;
+  }
+
+  .snapshot-grid-single {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .watch-grid {
@@ -540,9 +624,13 @@ const ourAsks = [
     gap: 0.7rem;
     min-height: 100%;
     padding: 1rem;
-    border: 1px solid rgba(179, 90, 30, 0.14);
+    border: 1px solid rgba(216, 222, 230, 0.92);
     border-radius: 20px;
-    background: rgba(255, 255, 255, 0.78);
+    background: rgba(255, 255, 255, 0.88);
+  }
+
+  .snapshot-card-placeholder {
+    gap: 1rem;
   }
 
   .number-card-top,
@@ -563,7 +651,8 @@ const ourAsks = [
     padding: 0.24rem 0.56rem;
     border-radius: 999px;
     color: var(--primary-color);
-    background: rgba(179, 90, 30, 0.1);
+    background: rgba(43, 76, 111, 0.08);
+    font-family: var(--font-ui);
     font-size: 0.8rem;
     text-transform: capitalize;
   }
@@ -610,6 +699,45 @@ const ourAsks = [
   .snapshot-header a:hover,
   .paper-card-top a:hover {
     text-decoration: underline;
+  }
+
+  .paper-card-links {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .placeholder-metric-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.85rem;
+  }
+
+  .placeholder-metric {
+    padding: 0.9rem 1rem;
+    border: 1px solid rgba(216, 222, 230, 0.92);
+    border-radius: 16px;
+    background: rgba(247, 249, 252, 0.72);
+  }
+
+  .placeholder-metric span {
+    display: block;
+    margin-bottom: 0.35rem;
+    color: var(--dark-gray);
+    font-family: var(--font-ui);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .placeholder-metric strong {
+    color: var(--primary-color);
+    font-family: var(--font-heading);
+    font-size: 1.3rem;
+    line-height: 1.15;
   }
 
   .calculator-shell {

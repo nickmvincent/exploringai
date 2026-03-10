@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import InputComparisonFigure from './InputComparisonFigure.vue';
 import type { Input, Scenario } from '../lib/calculations';
 import {
   createCalculationFunction,
+  evaluateMathExpression,
   formatLabel,
   formatOperation,
   formatValue,
@@ -11,17 +13,41 @@ import {
 } from '../lib/calculations';
 
 type ViewMode = 'scenarios' | 'inputs';
+type FreeScenarioState = {
+  title: string;
+  expression: string;
+  resultLabel: string;
+  resultUnits: string;
+  showCalcDetails: boolean;
+};
 
 const QUALITY_ORDER = ['official', 'primary', 'reported', 'industry', 'heuristic', 'assumption'];
+const FREE_SCENARIO_DEFAULTS: FreeScenarioState = {
+  title: 'Free Scenario Builder',
+  expression: '',
+  resultLabel: 'Custom result',
+  resultUnits: 'context-dependent units',
+  showCalcDetails: false,
+};
+const FREE_SCENARIO_SNIPPETS = [
+  { label: '+', value: ' + ' },
+  { label: '-', value: ' - ' },
+  { label: 'x', value: ' * ' },
+  { label: '/', value: ' / ' },
+  { label: '^', value: ' ^ ' },
+  { label: '( )', value: '()' },
+];
 
 const props = withDefaults(defineProps<{
   initialInputs: Record<string, Input>;
   initialScenarios: Scenario[];
   initialView?: ViewMode;
+  showInputLibrary?: boolean;
   showHeader?: boolean;
   showAbout?: boolean;
 }>(), {
   initialView: 'scenarios',
+  showInputLibrary: true,
   showHeader: true,
   showAbout: true,
 });
@@ -29,7 +55,7 @@ const props = withDefaults(defineProps<{
 const rightPanelOpen = ref(false);
 const selectedInputKey = ref<string | null>(null);
 const selectedScenario = ref('All');
-const activeView = ref<ViewMode>(props.initialView);
+const activeView = ref<ViewMode>(props.showInputLibrary ? props.initialView : 'scenarios');
 const inputSearch = ref('');
 const selectedSourceQuality = ref('All');
 const selectedInputType = ref('All');
@@ -40,6 +66,9 @@ const scenariosData = ref<Scenario[]>([]);
 const logs = ref<Record<string, { time: string; value: number }[]>>({});
 const fillSelections = ref<Record<string, string>>({});
 const inputDrafts = ref<Record<string, string>>({});
+const freeScenario = ref<FreeScenarioState>({ ...FREE_SCENARIO_DEFAULTS });
+const freeScenarioInputPicker = ref('');
+const freeScenarioExpressionField = ref<HTMLTextAreaElement | null>(null);
 
 const shareButtonLabel = ref('Copy Share Link');
 const hasMounted = ref(false);
@@ -171,6 +200,17 @@ const calcDetailsState = computed(() => {
 });
 
 const hasNonDefaultFills = computed(() => changedFillState.value.length > 0);
+const freeScenarioEvaluation = computed(() => evaluateMathExpression(freeScenario.value.expression, inputs.value));
+const freeScenarioReferencedInputKeys = computed(() => {
+  return freeScenarioEvaluation.value.usedVariables.filter((key) => Boolean(inputs.value[key]));
+});
+const freeScenarioState = computed(() => [
+  freeScenario.value.title,
+  freeScenario.value.expression,
+  freeScenario.value.resultLabel,
+  freeScenario.value.resultUnits,
+  freeScenario.value.showCalcDetails ? '1' : '0',
+].join('|'));
 
 function normalizeFieldNumber(value: number): string {
   if (!Number.isFinite(value)) return '';
@@ -235,11 +275,21 @@ function isInputChanged(key: string) {
   return Boolean(inputs.value[key] && inputs.value[key].value !== inputs.value[key].default_value);
 }
 
+function isAlternateFillSelected(variable: string) {
+  return (fillSelections.value[variable] || variable) !== variable;
+}
+
 function initializeFillSelections() {
   fillSelections.value = Object.keys(inputs.value).reduce((acc, key) => {
     acc[key] = key;
     return acc;
   }, {} as Record<string, string>);
+}
+
+function ensureFreeScenarioInputPicker() {
+  if (!freeScenarioInputPicker.value && sortedInputs.value.length) {
+    freeScenarioInputPicker.value = sortedInputs.value[0].key;
+  }
 }
 
 function logChange(key: string, newValue: number) {
@@ -357,6 +407,35 @@ function resetAllInputs() {
   applyCardVariantChange();
 }
 
+async function insertIntoFreeScenarioExpression(snippet: string) {
+  const textarea = freeScenarioExpressionField.value;
+  const currentExpression = freeScenario.value.expression;
+
+  if (!textarea) {
+    freeScenario.value.expression += snippet;
+    return;
+  }
+
+  const start = textarea.selectionStart ?? currentExpression.length;
+  const end = textarea.selectionEnd ?? currentExpression.length;
+  freeScenario.value.expression =
+    `${currentExpression.slice(0, start)}${snippet}${currentExpression.slice(end)}`;
+
+  const cursorTarget = snippet === '()' ? start + 1 : start + snippet.length;
+  await nextTick();
+  textarea.focus();
+  textarea.setSelectionRange(cursorTarget, cursorTarget);
+}
+
+function insertSelectedFreeScenarioInput() {
+  if (!freeScenarioInputPicker.value) return;
+  void insertIntoFreeScenarioExpression(`{${freeScenarioInputPicker.value}}`);
+}
+
+function resetFreeScenario() {
+  freeScenario.value = { ...FREE_SCENARIO_DEFAULTS };
+}
+
 function showDetails(key: string) {
   if (!inputs.value[key]) return;
 
@@ -369,6 +448,10 @@ function closeInspector() {
 }
 
 function setActiveView(view: ViewMode) {
+  if (!props.showInputLibrary && view === 'inputs') {
+    return;
+  }
+
   activeView.value = view;
 }
 
@@ -497,7 +580,7 @@ function syncUrlState() {
 
   const params = new URLSearchParams();
 
-  if (activeView.value !== 'scenarios') {
+  if (props.showInputLibrary && activeView.value !== 'scenarios') {
     params.set('view', activeView.value);
   }
 
@@ -509,19 +592,19 @@ function syncUrlState() {
     params.set('inspect', selectedInputKey.value);
   }
 
-  if (inputSearch.value.trim()) {
+  if (props.showInputLibrary && inputSearch.value.trim()) {
     params.set('q', inputSearch.value.trim());
   }
 
-  if (selectedSourceQuality.value !== 'All') {
+  if (props.showInputLibrary && selectedSourceQuality.value !== 'All') {
     params.set('quality', selectedSourceQuality.value);
   }
 
-  if (selectedInputType.value !== 'All') {
+  if (props.showInputLibrary && selectedInputType.value !== 'All') {
     params.set('type', selectedInputType.value);
   }
 
-  if (featuredOnly.value) {
+  if (props.showInputLibrary && featuredOnly.value) {
     params.set('featured', '1');
   }
 
@@ -547,6 +630,26 @@ function syncUrlState() {
     params.set('details', calcDetailsState.value.join(','));
   }
 
+  if (freeScenario.value.expression.trim()) {
+    params.set('custom_expr', freeScenario.value.expression);
+  }
+
+  if (freeScenario.value.title !== FREE_SCENARIO_DEFAULTS.title) {
+    params.set('custom_title', freeScenario.value.title);
+  }
+
+  if (freeScenario.value.resultLabel !== FREE_SCENARIO_DEFAULTS.resultLabel) {
+    params.set('custom_label', freeScenario.value.resultLabel);
+  }
+
+  if (freeScenario.value.resultUnits !== FREE_SCENARIO_DEFAULTS.resultUnits) {
+    params.set('custom_units', freeScenario.value.resultUnits);
+  }
+
+  if (freeScenario.value.showCalcDetails) {
+    params.set('custom_details', '1');
+  }
+
   const nextUrl = `${window.location.pathname}${params.toString() ? `?${params.toString()}` : ''}`;
   window.history.replaceState({}, '', nextUrl);
 }
@@ -557,19 +660,26 @@ function applyUrlStateFromLocation() {
   try {
     const params = new URLSearchParams(window.location.search);
 
-    activeView.value = params.get('view') === 'inputs' ? 'inputs' : 'scenarios';
+    activeView.value = props.showInputLibrary && params.get('view') === 'inputs' ? 'inputs' : 'scenarios';
 
     const category = params.get('category');
     selectedScenario.value = category && uniqueCategories.value.includes(category) ? category : 'All';
 
-    inputSearch.value = params.get('q') ?? '';
-    selectedSourceQuality.value = sourceQualityOptions.value.includes(params.get('quality') ?? '')
+    inputSearch.value = props.showInputLibrary ? (params.get('q') ?? '') : '';
+    selectedSourceQuality.value = props.showInputLibrary && sourceQualityOptions.value.includes(params.get('quality') ?? '')
       ? (params.get('quality') as string)
       : 'All';
-    selectedInputType.value = inputTypeOptions.value.includes(params.get('type') ?? '')
+    selectedInputType.value = props.showInputLibrary && inputTypeOptions.value.includes(params.get('type') ?? '')
       ? (params.get('type') as string)
       : 'All';
-    featuredOnly.value = params.get('featured') === '1';
+    featuredOnly.value = props.showInputLibrary && params.get('featured') === '1';
+    freeScenario.value = {
+      title: params.get('custom_title') ?? FREE_SCENARIO_DEFAULTS.title,
+      expression: params.get('custom_expr') ?? FREE_SCENARIO_DEFAULTS.expression,
+      resultLabel: params.get('custom_label') ?? FREE_SCENARIO_DEFAULTS.resultLabel,
+      resultUnits: params.get('custom_units') ?? FREE_SCENARIO_DEFAULTS.resultUnits,
+      showCalcDetails: params.get('custom_details') === '1',
+    };
 
     initializeFillSelections();
     const fillState = parseEntries(params.get('fills'));
@@ -605,6 +715,7 @@ function applyUrlStateFromLocation() {
     }
 
     recalculate();
+    ensureFreeScenarioInputPicker();
   } finally {
     isApplyingUrlState.value = false;
   }
@@ -646,6 +757,7 @@ watch(
     changedInputState,
     changedFillState,
     calcDetailsState,
+    freeScenarioState,
   ],
   () => {
     syncUrlState();
@@ -657,6 +769,7 @@ onMounted(() => {
   inputs.value = JSON.parse(JSON.stringify(props.initialInputs));
   scenariosData.value = JSON.parse(JSON.stringify(props.initialScenarios));
 
+  ensureFreeScenarioInputPicker();
   initializeFillSelections();
 
   scenariosData.value.forEach((scenario) => {
@@ -689,15 +802,20 @@ onBeforeUnmount(() => {
           <p class="eyebrow">Interactive calculator</p>
           <h1>Napkin Math for Training Data Value</h1>
           <p>
-            Explore order-of-magnitude questions about licensing, compensation, and distribution in AI.
-            Change the shared assumptions directly, compare alternate public benchmarks, and keep a
-            shareable URL for the exact state you are looking at.
+            Napkin math, back-of-the-envelope estimates, and ballpark figures: this interactive page
+            explores order-of-magnitude estimates for important data value questions. How will the
+            proceeds and benefits of AI be distributed?
           </p>
         </header>
 
         <section class="page-toolbar" aria-label="Page controls">
-          <div class="page-toolbar-top">
-            <div class="view-tabs" role="tablist" aria-label="Main views">
+          <div class="page-toolbar-top" :class="{ 'single-view': !props.showInputLibrary }">
+            <div
+              v-if="props.showInputLibrary"
+              class="view-tabs"
+              role="tablist"
+              aria-label="Main views"
+            >
               <button
                 class="view-tab"
                 :class="{ active: activeView === 'scenarios' }"
@@ -742,11 +860,11 @@ onBeforeUnmount(() => {
             </div>
           </div>
 
-          <div v-if="activeView === 'scenarios'" class="page-toolbar-bottom">
+          <div v-if="activeView === 'scenarios' || !props.showInputLibrary" class="page-toolbar-bottom">
             <p class="toolbar-note">
               <strong>{{ filteredScenarios.length }}</strong>
-              {{ pluralize(filteredScenarios.length, 'scenario') }} shown.
-              Inputs are shared across scenarios, so one edit updates every card that uses that variable.
+              curated {{ pluralize(filteredScenarios.length, 'scenario') }} shown, plus one free scenario builder.
+              Inputs are shared across cards, so one edit updates every calculation that uses that variable.
             </p>
 
             <div class="chip-row">
@@ -804,7 +922,7 @@ onBeforeUnmount(() => {
           </div>
         </section>
 
-        <section v-if="activeView === 'scenarios'" id="napkinMath">
+        <section v-if="activeView === 'scenarios' || !props.showInputLibrary" id="napkinMath">
           <h2 class="section-title">Scenarios</h2>
           <p class="section-description">
             Change the assumptions directly on each card. Inline comparison menus let you swap in
@@ -812,6 +930,245 @@ onBeforeUnmount(() => {
           </p>
 
           <div class="scenarios-container">
+            <article id="scenario-freeform" class="scenario-card free-scenario-card">
+              <div class="scenario-card-header free-scenario-header">
+                <div class="scenario-intro">
+                  <div class="scenario-category-label">Free exploration</div>
+                  <h3>{{ freeScenario.title || FREE_SCENARIO_DEFAULTS.title }}</h3>
+                  <p class="scenario-description-text">
+                    Build any formula from the shared input library. Use the inserter below for input tokens,
+                    then combine them with numbers, operators, and parentheses.
+                  </p>
+
+                  <div class="free-scenario-metadata">
+                    <label class="free-scenario-field">
+                      <span>Card title</span>
+                      <input
+                        v-model="freeScenario.title"
+                        class="form-control form-control-sm"
+                        type="text"
+                        placeholder="Free Scenario Builder"
+                      />
+                    </label>
+
+                    <label class="free-scenario-field">
+                      <span>Result label</span>
+                      <input
+                        v-model="freeScenario.resultLabel"
+                        class="form-control form-control-sm"
+                        type="text"
+                        placeholder="Custom result"
+                      />
+                    </label>
+
+                    <label class="free-scenario-field">
+                      <span>Units</span>
+                      <input
+                        v-model="freeScenario.resultUnits"
+                        class="form-control form-control-sm"
+                        type="text"
+                        placeholder="context-dependent units"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <div class="scenario-result-panel" :class="{ 'scenario-result-panel-error': freeScenarioEvaluation.error }">
+                  <span class="result-label">{{ freeScenario.resultLabel || FREE_SCENARIO_DEFAULTS.resultLabel }}</span>
+                  <div class="result-output" :class="{ 'result-output-error': freeScenarioEvaluation.error }">
+                    {{ freeScenarioEvaluation.error ? 'Check formula' : humanReadable(freeScenarioEvaluation.rawValue) }}
+                  </div>
+                  <div class="result-units">
+                    {{ freeScenario.resultUnits || FREE_SCENARIO_DEFAULTS.resultUnits }}
+                  </div>
+                  <p class="free-scenario-result-note" :class="{ error: freeScenarioEvaluation.error }">
+                    <template v-if="freeScenarioEvaluation.error">
+                      {{ freeScenarioEvaluation.error }}
+                    </template>
+                    <template v-else-if="freeScenarioReferencedInputKeys.length">
+                      Using {{ freeScenarioReferencedInputKeys.length }}
+                      shared {{ pluralize(freeScenarioReferencedInputKeys.length, 'input') }}.
+                    </template>
+                    <template v-else>
+                      Add input tokens to pull shared assumptions into this custom calculation.
+                    </template>
+                  </p>
+                </div>
+              </div>
+
+              <div class="free-scenario-builder">
+                <div class="free-scenario-toolbar">
+                  <label class="free-scenario-picker">
+                    <span>Insert input token</span>
+                    <select v-model="freeScenarioInputPicker" class="form-select form-select-sm">
+                      <option
+                        v-for="entry in sortedInputs"
+                        :key="entry.key"
+                        :value="entry.key"
+                      >
+                        {{ entry.input.title || formatLabel(entry.key) }} ({{ entry.input.display_units }})
+                      </option>
+                    </select>
+                  </label>
+
+                  <button class="btn btn-outline-primary btn-sm" type="button" @click="insertSelectedFreeScenarioInput">
+                    Insert input
+                  </button>
+                  <button class="btn btn-outline-secondary btn-sm" type="button" @click="resetFreeScenario">
+                    Reset card
+                  </button>
+                </div>
+
+                <div class="free-scenario-operator-row">
+                  <button
+                    v-for="snippet in FREE_SCENARIO_SNIPPETS"
+                    :key="snippet.label"
+                    class="operator-chip"
+                    type="button"
+                    @click="insertIntoFreeScenarioExpression(snippet.value)"
+                  >
+                    {{ snippet.label }}
+                  </button>
+                </div>
+
+                <label class="free-scenario-formula-field">
+                  <span>Formula</span>
+                  <textarea
+                    ref="freeScenarioExpressionField"
+                    v-model="freeScenario.expression"
+                    class="form-control free-scenario-textarea"
+                    rows="4"
+                    placeholder="Example: ({yearly_revenue__openai__dollars} / {group_size__world__people}) * 0.1"
+                  ></textarea>
+                </label>
+
+                <p class="free-scenario-helper">
+                  Supported syntax: numbers, parentheses, and <code>+</code>, <code>-</code>, <code>*</code>,
+                  <code>/</code>, <code>^</code>. Input tokens use curly braces, like
+                  <code>{{ '{yearly_revenue__openai__dollars}' }}</code>.
+                </p>
+              </div>
+
+              <div v-if="freeScenarioReferencedInputKeys.length" class="scenario-input-grid">
+                <div
+                  v-for="inputKey in freeScenarioReferencedInputKeys"
+                  :key="inputKey"
+                  class="scenario-input-card"
+                  :class="{ changed: isInputChanged(inputKey) }"
+                >
+                  <div class="scenario-input-header">
+                    <div>
+                      <h4>{{ inputs[inputKey]?.title || formatLabel(inputKey) }}</h4>
+                      <p class="scenario-input-summary">
+                        {{ inputs[inputKey]?.summary || inputs[inputKey]?.importanceReason }}
+                      </p>
+                    </div>
+
+                    <div class="scenario-input-badges">
+                      <span class="input-quality-badge">
+                        {{ formatSourceQuality(inputs[inputKey]?.sourceQuality) }}
+                      </span>
+                      <span v-if="isInputChanged(inputKey)" class="changed-badge">Modified</span>
+                    </div>
+                  </div>
+
+                  <label class="scenario-input-label">
+                    {{ inputs[inputKey]?.display_units }}
+                  </label>
+
+                  <InputComparisonFigure
+                    v-if="inputs[inputKey]?.comparisonImage"
+                    :comparison-image="inputs[inputKey]?.comparisonImage"
+                  />
+
+                  <div class="scenario-input-controls">
+                    <input
+                      type="number"
+                      class="form-control"
+                      :value="getFieldValue(inputKey)"
+                      :step="getInputStep(inputs[inputKey])"
+                      :min="inputs[inputKey]?.min ?? undefined"
+                      :max="inputs[inputKey]?.max ?? undefined"
+                      @focus="beginEditingValue(inputKey)"
+                      @input="updateDraftValue(inputKey, ($event.target as HTMLInputElement).value)"
+                      @blur="commitDraftValue(inputKey)"
+                      @keydown="handleValueKeydown(inputKey, $event)"
+                    />
+                    <button class="btn btn-outline-secondary" type="button" @click="adjustValue(inputKey, 0.1)">
+                      x0.1
+                    </button>
+                    <button class="btn btn-outline-secondary" type="button" @click="adjustValue(inputKey, 10)">
+                      x10
+                    </button>
+                    <button
+                      class="btn btn-outline-secondary"
+                      type="button"
+                      :disabled="!isInputChanged(inputKey)"
+                      @click="resetValue(inputKey)"
+                    >
+                      Reset
+                    </button>
+                    <button class="btn btn-secondary" type="button" @click="showDetails(inputKey)">
+                      Inspect
+                    </button>
+                  </div>
+
+                  <div class="scenario-input-footer">
+                    <span v-if="inputs[inputKey]?.usedIn?.length" class="input-usage">
+                      Used in {{ inputs[inputKey]?.usedIn?.length }}
+                      {{ pluralize(inputs[inputKey]?.usedIn?.length || 0, 'scenario') }}
+                    </span>
+                    <span v-if="inputs[inputKey]?.confidence !== undefined" class="confidence-text">
+                      {{ formatConfidence(inputs[inputKey]?.confidence) }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div v-else class="free-scenario-empty-state">
+                Referenced inputs will appear here once your formula includes one or more shared input tokens.
+              </div>
+
+              <div class="scenario-card-footer">
+                <button
+                  class="btn btn-outline-info btn-sm"
+                  type="button"
+                  @click="freeScenario.showCalcDetails = !freeScenario.showCalcDetails"
+                >
+                  {{ freeScenario.showCalcDetails ? 'Hide' : 'Show' }} Calculation Details
+                </button>
+              </div>
+
+              <div v-if="freeScenario.showCalcDetails" class="calc-details">
+                <h4>Calculation Details</h4>
+                <div class="operation-description">
+                  <strong>Formula</strong>
+                  <pre class="formula-preview">{{ freeScenario.expression.trim() || 'No formula yet' }}</pre>
+                </div>
+                <div v-if="freeScenarioReferencedInputKeys.length" class="calculation-inputs">
+                  <strong>Current inputs</strong>
+                  <ul class="list-unstyled">
+                    <li v-for="inputKey in freeScenarioReferencedInputKeys" :key="inputKey">
+                      {{ inputs[inputKey]?.title || formatLabel(inputKey) }}:
+                      <span class="text-primary">
+                        {{ formatInputFieldValue(inputs[inputKey]) }} {{ inputs[inputKey]?.display_units }}
+                      </span>
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <strong>Result</strong>
+                  <span class="text-primary">
+                    {{
+                      freeScenarioEvaluation.error
+                        ? freeScenarioEvaluation.error
+                        : `${humanReadable(freeScenarioEvaluation.rawValue)} ${freeScenario.resultUnits || FREE_SCENARIO_DEFAULTS.resultUnits}`
+                    }}
+                  </span>
+                </div>
+              </div>
+            </article>
+
             <article
               v-for="scenario in filteredScenarios"
               :id="`scenario-${scenario.id}`"
@@ -826,19 +1183,24 @@ onBeforeUnmount(() => {
                     <template v-for="(segment, idx) in parseDescription(scenario.description)" :key="idx">
                       <template v-if="segment.type === 'text'">{{ segment.text }}</template>
                       <template v-else>
-                        <select
-                          class="inline-select"
-                          :value="fillSelections[segment.variable!] || segment.variable"
-                          @change="onVariableChange(segment.variable!, ($event.target as HTMLSelectElement).value)"
+                        <span
+                          class="inline-select-shell"
+                          :class="{ changed: isAlternateFillSelected(segment.variable!) }"
                         >
-                          <option
-                            v-for="option in getFillOptions(segment.variable!)"
-                            :key="option.variable"
-                            :value="option.variable"
+                          <select
+                            class="inline-select"
+                            :value="fillSelections[segment.variable!] || segment.variable"
+                            @change="onVariableChange(segment.variable!, ($event.target as HTMLSelectElement).value)"
                           >
-                            {{ option.text }}
-                          </option>
-                        </select>
+                            <option
+                              v-for="option in getFillOptions(segment.variable!)"
+                              :key="option.variable"
+                              :value="option.variable"
+                            >
+                              {{ option.text }}
+                            </option>
+                          </select>
+                        </span>
                       </template>
                     </template>
                   </p>
@@ -877,6 +1239,11 @@ onBeforeUnmount(() => {
                   <label class="scenario-input-label">
                     {{ inputs[inputKey]?.display_units }}
                   </label>
+
+                  <InputComparisonFigure
+                    v-if="inputs[inputKey]?.comparisonImage"
+                    :comparison-image="inputs[inputKey]?.comparisonImage"
+                  />
 
                   <div class="scenario-input-controls">
                     <input
@@ -958,7 +1325,7 @@ onBeforeUnmount(() => {
           </div>
         </section>
 
-        <section v-else id="inputLibrary">
+        <section v-else-if="props.showInputLibrary" id="inputLibrary">
           <h2 class="section-title">Inputs Library</h2>
           <p class="section-description">
             Search, filter, and edit the shared assumptions. Each change immediately updates every
@@ -990,6 +1357,11 @@ onBeforeUnmount(() => {
               <p class="input-library-summary">
                 {{ entry.input.summary || entry.input.importanceReason }}
               </p>
+
+              <InputComparisonFigure
+                v-if="entry.input.comparisonImage"
+                :comparison-image="entry.input.comparisonImage"
+              />
 
               <div class="input-library-value-row">
                 <input

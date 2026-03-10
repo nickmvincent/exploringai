@@ -25,6 +25,13 @@ const inputs = defineCollection({
     min: z.number().optional().nullable(),
     max: z.number().optional().nullable(),
     step: z.number().optional().nullable(),
+    comparisonImage: z.object({
+      src: z.string(),
+      alt: z.string(),
+      caption: z.string().optional().nullable(),
+      href: z.string().optional().nullable(),
+      label: z.string().optional().nullable(),
+    }).optional().nullable(),
     date_added: z.string().optional().nullable(),
     tags: z.array(z.string()).optional().nullable(),
     visibility: z.string().optional().nullable(),
