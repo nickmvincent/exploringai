@@ -8,6 +8,8 @@ interface Props {
 
 const { title } = Astro.props;
 const networkLinks = networkData.allProjects.map(p => ({ href: p.website, label: p.title }));
+const allowIndexing = import.meta.env.PUBLIC_ALLOW_INDEXING !== 'false';
+const canonicalUrl = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString() : null;
 ---
 
 <!doctype html>
@@ -19,6 +21,8 @@ const networkLinks = networkData.allProjects.map(p => ({ href: p.website, label:
       name="description"
       content="Interactive napkin math for AI training-data value, compensation benchmarks, and distribution scenarios."
     />
+    {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+    {!allowIndexing && <meta name="robots" content="noindex, nofollow" />}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title}</title>
   </head>
