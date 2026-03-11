@@ -64,6 +64,7 @@ See existing files for the expected frontmatter format.
 
 - GitHub Pages stable builds use `SITE_URL=https://exploringai.org`
 - Cloudflare dev builds should set `SITE_URL` to the dev domain and `PUBLIC_ALLOW_INDEXING=false`
+- Manual Cloudflare deploys use the Pages project configured in `wrangler.jsonc` (`exploringai-dev`)
 - Run `npm exec wrangler login` once before using Wrangler locally
 
-The repository root README documents the GitHub Actions workflows and required Cloudflare secrets.
+The repository root README documents the GitHub Pages promotion workflow and the manual Cloudflare deploy flow.
