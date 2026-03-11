@@ -1,12 +1,12 @@
-# exploringai
+# Exploring AI: Data Napkin Math
 
-Standalone home for the ExploringAI "data napkin math" content and website.
+Standalone home for the Exploring AI: Data Napkin Math content and website.
 
 This repository is the source of truth for both the markdown content and the Astro site. You can edit, run, and build the project directly from this repo without using Extenote.
 
 ## Repository Structure
 
-- `content/` markdown inputs and scenarios used by the site
+- `content/` markdown content database for inputs, scenarios, blogs, key papers, and asks
 - `website/` Astro app that loads content from `../content` at dev/build time
 - `helpers/` shared helper utilities and components
 
@@ -43,7 +43,33 @@ If you prefer, you can also `cd website` and run the same `npm` commands there.
 
 - Update `content/inputs/` for input definitions.
 - Update `content/scenarios/` for scenario pages and calculations.
+- Update `content/blogs/` for short essays and working notes.
+- Update `content/key-papers/` for important papers, trackers, and primary-source legal filings.
+- Update `content/asks/` for concrete disclosure or policy asks.
 - Update `website/src/` for site UI or rendering changes.
+- Run `npm --prefix website run content:check` to validate ids, formulas, categories, units, and cross-references.
+
+### Contributor Helpers
+
+To scaffold new content instead of copying an existing file by hand:
+
+```bash
+npm --prefix website run new:input
+npm --prefix website run new:scenario
+```
+
+The input helper derives the file id from `variable_type + entity + units`, so new inputs do not need a repeated `variable_name` unless you want to keep it explicit.
+
+Scenarios now use a single `formula` field with `{input_tokens}` instead of duplicated `input_variables` and JSON `operations`. Example:
+
+```yaml
+formula: >-
+  {yearly_revenue__openai__dollars} / {group_size__world__people}
+```
+
+You can also draft a scenario in the app itself: start the dev server, scroll to the open-ended scenario builder on the Scenarios page, fill in the title/description/category/formula fields, and use `Copy Scenario Markdown` to generate a file you can save under `content/scenarios/<slug>.md`.
+
+`npm --prefix website run build` now runs `content:check` automatically before the Astro build, so the normal build path also validates content.
 
 Because the Astro site reads directly from `content/`, changes made in this repo show up in local development and production builds without any separate sync step.
 
@@ -66,8 +92,9 @@ For code or content changes:
 
 1. Create a branch from the latest default branch.
 2. Make your changes in `content/`, `website/`, or both.
-3. Run `npm --prefix website run build` to verify the site still builds.
-4. Open a pull request with a clear summary of what changed and why.
+3. Run `npm --prefix website run content:check` or just `npm --prefix website run build` if you want validation plus a full site build in one step.
+4. Run `npm --prefix website run build` to verify the site still builds if you did not already do so in step 3.
+5. Open a pull request with a clear summary of what changed and why.
 
 If your PR addresses an existing issue, link it in the pull request description.
 

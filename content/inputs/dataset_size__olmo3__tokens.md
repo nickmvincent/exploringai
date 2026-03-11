@@ -19,6 +19,28 @@ lastReviewed: "2026-03-10"
 featured: true
 min: 0
 step: 10
+referenceCharts:
+  - title: "From a home shelf to frontier pretraining"
+    description: "Approximate token volume, using 80k words per book and 0.75 words per token for the book-based reference points."
+    scale: log
+    bars:
+      - label: "20-book personal library"
+        value: 2133333
+        displayValue: "~2.1M tokens"
+        note: "About 20 average books."
+      - label: "Books3 at average-book length"
+        value: 20974933333
+        displayValue: "~21B tokens"
+        note: "196,640 books converted with the site's book-length assumptions."
+      - label: "OLMo 3 7B pretraining mix"
+        value: 5930000000000
+        displayValue: "5.93T tokens"
+        note: "The current input."
+        highlight: true
+      - label: "Llama 3 pretraining corpus"
+        value: 15000000000000
+        displayValue: "15T tokens"
+        note: "A larger public frontier benchmark."
 date_added: '2026-03-10T00:00:00.000Z'
 tags:
   - variable-type:dataset-size

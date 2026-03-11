@@ -20,6 +20,22 @@ lastReviewed: "2026-03-10"
 featured: false
 min: 0
 step: 100
+referenceCharts:
+  - title: "What counts as a book-length text?"
+    description: "This keeps the site's book-based comparisons anchored to something readers can picture."
+    scale: linear
+    bars:
+      - label: "Short novel"
+        value: 50000
+        displayValue: "50k words"
+      - label: "Average full-length book"
+        value: 80000
+        displayValue: "80k words"
+        note: "The current input."
+        highlight: true
+      - label: "Long novel"
+        value: 120000
+        displayValue: "120k words"
 date_added: '2025-03-19T00:00:00.000Z'
 tags:
   - variable-type:average-length
