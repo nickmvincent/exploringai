@@ -589,7 +589,7 @@ input[type="number"] {
   flex-wrap: wrap;
 }
 
-.input-quality-badge,
+.source-link-chip,
 .featured-badge,
 .changed-badge {
   display: inline-flex;
@@ -598,23 +598,32 @@ input[type="number"] {
   padding: 0.2rem 0.58rem;
   border-radius: 999px;
   font-size: 0.8rem;
-  white-space: nowrap;
 }
 
-.input-quality-badge {
-  color: var(--ink-soft);
+.source-link-chip {
+  max-width: 100%;
+  color: var(--primary-color);
   background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(106, 90, 76, 0.16);
+  border: 1px solid rgba(179, 90, 30, 0.18);
+  text-decoration: none;
+  line-height: 1.25;
+}
+
+.source-link-chip:hover {
+  border-color: rgba(179, 90, 30, 0.34);
+  background: rgba(255, 255, 255, 1);
 }
 
 .featured-badge {
   color: var(--primary-color);
   background: rgba(179, 90, 30, 0.1);
+  white-space: nowrap;
 }
 
 .changed-badge {
   color: var(--white);
   background: var(--dark-gray);
+  white-space: nowrap;
 }
 
 .scenario-input-label,
@@ -647,7 +656,7 @@ input[type="number"] {
 }
 
 .input-usage,
-.confidence-text {
+.source-meta {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
@@ -783,6 +792,17 @@ input[type="number"] {
 .input-library-source {
   color: var(--dark-gray);
   font-size: 0.92rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.input-library-source a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.input-library-source a:hover {
+  text-decoration: underline;
 }
 
 .empty-state {
@@ -960,14 +980,26 @@ input[type="number"] {
 }
 
 @media (max-width: 860px) {
+  :root {
+    --navbar-height: 128px;
+  }
+
   .navbar {
     flex-direction: column;
     align-items: stretch;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
   }
 
   .navbar-nav {
-    overflow-x: auto;
-    padding-bottom: 0.2rem;
+    flex-wrap: wrap;
+    overflow: visible;
+    padding-bottom: 0;
+  }
+
+  .nav-link {
+    padding: 0.4rem 0.68rem;
+    font-size: 0.95rem;
   }
 
   .main-content {
@@ -998,6 +1030,14 @@ input[type="number"] {
 }
 
 @media (max-width: 640px) {
+  :root {
+    --navbar-height: 152px;
+  }
+
+  .navbar-brand {
+    font-size: 1.2rem;
+  }
+
   .page-header,
   .page-toolbar,
   .scenario-card,

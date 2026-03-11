@@ -12,8 +12,6 @@ import {
 
 type ViewMode = 'scenarios' | 'inputs';
 
-const QUALITY_ORDER = ['official', 'primary', 'reported', 'industry', 'heuristic', 'assumption'];
-
 const props = withDefaults(defineProps<{
   initialInputs: Record<string, Input>;
   initialScenarios: Scenario[];
@@ -31,7 +29,6 @@ const selectedInputKey = ref<string | null>(null);
 const selectedScenario = ref('All');
 const activeView = ref<ViewMode>(props.initialView);
 const inputSearch = ref('');
-const selectedSourceQuality = ref('All');
 const selectedInputType = ref('All');
 const featuredOnly = ref(false);
 
@@ -49,6 +46,16 @@ let shareResetTimeout: ReturnType<typeof setTimeout> | null = null;
 
 const selectedInputDetails = computed(() => {
   return selectedInputKey.value ? inputs.value[selectedInputKey.value] : null;
+});
+
+const canToggleInspector = computed(() => Boolean(selectedInputKey.value));
+
+const inspectorToggleLabel = computed(() => {
+  if (!selectedInputKey.value) {
+    return 'Inspect an input below';
+  }
+
+  return rightPanelOpen.value ? 'Hide Inspector' : 'Show Inspector';
 });
 
 const uniqueCategories = computed(() => {
@@ -96,25 +103,11 @@ const inputTypeOptions = computed(() => {
   return types.sort((a, b) => formatLabel(a).localeCompare(formatLabel(b)));
 });
 
-const sourceQualityOptions = computed(() => {
-  const found = new Set(
-    sortedInputs.value
-      .map(({ input }) => input.sourceQuality)
-      .filter((value): value is string => Boolean(value))
-  );
-
-  return QUALITY_ORDER.filter((quality) => found.has(quality));
-});
-
 const filteredInputs = computed(() => {
   const query = inputSearch.value.trim().toLowerCase();
 
   return sortedInputs.value.filter(({ input }) => {
     if (featuredOnly.value && !input.featured) {
-      return false;
-    }
-
-    if (selectedSourceQuality.value !== 'All' && input.sourceQuality !== selectedSourceQuality.value) {
       return false;
     }
 
@@ -204,27 +197,10 @@ function getInputStep(input?: Input | null): number | undefined {
   return input?.step;
 }
 
-function formatSourceQuality(sourceQuality?: string | null) {
-  if (!sourceQuality) return 'Unlabeled';
+function getSourceLinkLabel(input?: Input | null): string {
+  if (!input) return 'Open external source';
 
-  const labels: Record<string, string> = {
-    official: 'Official',
-    primary: 'Primary',
-    reported: 'Reported',
-    industry: 'Industry',
-    heuristic: 'Heuristic',
-    assumption: 'Assumption',
-  };
-
-  return labels[sourceQuality] || formatLabel(sourceQuality);
-}
-
-function formatConfidence(confidence?: number | null): string {
-  if (confidence === null || confidence === undefined) {
-    return 'Confidence unlabeled';
-  }
-
-  return `${Math.round(confidence * 100)}% confidence`;
+  return input.sourceName || 'Open external source';
 }
 
 function pluralize(count: number, singular: string, plural = `${singular}s`) {
@@ -454,7 +430,6 @@ function getFillOptions(variable: string) {
 
 function resetInputFilters() {
   inputSearch.value = '';
-  selectedSourceQuality.value = 'All';
   selectedInputType.value = 'All';
   featuredOnly.value = false;
 }
@@ -513,10 +488,6 @@ function syncUrlState() {
     params.set('q', inputSearch.value.trim());
   }
 
-  if (selectedSourceQuality.value !== 'All') {
-    params.set('quality', selectedSourceQuality.value);
-  }
-
   if (selectedInputType.value !== 'All') {
     params.set('type', selectedInputType.value);
   }
@@ -556,16 +527,18 @@ function applyUrlStateFromLocation() {
 
   try {
     const params = new URLSearchParams(window.location.search);
+    const scenarioId = params.get('scenario');
+    const requestedScenario = scenarioId
+      ? scenariosData.value.find((scenario) => scenario.id === scenarioId)
+      : null;
 
     activeView.value = params.get('view') === 'inputs' ? 'inputs' : 'scenarios';
 
     const category = params.get('category');
-    selectedScenario.value = category && uniqueCategories.value.includes(category) ? category : 'All';
+    selectedScenario.value = requestedScenario?.category
+      || (category && uniqueCategories.value.includes(category) ? category : 'All');
 
     inputSearch.value = params.get('q') ?? '';
-    selectedSourceQuality.value = sourceQualityOptions.value.includes(params.get('quality') ?? '')
-      ? (params.get('quality') as string)
-      : 'All';
     selectedInputType.value = inputTypeOptions.value.includes(params.get('type') ?? '')
       ? (params.get('type') as string)
       : 'All';
@@ -605,6 +578,15 @@ function applyUrlStateFromLocation() {
     }
 
     recalculate();
+
+    if (activeView.value === 'scenarios' && requestedScenario) {
+      void nextTick(() => {
+        document.getElementById(`scenario-${requestedScenario.id}`)?.scrollIntoView({
+          behavior: hasMounted.value ? 'smooth' : 'auto',
+          block: 'start',
+        });
+      });
+    }
   } finally {
     isApplyingUrlState.value = false;
   }
@@ -640,7 +622,6 @@ watch(
     selectedInputKey,
     rightPanelOpen,
     inputSearch,
-    selectedSourceQuality,
     selectedInputType,
     featuredOnly,
     changedInputState,
@@ -732,9 +713,10 @@ onBeforeUnmount(() => {
               <button
                 class="btn btn-outline-primary btn-sm"
                 type="button"
+                :disabled="!canToggleInspector"
                 @click="rightPanelOpen = !rightPanelOpen"
               >
-                {{ rightPanelOpen ? 'Hide' : 'Show' }} Inspector
+                {{ inspectorToggleLabel }}
               </button>
               <button class="btn btn-primary btn-sm" type="button" @click="copyShareLink">
                 {{ shareButtonLabel }}
@@ -781,13 +763,6 @@ onBeforeUnmount(() => {
               </option>
             </select>
 
-            <select v-model="selectedSourceQuality" class="form-select form-select-sm">
-              <option value="All">All source quality</option>
-              <option v-for="quality in sourceQualityOptions" :key="quality" :value="quality">
-                {{ formatSourceQuality(quality) }}
-              </option>
-            </select>
-
             <label class="toggle-chip">
               <input v-model="featuredOnly" type="checkbox" />
               Featured only
@@ -808,7 +783,7 @@ onBeforeUnmount(() => {
           <h2 class="section-title">Scenarios</h2>
           <p class="section-description">
             Change the assumptions directly on each card. Inline comparison menus let you swap in
-            related public benchmarks without leaving the page.
+            related public benchmarks without leaving the page, and every input card links to its cited source.
           </p>
 
           <div class="scenarios-container">
@@ -867,9 +842,15 @@ onBeforeUnmount(() => {
                     </div>
 
                     <div class="scenario-input-badges">
-                      <span class="input-quality-badge">
-                        {{ formatSourceQuality(inputs[inputKey]?.sourceQuality) }}
-                      </span>
+                      <a
+                        v-if="inputs[inputKey]?.source_url"
+                        class="source-link-chip"
+                        :href="inputs[inputKey]?.source_url"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {{ getSourceLinkLabel(inputs[inputKey]) }}
+                      </a>
                       <span v-if="isInputChanged(inputKey)" class="changed-badge">Modified</span>
                     </div>
                   </div>
@@ -915,8 +896,8 @@ onBeforeUnmount(() => {
                       Used in {{ inputs[inputKey]?.usedIn?.length }}
                       {{ pluralize(inputs[inputKey]?.usedIn?.length || 0, 'scenario') }}
                     </span>
-                    <span v-if="inputs[inputKey]?.confidence !== undefined" class="confidence-text">
-                      {{ formatConfidence(inputs[inputKey]?.confidence) }}
+                    <span v-if="inputs[inputKey]?.lastReviewed" class="source-meta">
+                      Reviewed {{ inputs[inputKey]?.lastReviewed }}
                     </span>
                   </div>
                 </div>
@@ -962,7 +943,7 @@ onBeforeUnmount(() => {
           <h2 class="section-title">Inputs Library</h2>
           <p class="section-description">
             Search, filter, and edit the shared assumptions. Each change immediately updates every
-            scenario that depends on that input.
+            scenario that depends on that input, and each card links out to the source behind the number.
           </p>
 
           <div v-if="filteredInputs.length" class="inputs-library">
@@ -979,9 +960,15 @@ onBeforeUnmount(() => {
                 </div>
 
                 <div class="input-library-badges">
-                  <span class="input-quality-badge">
-                    {{ formatSourceQuality(entry.input.sourceQuality) }}
-                  </span>
+                  <a
+                    v-if="entry.input.source_url"
+                    class="source-link-chip"
+                    :href="entry.input.source_url"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {{ getSourceLinkLabel(entry.input) }}
+                  </a>
                   <span v-if="entry.input.featured" class="featured-badge">Featured</span>
                 </div>
               </div>
@@ -1025,21 +1012,11 @@ onBeforeUnmount(() => {
                 <button class="btn btn-outline-primary btn-sm" type="button" @click="showDetails(entry.key)">
                   Inspect
                 </button>
-                <a
-                  v-if="entry.input.source_url"
-                  class="btn btn-outline-secondary btn-sm"
-                  :href="entry.input.source_url"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Source
-                </a>
               </div>
 
               <div class="input-library-meta">
                 <span>{{ formatLabel(entry.input.variable_type) }}</span>
                 <span v-if="entry.input.entity">{{ formatLabel(entry.input.entity) }}</span>
-                <span v-if="entry.input.confidence !== undefined">{{ formatConfidence(entry.input.confidence) }}</span>
               </div>
 
               <p v-if="entry.input.importanceReason" class="input-library-reason">
@@ -1047,7 +1024,15 @@ onBeforeUnmount(() => {
               </p>
 
               <div class="input-library-source">
-                <strong>{{ entry.input.sourceName || 'Source status' }}</strong>
+                <strong>{{ entry.input.sourceName || 'External source' }}</strong>
+                <a
+                  v-if="entry.input.source_url"
+                  :href="entry.input.source_url"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Open source
+                </a>
                 <span v-if="entry.input.lastReviewed">Reviewed {{ entry.input.lastReviewed }}</span>
               </div>
 
@@ -1108,7 +1093,7 @@ onBeforeUnmount(() => {
 
           <div class="inspector-content">
             <div v-if="!selectedInputDetails" class="inspector-empty">
-              Select any "Inspect" button to see the source notes, confidence, and scenario usage for that input.
+              Select any "Inspect" button to see the source note, external link, and scenario usage for that input.
             </div>
 
             <div v-else class="inspector-details">
@@ -1117,9 +1102,15 @@ onBeforeUnmount(() => {
                   <p class="eyebrow">{{ formatLabel(selectedInputDetails.variable_type) }}</p>
                   <h3>{{ selectedInputDetails.title }}</h3>
                 </div>
-                <span class="input-quality-badge">
-                  {{ formatSourceQuality(selectedInputDetails.sourceQuality) }}
-                </span>
+                <a
+                  v-if="selectedInputDetails.source_url"
+                  class="source-link-chip"
+                  :href="selectedInputDetails.source_url"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {{ getSourceLinkLabel(selectedInputDetails) }}
+                </a>
               </div>
 
               <p class="inspector-summary">
@@ -1151,26 +1142,16 @@ onBeforeUnmount(() => {
                 <span class="detail-value">{{ selectedInputDetails.importanceReason }}</span>
               </div>
 
-              <div v-if="selectedInputDetails.confidence !== undefined" class="detail-item">
-                <span class="detail-label">Confidence</span>
-                <span class="detail-value">{{ formatConfidence(selectedInputDetails.confidence) }}</span>
-              </div>
-
               <div class="detail-item">
                 <span class="detail-label">Variable name</span>
                 <span class="detail-value">{{ selectedInputDetails.variable_name }}</span>
               </div>
 
-              <div v-if="selectedInputDetails.sourceName" class="detail-item">
-                <span class="detail-label">Source name</span>
-                <span class="detail-value">{{ selectedInputDetails.sourceName }}</span>
-              </div>
-
               <div v-if="selectedInputDetails.source_url" class="detail-item">
-                <span class="detail-label">Source link</span>
+                <span class="detail-label">External source</span>
                 <span class="detail-value">
                   <a :href="selectedInputDetails.source_url" target="_blank" rel="noreferrer">
-                    {{ selectedInputDetails.source_url }}
+                    {{ selectedInputDetails.sourceName || selectedInputDetails.source_url }}
                   </a>
                 </span>
               </div>

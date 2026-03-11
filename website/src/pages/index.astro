@@ -121,6 +121,15 @@ const simpleInputs = simpleInputIds
     displayValue: formatInputNumber(input),
   }));
 
+function buildCalculatorHref(params: Record<string, string> = {}) {
+  const search = new URLSearchParams(params);
+  const query = search.toString();
+  return `/${query ? `?${query}` : ''}#calculations`;
+}
+
+const calculatorHref = buildCalculatorHref();
+const inputLibraryHref = buildCalculatorHref({ view: 'inputs' });
+
 const snapshotIntroById: Record<string, string> = {
   'distributing-money-from-data-deals':
     'A concrete licensing example: what happens when a disclosed platform deal gets spread across the people who made the platform valuable?',
@@ -146,6 +155,7 @@ const scenarioSnapshots = scenarios.map((scenario) => {
     resultLabel: scenario.result_label,
     resultValue: humanReadable(rawValue),
     resultUnits: scenario.result_units,
+    liveHref: buildCalculatorHref({ scenario: scenario.id }),
   };
 });
 
@@ -164,7 +174,6 @@ const paperHighlights = paperHighlightIds
     href: input.source_url,
     blurb: input.sourceNote || input.summary || input.importanceReason || 'Reference source highlighted in the input library.',
     anchor: input.title,
-    quality: input.sourceQuality,
   }));
 
 const watchIndicators = [
@@ -189,49 +198,53 @@ const ourAsks = [
     <section class="landing-hero">
       <div class="hero-copy">
         <p class="section-kicker">Exploring AI in public numbers</p>
-        <h1>Five sections, one live calculator, and a clearer path through the data.</h1>
+        <h1>Featured inputs, live scenarios, and linked sources in one place.</h1>
         <p class="hero-text">
-          This homepage now moves from raw inputs, to calculations, to snapshot-style takeaways,
-          to outside reading, to the indicators and disclosures we still want to watch.
+          Start with a few anchor numbers, then move into the live calculator or the full editable
+          input library. Each assumption now foregrounds the external source behind it.
         </p>
         <div class="hero-actions">
-          <a class="hero-link hero-link-primary" href="/#inputs">Start with inputs</a>
-          <a class="hero-link" href="/#calculations">Jump to calculations</a>
-          <a class="hero-link" href="/#watch">See the watchlist</a>
+          <a class="hero-link hero-link-primary" href={calculatorHref}>Open live calculator</a>
+          <a class="hero-link" href={inputLibraryHref}>Browse input library</a>
+          <a class="hero-link" href="/#inputs">See featured inputs</a>
         </div>
       </div>
 
       <div class="hero-stats">
         <div class="hero-stat">
           <strong>{simpleInputs.length}</strong>
-          <span>anchor inputs</span>
+          <span>featured inputs</span>
         </div>
         <div class="hero-stat">
           <strong>{scenarioSnapshots.length}</strong>
-          <span>live calculations</span>
+          <span>live scenarios</span>
         </div>
         <div class="hero-stat">
           <strong>{paperHighlights.length}</strong>
-          <span>highlighted sources</span>
+          <span>source highlights</span>
         </div>
       </div>
     </section>
 
     <section id="inputs" class="landing-section">
-      <div class="section-header">
-        <p class="section-kicker">Section 1</p>
-        <h2>Inputs</h2>
-        <p>
-          Start with plain numbers from public sources. These are the least interpretive pieces of the site:
-          counts, rates, sizes, and benchmark totals that anchor the rest of the math.
-        </p>
+      <div class="section-header section-header-inline">
+        <div>
+          <p class="section-kicker">Section 1</p>
+          <h2>Featured inputs</h2>
+          <p>
+            A quick subset of anchor numbers from the full library. Use this section to orient
+            yourself, then open the editable input library if you want to inspect or change more assumptions.
+          </p>
+        </div>
+
+        <a class="section-link" href={inputLibraryHref}>Open full input library</a>
       </div>
 
       <div class="number-grid">
         {simpleInputs.map((input) => (
           <article class="number-card">
             <div class="number-card-top">
-              <span class="mini-badge">{input.sourceQuality === 'primary' ? 'Primary' : 'Official'}</span>
+              <span class="mini-badge">Featured input</span>
               {input.lastReviewed && <span class="number-meta">Reviewed {input.lastReviewed}</span>}
             </div>
             <h3>{input.title}</h3>
@@ -242,7 +255,7 @@ const ourAsks = [
               <span>Used in {input.usedIn?.length || 0} scenarios</span>
               {input.source_url && (
                 <a href={input.source_url} target="_blank" rel="noreferrer">
-                  Source
+                  {input.sourceName || 'Open source'}
                 </a>
               )}
             </div>
@@ -256,8 +269,8 @@ const ourAsks = [
         <p class="section-kicker">Section 2</p>
         <h2>Calculations</h2>
         <p>
-          This is the interactive layer. Take the inputs above, swap comparable benchmarks, and see how
-          quickly the outputs move when the assumptions change.
+          This is the interactive layer. It includes both the live scenarios and the full editable
+          input library, so you can swap benchmarks, follow source links, and see how the outputs move.
         </p>
       </div>
 
@@ -277,10 +290,10 @@ const ourAsks = [
       <div class="section-header section-header-inline">
         <div>
           <p class="section-kicker">Section 3</p>
-          <h2>Blogs</h2>
+          <h2>Default snapshots</h2>
           <p>
-            Snapshot cards for the current default calculations. These are the kinds of numbers we can
-            quickly turn into short posts, explainers, or shareable references.
+            Reference cards for the currently published default assumptions. These numbers do not
+            change when you edit the live calculator above; use each card's link to open the live scenario.
           </p>
         </div>
 
@@ -295,9 +308,10 @@ const ourAsks = [
         {scenarioSnapshots.map((snapshot) => (
           <article class="snapshot-card">
             <div class="snapshot-header">
-              <span class="mini-badge">{snapshot.category}</span>
-              <a href="/#calculations">Open calculator</a>
+              <span class="mini-badge">Published default</span>
+              <a href={snapshot.liveHref}>Open live scenario</a>
             </div>
+            <p class="snapshot-category">{snapshot.category}</p>
             <h3>{snapshot.title}</h3>
             <p>{snapshot.description}</p>
             <div class="snapshot-result-label">{snapshot.resultLabel}</div>
@@ -311,10 +325,10 @@ const ourAsks = [
     <section id="papers" class="landing-section">
       <div class="section-header">
         <p class="section-kicker">Section 4</p>
-        <h2>Highlighted other papers</h2>
+        <h2>Source highlights</h2>
         <p>
-          A short reading list of outside sources that do real work for the numbers on this site:
-          benchmark papers, model cards, and dataset cards that add context beyond the calculator itself.
+          A short reading list of external sources doing real work for the numbers on this site:
+          benchmark papers, model cards, dataset cards, and filings worth opening directly.
         </p>
       </div>
 
@@ -322,10 +336,10 @@ const ourAsks = [
         {paperHighlights.map((paper) => (
           <article class="paper-card">
             <div class="paper-card-top">
-              <span class="mini-badge">{paper.quality ? paper.quality : 'Reference'}</span>
+              <span class="mini-badge">External source</span>
               {paper.href && (
                 <a href={paper.href} target="_blank" rel="noreferrer">
-                  Read source
+                  Open source
                 </a>
               )}
             </div>
@@ -570,11 +584,18 @@ const ourAsks = [
 
   .number-meta,
   .number-footer,
+  .snapshot-category,
   .snapshot-result-label,
   .snapshot-result-units,
   .paper-anchor {
     color: var(--dark-gray);
     font-size: 0.9rem;
+  }
+
+  .snapshot-category {
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
 
   .number-card h3,
