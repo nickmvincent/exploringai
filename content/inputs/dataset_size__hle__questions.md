@@ -22,6 +22,24 @@ lastReviewed: "2026-03-10"
 featured: false
 min: 0
 step: 10
+referenceCharts:
+  - title: "How big is a 2,500-question benchmark?"
+    description: "One way to picture this scale is to imagine how many carefully written questions a team of experts would need to contribute."
+    scale: log
+    bars:
+      - label: "One expert"
+        value: 25
+        displayValue: "25 questions"
+        note: "If one contributor writes about 25 strong questions."
+      - label: "Small expert cohort"
+        value: 250
+        displayValue: "250 questions"
+        note: "Roughly 10 experts at 25 questions each."
+      - label: "HLE public benchmark"
+        value: 2500
+        displayValue: "2,500 questions"
+        note: "Roughly 100 experts at 25 questions each."
+        highlight: true
 date_added: '2025-03-19T00:00:00.000Z'
 tags:
   - variable-type:dataset-size

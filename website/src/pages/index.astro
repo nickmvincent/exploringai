@@ -2,20 +2,49 @@
 import { getCollection } from 'astro:content';
 import NapkinApp from '../components/NapkinApp.vue';
 import Layout from '../layouts/Layout.astro';
-import networkData from '../data/network.json';
 import type { Input, Scenario } from '../lib/calculations';
 import { createCalculationFunction, formatValue, humanReadable } from '../lib/calculations';
+import { extractInputTokens } from '../lib/formulas.js';
+import { INPUT_FOCUS_GROUPS, getInputFocusGroupKey } from '../lib/input-groups';
+
+function getEntryStem(entryId: string) {
+  const segments = entryId.split('/').filter(Boolean);
+  return segments[segments.length - 1] || entryId;
+}
 
 const inputEntries = await getCollection('inputs');
 const scenarioEntries = await getCollection('scenarios');
+const blogEntries = await getCollection('blogs');
+const keyPaperEntries = await getCollection('keyPapers');
+const askEntries = await getCollection('asks');
 
-const blogProject = networkData.allProjects.find((project) => project.name === 'data-leverage-blogs');
+const BLOG_STATUS_LABELS = {
+  draft: 'Draft',
+  in_progress: 'Essay in progress',
+  published: 'Published',
+} as const;
+
+const KEY_PAPER_KIND_LABELS = {
+  position: 'Position',
+  policy: 'Policy',
+  empirical: 'Empirical',
+  legal: 'Legal',
+  tracker: 'Tracker',
+} as const;
+
+function sortByOrder<T extends { data: { sort_order?: number | null; title: string } }>(entries: T[]) {
+  return [...entries].sort((left, right) => {
+    const orderDelta = (left.data.sort_order ?? Number.MAX_SAFE_INTEGER) - (right.data.sort_order ?? Number.MAX_SAFE_INTEGER);
+    if (orderDelta !== 0) return orderDelta;
+    return left.data.title.localeCompare(right.data.title);
+  });
+}
 
 const scenarioReferences = scenarioEntries.map((entry) => ({
-  id: entry.id,
+  id: getEntryStem(entry.id),
   title: entry.data.title,
   category: entry.data.category,
-  inputVariables: entry.data.input_variables,
+  inputVariables: entry.data.input_variables?.length ? entry.data.input_variables : extractInputTokens(entry.data.formula),
 }));
 
 const inputUsage = new Map<string, { id: string; title: string; category: string }[]>();
@@ -34,14 +63,20 @@ for (const scenario of scenarioReferences) {
 const inputs: Record<string, Input> = {};
 for (const entry of inputEntries) {
   const { data } = entry;
-  inputs[data.variable_name] = {
+  const variableName = data.variable_name ?? getEntryStem(entry.id);
+
+  if (inputs[variableName]) {
+    throw new Error(`Duplicate input id "${variableName}" found while building the input library.`);
+  }
+
+  inputs[variableName] = {
     id: entry.id,
     title: data.title,
     value: data.value,
     default_value: data.value,
     scale: data.scale || 1,
     display_units: data.display_units,
-    variable_name: data.variable_name,
+    variable_name: variableName,
     variable_type: data.variable_type,
     entity: data.entity ?? undefined,
     units: data.units,
@@ -64,20 +99,42 @@ for (const entry of inputEntries) {
     min: data.min ?? undefined,
     max: data.max ?? undefined,
     step: data.step ?? undefined,
-    usedIn: inputUsage.get(data.variable_name) ?? [],
+    comparisonImage: data.comparisonImage
+      ? {
+          src: data.comparisonImage.src,
+          alt: data.comparisonImage.alt,
+          caption: data.comparisonImage.caption ?? undefined,
+          href: data.comparisonImage.href ?? undefined,
+          label: data.comparisonImage.label ?? undefined,
+        }
+      : undefined,
+    referenceCharts: data.referenceCharts?.map((chart) => ({
+      title: chart.title,
+      description: chart.description ?? undefined,
+      scale: chart.scale ?? undefined,
+      bars: chart.bars.map((bar) => ({
+        label: bar.label,
+        value: bar.value,
+        displayValue: bar.displayValue ?? undefined,
+        note: bar.note ?? undefined,
+        highlight: bar.highlight ?? false,
+      })),
+    })),
+    usedIn: inputUsage.get(variableName) ?? [],
   };
 }
 
 const scenarios: Scenario[] = scenarioEntries.map((entry) => {
   const { data } = entry;
+  const inputVariables = data.input_variables?.length ? data.input_variables : extractInputTokens(data.formula);
+
   return {
-    id: entry.id,
+    id: getEntryStem(entry.id),
     title: data.title,
     description: data.description,
-    input_variables: data.input_variables,
-    inputs: data.input_variables,
-    calculation_type: data.calculation_type,
-    operations: data.operations,
+    input_variables: inputVariables,
+    inputs: inputVariables,
+    formula: data.formula,
     result_label: data.result_label,
     result_units: data.result_units,
     category: data.category,
@@ -107,18 +164,20 @@ function formatInputNumber(input: Input) {
   return formatter.format(displayedValue);
 }
 
-const simpleInputIds = [
+const landingInputIds = [
+  'yearly_revenue__openai__dollars',
+  'deal_value__reddit_google__dollars',
   'dataset_size__llama3__tokens',
   'dataset_size__olmo3__tokens',
   'training_detail__openai__words_per_token',
   'dataset_size__hle__questions',
   'deal_group_size__reddit__daily_active_users',
-  'group_size__usa__people',
   'group_size__world__people',
   'post_training_size__tulu_3__sft_examples',
+  'pretraining_composition__dolma_v1_6__web_percent',
 ];
 
-const simpleInputs = simpleInputIds
+const landingInputs = landingInputIds
   .map((id) => inputs[id])
   .filter(Boolean)
   .map((input) => ({
@@ -126,43 +185,94 @@ const simpleInputs = simpleInputIds
     displayValue: formatInputNumber(input),
   }));
 
-function buildCalculatorHref(params: Record<string, string> = {}) {
-  const search = new URLSearchParams(params);
-  const query = search.toString();
-  return `/${query ? `?${query}` : ''}#calculations`;
+const landingInputGroups = INPUT_FOCUS_GROUPS.map((group) => ({
+  ...group,
+  inputs: landingInputs.filter((input) => getInputFocusGroupKey(input) === group.key),
+})).filter((group) => group.inputs.length);
+
+function formatMultiple(value?: number | null) {
+  if (value === null || value === undefined || !Number.isFinite(value)) return null;
+  if (value >= 100) return `${Math.round(value).toLocaleString('en-US')}x`;
+  if (value >= 10) return `${value.toFixed(1)}x`;
+  return `${value.toFixed(2)}x`;
 }
 
-const calculatorHref = buildCalculatorHref();
-const inputLibraryHref = buildCalculatorHref({ view: 'inputs' });
+const commissioningScenario = scenarios.find((scenario) => scenario.id === 'commissioning-new-datasets');
+const commissioningScenarioRawValue = commissioningScenario
+  ? createCalculationFunction(commissioningScenario)(
+      ...commissioningScenario.input_variables.map((inputKey) => inputs[inputKey]?.value ?? 0)
+    )
+  : null;
 
-const snapshotIntroById: Record<string, string> = {
-  'distributing-money-from-data-deals':
-    'A concrete licensing example: what happens when a disclosed platform deal gets spread across the people who made the platform valuable?',
-  'distributing-ai-company-revenue-broadly':
-    'A top-down framing of AI revenue at population scale. Useful when people talk about broad-based benefit sharing.',
-  'commissioning-new-datasets':
-    'A replacement-cost thought experiment for commissioning new pretraining data rather than scraping it.',
-  'producing-an-expert-evaluation-set':
-    'A labor-cost framing for expert benchmarks, using a public eval as the anchor point.',
+const openAiRevenue = inputs['yearly_revenue__openai__dollars']?.value;
+const anthropicRevenue = inputs['yearly_revenue__anthropic__dollars']?.value;
+const combinedAiRevenue =
+  [openAiRevenue, anthropicRevenue]
+    .filter((value): value is number => typeof value === 'number' && Number.isFinite(value))
+    .reduce((sum, value) => sum + value, 0) || null;
+
+const blogPlaceholder = {
+  commissioningCost:
+    commissioningScenarioRawValue !== null
+      ? `${humanReadable(commissioningScenarioRawValue)} ${commissioningScenario?.result_units ?? ''}`.trim()
+      : 'Unavailable',
+  openAiRevenue:
+    openAiRevenue !== undefined
+      ? `${humanReadable(openAiRevenue)} ${inputs['yearly_revenue__openai__dollars']?.units ?? ''}`.trim()
+      : 'Unavailable',
+  anthropicRevenue:
+    anthropicRevenue !== undefined
+      ? `${humanReadable(anthropicRevenue)} ${inputs['yearly_revenue__anthropic__dollars']?.units ?? ''}`.trim()
+      : 'Unavailable',
+  combinedRevenue:
+    combinedAiRevenue !== null
+      ? `${humanReadable(combinedAiRevenue)} dollars`
+      : 'Unavailable',
+  multipleVsCombined:
+    commissioningScenarioRawValue !== null && combinedAiRevenue !== null
+      ? formatMultiple(commissioningScenarioRawValue / combinedAiRevenue)
+      : null,
 };
 
-const scenarioSnapshots = scenarios.map((scenario) => {
-  const calculate = createCalculationFunction(scenario);
-  const rawValue = calculate(...scenario.input_variables.map((inputKey) => inputs[inputKey]?.value ?? 0));
+const featuredBlogEntry = sortByOrder(
+  blogEntries.filter((entry) => (entry.data.visibility ?? 'public') === 'public')
+)[0];
 
-  return {
-    id: scenario.id,
-    title: scenario.title,
-    category: scenario.category,
-    description:
-      snapshotIntroById[scenario.id] ??
-      'A default snapshot of the current calculation using the live input values published in this repository.',
-    resultLabel: scenario.result_label,
-    resultValue: humanReadable(rawValue),
-    resultUnits: scenario.result_units,
-    liveHref: buildCalculatorHref({ scenario: scenario.id }),
-  };
-});
+const featuredBlog = featuredBlogEntry
+  ? {
+      title: featuredBlogEntry.data.title,
+      excerpt: featuredBlogEntry.data.excerpt,
+      statusLabel: BLOG_STATUS_LABELS[featuredBlogEntry.data.status],
+    }
+  : {
+      title: 'Commissioning a new frontier dataset versus current AI revenue',
+      excerpt:
+        'A working note on the tension between replacement-cost estimates for commissioned training data and the current revenue anchors for frontier AI companies.',
+      statusLabel: BLOG_STATUS_LABELS.in_progress,
+    };
+
+const curatedPaperHighlights = sortByOrder(
+  keyPaperEntries.filter((entry) => (entry.data.visibility ?? 'public') === 'public')
+).map((entry) => ({
+  title: entry.data.title,
+  anchor: entry.data.anchor,
+  blurb: entry.data.relevance,
+  quality: KEY_PAPER_KIND_LABELS[entry.data.kind],
+  links: [
+    ...(entry.data.source_url
+      ? [
+          {
+            href: entry.data.source_url,
+            label: 'Read source',
+          },
+        ]
+      : []),
+    ...((entry.data.links ?? []).map((link) => ({
+      href: link.href,
+      label: link.label,
+    }))),
+  ],
+}));
 
 const paperHighlightIds = [
   'dataset_size__hle__questions',
@@ -176,10 +286,20 @@ const paperHighlights = paperHighlightIds
   .filter(Boolean)
   .map((input) => ({
     title: input.sourceName || input.title,
-    href: input.source_url,
     blurb: input.sourceNote || input.summary || input.importanceReason || 'Reference source highlighted in the input library.',
     anchor: input.title,
+    quality: input.sourceQuality,
+    links: input.source_url
+      ? [
+          {
+            href: input.source_url,
+            label: 'Read source',
+          },
+        ]
+      : [],
   }));
+
+const allPaperHighlights = [...curatedPaperHighlights, ...paperHighlights];
 
 const watchIndicators = [
   'AI company earnings calls, SEC filings, and updated revenue run rates.',
@@ -189,82 +309,85 @@ const watchIndicators = [
   'Inference price movement across flagship and mini model tiers.',
 ];
 
-const ourAsks = [
-  'Publish deal values and renewal terms in ways researchers and journalists can cite.',
-  'Break out AI-specific revenue from total company revenue whenever possible.',
-  'Disclose pretraining size, post-training size, and mix composition as first-class metrics.',
-  'Make contributor compensation for benchmarks and labeling more legible.',
-  'Treat data access, licensing, and opt-out infrastructure as measurable public-interest indicators.',
-];
+const ourAsks = sortByOrder(
+  askEntries.filter((entry) => (entry.data.visibility ?? 'public') === 'public')
+).map((entry) => entry.data.summary || entry.data.title);
 ---
 
-<Layout title="Data Napkin Math">
+<Layout title="Exploring AI: Data Napkin Math">
   <main class="home-shell">
     <section class="landing-hero">
       <div class="hero-copy">
-        <p class="section-kicker">Exploring AI in public numbers</p>
-        <h1>Featured inputs, live scenarios, and linked sources in one place.</h1>
+        <p class="section-kicker">Interactive calculator</p>
+        <h1>Exploring AI: Data Napkin Math</h1>
         <p class="hero-text">
-          Start with a few anchor numbers, then move into the live calculator or the full editable
-          input library. Each assumption now foregrounds the external source behind it.
+          Interactive napkin math, back-of-the-envelope estimates, and ballpark figures for training-data
+          value, compensation, and distribution questions. How will the proceeds and benefits of AI be
+          distributed?
         </p>
         <div class="hero-actions">
-          <a class="hero-link hero-link-primary" href={calculatorHref}>Open live calculator</a>
-          <a class="hero-link" href={inputLibraryHref}>Browse input library</a>
-          <a class="hero-link" href="/#inputs">See featured inputs</a>
+          <a class="hero-link hero-link-primary" href="/#calculations">Open calculator</a>
+          <a class="hero-link" href="/#inputs">Browse inputs</a>
+          <a class="hero-link" href="https://github.com/nickmvincent/exploringai" target="_blank" rel="noreferrer">
+            GitHub repository
+          </a>
         </div>
       </div>
 
-      <div class="hero-stats">
-        <div class="hero-stat">
-          <strong>{simpleInputs.length}</strong>
-          <span>featured inputs</span>
-        </div>
-        <div class="hero-stat">
-          <strong>{scenarioSnapshots.length}</strong>
-          <span>live scenarios</span>
-        </div>
-        <div class="hero-stat">
-          <strong>{paperHighlights.length}</strong>
-          <span>source highlights</span>
-        </div>
-      </div>
     </section>
 
-    <section id="inputs" class="landing-section">
-      <div class="section-header section-header-inline">
-        <div>
-          <p class="section-kicker">Section 1</p>
-          <h2>Featured inputs</h2>
-          <p>
-            A quick subset of anchor numbers from the full library. Use this section to orient
-            yourself, then open the editable input library if you want to inspect or change more assumptions.
-          </p>
-        </div>
-
-        <a class="section-link" href={inputLibraryHref}>Open full input library</a>
+    <section id="inputs" class="landing-section section-inputs">
+      <div class="section-header">
+        <p class="section-kicker">Section 1</p>
+        <h2>Inputs</h2>
+        <p>
+          Start with plain numbers from public sources, grouped by the kind of question you want to ask.
+          Jump straight to money, training scale, people, or data mix instead of scanning one long list.
+        </p>
       </div>
 
-      <div class="number-grid">
-        {simpleInputs.map((input) => (
-          <article class="number-card">
-            <div class="number-card-top">
-              <span class="mini-badge">Featured input</span>
-              {input.lastReviewed && <span class="number-meta">Reviewed {input.lastReviewed}</span>}
+      <div class="input-topic-nav" aria-label="Input categories">
+        {landingInputGroups.map((group) => (
+          <a class="input-topic-link" href={`#input-topic-${group.key}`}>
+            {group.prompt}
+          </a>
+        ))}
+      </div>
+
+      <div class="input-topic-list">
+        {landingInputGroups.map((group) => (
+          <section class="input-topic-section" id={`input-topic-${group.key}`}>
+            <div class="input-topic-header">
+              <div>
+                <p class="section-kicker input-topic-kicker">{group.prompt}</p>
+                <h3>{group.label}</h3>
+              </div>
+              <p>{group.description}</p>
             </div>
-            <h3>{input.title}</h3>
-            <div class="number-value">{input.displayValue}</div>
-            <div class="number-units">{input.display_units}</div>
-            <p class="number-summary">{input.summary || input.importanceReason}</p>
-            <div class="number-footer">
-              <span>Used in {input.usedIn?.length || 0} scenarios</span>
-              {input.source_url && (
-                <a href={input.source_url} target="_blank" rel="noreferrer">
-                  {input.sourceName || 'Open source'}
-                </a>
-              )}
+
+            <div class="number-grid">
+              {group.inputs.map((input) => (
+                <article class="number-card">
+                  <div class="number-card-top">
+                    <span class="mini-badge">{input.sourceQuality === 'primary' ? 'Primary' : 'Official'}</span>
+                    {input.lastReviewed && <span class="number-meta">Reviewed {input.lastReviewed}</span>}
+                  </div>
+                  <h3>{input.title}</h3>
+                  <div class="number-value">{input.displayValue}</div>
+                  <div class="number-units">{input.display_units}</div>
+                  <p class="number-summary">{input.summary || input.importanceReason}</p>
+                  <div class="number-footer">
+                    <span>Used in {input.usedIn?.length || 0} scenarios</span>
+                    {input.source_url && (
+                      <a href={input.source_url} target="_blank" rel="noreferrer">
+                        Source
+                      </a>
+                    )}
+                  </div>
+                </article>
+              ))}
             </div>
-          </article>
+          </section>
         ))}
       </div>
     </section>
@@ -285,67 +408,84 @@ const ourAsks = [
           initialInputs={inputs}
           initialScenarios={scenarios}
           initialView="scenarios"
+          showInputLibrary={false}
           showHeader={false}
           showAbout={false}
         />
       </div>
     </section>
 
-    <section id="blogs" class="landing-section">
-      <div class="section-header section-header-inline">
-        <div>
-          <p class="section-kicker">Section 3</p>
-          <h2>Default snapshots</h2>
-          <p>
-            Reference cards for the currently published default assumptions. These numbers do not
-            change when you edit the live calculator above; use each card's link to open the live scenario.
-          </p>
-        </div>
-
-        {blogProject && (
-          <a class="section-link" href={blogProject.website} target="_blank" rel="noreferrer">
-            Visit Data Leverage Blogs
-          </a>
-        )}
+    <section id="blogs" class="landing-section section-essay">
+      <div class="section-header">
+        <p class="section-kicker">Section 3</p>
+        <h2>Blogs</h2>
+        <p>
+          Working notes and short essays can now live in the markdown content library alongside inputs,
+          scenarios, asks, and key papers.
+        </p>
       </div>
 
-      <div class="snapshot-grid">
-        {scenarioSnapshots.map((snapshot) => (
-          <article class="snapshot-card">
-            <div class="snapshot-header">
-              <span class="mini-badge">Published default</span>
-              <a href={snapshot.liveHref}>Open live scenario</a>
+      <div class="essay-grid">
+        <article class="essay-card">
+          <div class="essay-header">
+            <span class="mini-badge essay-status">{featuredBlog.statusLabel}</span>
+            <a href="/#calculations">Open calculator</a>
+          </div>
+          <h3>{featuredBlog.title}</h3>
+          <p>{featuredBlog.excerpt}</p>
+
+          <div class="placeholder-metric-grid">
+            <div class="placeholder-metric">
+              <span>Commissioning estimate</span>
+              <strong>{blogPlaceholder.commissioningCost}</strong>
             </div>
-            <p class="snapshot-category">{snapshot.category}</p>
-            <h3>{snapshot.title}</h3>
-            <p>{snapshot.description}</p>
-            <div class="snapshot-result-label">{snapshot.resultLabel}</div>
-            <div class="snapshot-result-value">{snapshot.resultValue}</div>
-            <div class="snapshot-result-units">{snapshot.resultUnits}</div>
-          </article>
-        ))}
+            <div class="placeholder-metric">
+              <span>OpenAI annualized revenue</span>
+              <strong>{blogPlaceholder.openAiRevenue}</strong>
+            </div>
+            <div class="placeholder-metric">
+              <span>Anthropic annualized revenue</span>
+              <strong>{blogPlaceholder.anthropicRevenue}</strong>
+            </div>
+            <div class="placeholder-metric">
+              <span>Combined revenue anchor</span>
+              <strong>{blogPlaceholder.combinedRevenue}</strong>
+            </div>
+          </div>
+
+          <p>
+            At the current defaults, the commissioning estimate is roughly
+            {blogPlaceholder.multipleVsCombined ? ` ${blogPlaceholder.multipleVsCombined} ` : ' '}
+            the combined OpenAI-plus-Anthropic revenue anchor. That mismatch is the core tension this
+            placeholder post should unpack.
+          </p>
+        </article>
       </div>
     </section>
 
-    <section id="papers" class="landing-section">
+    <section id="papers" class="landing-section section-papers">
       <div class="section-header">
         <p class="section-kicker">Section 4</p>
-        <h2>Source highlights</h2>
+        <h2>Highlighted papers and trackers</h2>
         <p>
-          A short reading list of external sources doing real work for the numbers on this site:
-          benchmark papers, model cards, dataset cards, and filings worth opening directly.
+          A short reading list of outside sources that do real work for the numbers on this site:
+          benchmark papers, model cards, dataset cards, and live trackers that add context beyond the calculator itself.
         </p>
       </div>
 
       <div class="paper-grid">
-        {paperHighlights.map((paper) => (
+        {allPaperHighlights.map((paper) => (
           <article class="paper-card">
             <div class="paper-card-top">
-              <span class="mini-badge">External source</span>
-              {paper.href && (
-                <a href={paper.href} target="_blank" rel="noreferrer">
-                  Open source
-                </a>
+              <span class="mini-badge">{paper.quality ? paper.quality : 'Reference'}</span>
+              {paper.links.length > 0 && (
+                <div class="paper-card-links">
+                  {paper.links.map((link) => (
+                    <a href={link.href} target="_blank" rel="noreferrer">
+                      {link.label}
+                    </a>
+                  ))}
+                </div>
               )}
             </div>
             <h3>{paper.title}</h3>
@@ -356,7 +496,7 @@ const ourAsks = [
       </div>
     </section>
 
-    <section id="watch" class="landing-section">
+    <section id="watch" class="landing-section section-watch">
       <div class="section-header">
         <p class="section-kicker">Section 5</p>
         <h2>Indicators to watch and our asks</h2>
@@ -367,14 +507,14 @@ const ourAsks = [
       </div>
 
       <div class="watch-grid">
-        <article class="watch-card">
+        <article class="watch-card watch-card-indicators">
           <h3>Indicators we want to watch</h3>
           <ul>
             {watchIndicators.map((item) => <li>{item}</li>)}
           </ul>
         </article>
 
-        <article class="watch-card">
+        <article class="watch-card watch-card-asks">
           <h3>Our asks</h3>
           <ul>
             {ourAsks.map((item) => <li>{item}</li>)}
@@ -395,21 +535,22 @@ const ourAsks = [
 
   .landing-hero,
   .landing-section {
-    border: 1px solid rgba(179, 90, 30, 0.18);
+    border: 1px solid rgba(216, 222, 230, 0.92);
     border-radius: 26px;
-    background: rgba(255, 250, 242, 0.92);
-    box-shadow: 0 12px 24px rgba(78, 56, 36, 0.12);
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 16px 32px rgba(31, 39, 51, 0.08);
   }
 
   .landing-hero {
-    display: grid;
-    grid-template-columns: minmax(0, 1.4fr) minmax(260px, 0.8fr);
-    gap: 1.5rem;
     padding: 2rem;
     background:
-      radial-gradient(circle at 10% 10%, rgba(255, 255, 255, 0.72), transparent 34%),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.26), rgba(255, 255, 255, 0.04)),
-      rgba(255, 250, 242, 0.92);
+      radial-gradient(circle at 10% 10%, rgba(255, 255, 255, 0.82), transparent 34%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.76), rgba(247, 249, 252, 0.92)),
+      rgba(255, 255, 255, 0.84);
+  }
+
+  .hero-copy {
+    max-width: 820px;
   }
 
   .hero-copy h1 {
@@ -439,10 +580,11 @@ const ourAsks = [
     min-height: 2.6rem;
     padding: 0.62rem 0.98rem;
     border-radius: 999px;
-    border: 1px solid rgba(179, 90, 30, 0.22);
+    border: 1px solid rgba(216, 222, 230, 0.92);
     color: var(--ink-soft);
+    font-family: var(--font-ui);
     text-decoration: none;
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.9);
     transition: transform 0.18s ease, background-color 0.18s ease, color 0.18s ease;
   }
 
@@ -453,42 +595,80 @@ const ourAsks = [
 
   .hero-link-primary {
     color: var(--white);
-    background: linear-gradient(135deg, var(--primary-color), #c56e31);
+    background: linear-gradient(135deg, var(--primary-color), #3a618c);
   }
 
   .hero-link-primary:hover {
     color: var(--white);
   }
 
-  .hero-stats {
-    display: grid;
-    gap: 0.9rem;
-    align-content: start;
-  }
-
-  .hero-stat {
-    padding: 1rem 1.1rem;
-    border-radius: 20px;
-    border: 1px solid rgba(179, 90, 30, 0.16);
-    background: rgba(255, 255, 255, 0.78);
-  }
-
-  .hero-stat strong {
-    display: block;
-    color: var(--primary-color);
-    font-family: var(--font-heading);
-    font-size: 2rem;
-    line-height: 1;
-  }
-
-  .hero-stat span {
-    color: var(--dark-gray);
-    font-size: 0.92rem;
-  }
-
   .landing-section {
     margin-top: 1.5rem;
     padding: 1.4rem;
+  }
+
+  .input-topic-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.15rem;
+  }
+
+  .input-topic-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.35rem;
+    padding: 0.52rem 0.85rem;
+    border-radius: 999px;
+    border: 1px solid rgba(216, 222, 230, 0.92);
+    color: var(--ink-soft);
+    font-family: var(--font-ui);
+    text-decoration: none;
+    background: rgba(255, 255, 255, 0.88);
+    transition: transform 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+  }
+
+  .input-topic-link:hover {
+    transform: translateY(-1px);
+    color: var(--primary-color);
+    border-color: rgba(43, 76, 111, 0.2);
+  }
+
+  .input-topic-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.15rem;
+  }
+
+  .input-topic-section {
+    padding: 1rem;
+    border-radius: 22px;
+    border: 1px solid rgba(216, 222, 230, 0.92);
+    background:
+      linear-gradient(180deg, rgba(247, 249, 252, 0.58), rgba(255, 255, 255, 0.92)),
+      rgba(255, 255, 255, 0.9);
+  }
+
+  .input-topic-header {
+    display: grid;
+    grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
+    gap: 1rem;
+    align-items: end;
+    margin-bottom: 0.95rem;
+  }
+
+  .input-topic-kicker {
+    margin-bottom: 0.3rem;
+  }
+
+  .input-topic-header h3 {
+    margin-bottom: 0;
+  }
+
+  .input-topic-header p {
+    margin-bottom: 0;
+    color: var(--ink-soft);
   }
 
   .section-header {
@@ -507,6 +687,7 @@ const ourAsks = [
   .section-kicker {
     margin-bottom: 0.4rem;
     color: var(--dark-gray);
+    font-family: var(--font-ui);
     text-transform: uppercase;
     letter-spacing: 0.08em;
     font-size: 0.78rem;
@@ -531,13 +712,14 @@ const ourAsks = [
     min-height: 2.5rem;
     padding: 0.58rem 0.92rem;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.82);
-    border: 1px solid rgba(179, 90, 30, 0.18);
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(216, 222, 230, 0.92);
+    font-family: var(--font-ui);
     text-decoration: none;
   }
 
   .number-grid,
-  .snapshot-grid,
+  .essay-grid,
   .paper-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -550,22 +732,72 @@ const ourAsks = [
     gap: 1rem;
   }
 
-  .number-card,
-  .snapshot-card,
-  .paper-card,
-  .watch-card {
+  .number-card {
     display: flex;
     flex-direction: column;
     gap: 0.7rem;
     min-height: 100%;
     padding: 1rem;
-    border: 1px solid rgba(179, 90, 30, 0.14);
+    border: 1px solid rgba(216, 222, 230, 0.92);
     border-radius: 20px;
-    background: rgba(255, 255, 255, 0.78);
+    background: rgba(255, 255, 255, 0.88);
+  }
+
+  .essay-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .essay-card {
+    display: grid;
+    gap: 1rem;
+    padding: 1.35rem;
+    border: 1px solid rgba(216, 222, 230, 0.92);
+    border-radius: 24px;
+    background:
+      linear-gradient(120deg, rgba(43, 76, 111, 0.06), rgba(255, 255, 255, 0) 44%),
+      rgba(255, 255, 255, 0.94);
+    box-shadow: 0 18px 34px rgba(31, 39, 51, 0.08);
+  }
+
+  .paper-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    min-height: 100%;
+    padding: 1.1rem 1.15rem 1.2rem;
+    border: 1px solid rgba(216, 222, 230, 0.92);
+    border-left: 4px solid rgba(43, 76, 111, 0.18);
+    border-radius: 22px;
+    background:
+      linear-gradient(180deg, rgba(247, 249, 252, 0.86), rgba(255, 255, 255, 0.96)),
+      rgba(255, 255, 255, 0.92);
+  }
+
+  .watch-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    min-height: 100%;
+    padding: 1.15rem 1.2rem;
+    border: 1px solid rgba(216, 222, 230, 0.92);
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.9);
+  }
+
+  .watch-card-indicators {
+    background:
+      linear-gradient(180deg, rgba(241, 246, 252, 0.92), rgba(255, 255, 255, 0.94)),
+      rgba(255, 255, 255, 0.92);
+  }
+
+  .watch-card-asks {
+    background:
+      linear-gradient(180deg, rgba(248, 250, 253, 0.9), rgba(255, 255, 255, 0.96)),
+      rgba(255, 255, 255, 0.94);
   }
 
   .number-card-top,
-  .snapshot-header,
+  .essay-header,
   .paper-card-top,
   .number-footer {
     display: flex;
@@ -582,16 +814,14 @@ const ourAsks = [
     padding: 0.24rem 0.56rem;
     border-radius: 999px;
     color: var(--primary-color);
-    background: rgba(179, 90, 30, 0.1);
+    background: rgba(43, 76, 111, 0.08);
+    font-family: var(--font-ui);
     font-size: 0.8rem;
     text-transform: capitalize;
   }
 
   .number-meta,
   .number-footer,
-  .snapshot-category,
-  .snapshot-result-label,
-  .snapshot-result-units,
   .paper-anchor {
     color: var(--dark-gray);
     font-size: 0.9rem;
@@ -604,14 +834,13 @@ const ourAsks = [
   }
 
   .number-card h3,
-  .snapshot-card h3,
+  .essay-card h3,
   .paper-card h3,
   .watch-card h3 {
     margin-bottom: 0;
   }
 
-  .number-value,
-  .snapshot-result-value {
+  .number-value {
     color: var(--primary-color);
     font-family: var(--font-heading);
     font-size: 2rem;
@@ -619,23 +848,88 @@ const ourAsks = [
   }
 
   .number-summary,
-  .snapshot-card p,
+  .essay-card p,
   .paper-card p,
   .watch-card li {
     color: var(--ink-soft);
   }
 
   .number-footer a,
-  .snapshot-header a,
+  .essay-header a,
   .paper-card-top a {
     color: var(--primary-color);
     text-decoration: none;
   }
 
   .number-footer a:hover,
-  .snapshot-header a:hover,
+  .essay-header a:hover,
   .paper-card-top a:hover {
     text-decoration: underline;
+  }
+
+  .section-essay {
+    background:
+      linear-gradient(180deg, rgba(249, 250, 253, 0.9), rgba(255, 255, 255, 0.9)),
+      rgba(255, 255, 255, 0.88);
+  }
+
+  .essay-card h3 {
+    max-width: 18ch;
+    font-size: clamp(1.6rem, 3vw, 2.15rem);
+    line-height: 1.08;
+  }
+
+  .essay-status {
+    background: rgba(43, 76, 111, 0.1);
+  }
+
+  .section-papers .paper-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+
+  .section-watch {
+    background:
+      linear-gradient(180deg, rgba(246, 248, 251, 0.92), rgba(255, 255, 255, 0.9)),
+      rgba(255, 255, 255, 0.88);
+  }
+
+  .paper-card-links {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .placeholder-metric-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.85rem;
+  }
+
+  .placeholder-metric {
+    padding: 0.9rem 1rem;
+    border: 1px solid rgba(216, 222, 230, 0.92);
+    border-radius: 16px;
+    background: rgba(247, 249, 252, 0.72);
+  }
+
+  .placeholder-metric span {
+    display: block;
+    margin-bottom: 0.35rem;
+    color: var(--dark-gray);
+    font-family: var(--font-ui);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .placeholder-metric strong {
+    color: var(--primary-color);
+    font-family: var(--font-heading);
+    font-size: 1.3rem;
+    line-height: 1.15;
   }
 
   .calculator-shell {
@@ -654,19 +948,16 @@ const ourAsks = [
 
   #inputs,
   #calculations,
-  #blogs,
+  #essay,
   #papers,
   #watch {
     scroll-margin-top: calc(var(--navbar-height) + 1rem);
   }
 
   @media (max-width: 920px) {
-    .landing-hero {
-      grid-template-columns: 1fr;
-    }
-
     .section-header-inline,
-    .watch-grid {
+    .watch-grid,
+    .input-topic-header {
       grid-template-columns: 1fr;
       display: grid;
     }
@@ -685,10 +976,14 @@ const ourAsks = [
 
     .hero-actions,
     .number-grid,
-    .snapshot-grid,
+    .essay-grid,
     .paper-grid,
     .watch-grid {
       grid-template-columns: 1fr;
+    }
+
+    .input-topic-section {
+      padding: 0.9rem;
     }
   }
 </style>

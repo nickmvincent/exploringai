@@ -1,10 +1,10 @@
 ---
-title: Data Napkin Math TODO
+title: Exploring AI: Data Napkin Math TODO
 type: scratchpad
 visibility: private
 ---
 
-# Data Napkin Math TODO
+# Exploring AI: Data Napkin Math TODO
 
 ## New Inputs to Research and Add
 

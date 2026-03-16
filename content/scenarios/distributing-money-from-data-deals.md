@@ -4,13 +4,8 @@ description: >-
   If we distribute the payments from recent data deal (say,
   {deal_value__reddit_google__dollars}) to some group of people (say,
   {deal_group_size__reddit__daily_active_users}), how much will each person get?
-input_variables:
-  - deal_value__reddit_google__dollars
-  - deal_group_size__reddit__daily_active_users
-calculation_type: operations
-operations: >-
-  [{"func": "divide", "args": ["{deal_value__reddit_google__dollars}",
-  "{deal_group_size__reddit__daily_active_users}"]}]
+formula: >-
+  {deal_value__reddit_google__dollars} / {deal_group_size__reddit__daily_active_users}
 result_label: Per Person Revenue
 result_units: dollars
 category: Distributing money

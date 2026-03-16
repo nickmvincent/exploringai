@@ -1,4 +1,4 @@
-# Data Napkin Math - Astro Site
+# Exploring AI: Data Napkin Math - Astro Site
 
 An Astro + Vue site for interactive "napkin math" calculations about training data value.
 

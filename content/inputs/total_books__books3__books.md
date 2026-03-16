@@ -22,6 +22,24 @@ lastReviewed: "2026-03-11"
 featured: false
 min: 0
 step: 100
+referenceCharts:
+  - title: "How many books is that, really?"
+    description: "Book counts are easier to reason about when you compare a scraped corpus to shelves a person might actually picture."
+    scale: log
+    bars:
+      - label: "Small personal library"
+        value: 20
+        displayValue: "20 books"
+        note: "A rough home shelf."
+      - label: "Serious home library"
+        value: 200
+        displayValue: "200 books"
+        note: "A full room or years of collecting."
+      - label: "Books3 corpus"
+        value: 196640
+        displayValue: "196,640 books"
+        note: "The current input."
+        highlight: true
 date_added: '2025-03-19T00:00:00.000Z'
 tags:
   - variable-type:total-books
