@@ -1,4 +1,5 @@
-// Calculation utilities for Data Napkin Math
+// Calculation utilities for Exploring AI: Data Napkin Math
+import { evaluateFormulaExpression } from './formulas.js';
 
 export interface Input {
   id: string;
@@ -17,6 +18,11 @@ export interface Input {
   importanceReason?: string;
   sourceName?: string;
   sourceNote?: string;
+  sourceLocator?: string;
+  sourceLocatorUrl?: string;
+  sourceExcerpt?: string;
+  derivationNote?: string;
+  sourcePublished?: string;
   sourceQuality?: string;
   summary?: string;
   confidence?: number;
@@ -25,11 +31,36 @@ export interface Input {
   min?: number;
   max?: number;
   step?: number;
+  comparisonImage?: InputComparisonImage;
+  referenceCharts?: InputReferenceChart[];
   usedIn?: {
     id: string;
     title: string;
     category: string;
   }[];
+}
+
+export interface InputComparisonImage {
+  src: string;
+  alt: string;
+  caption?: string;
+  href?: string;
+  label?: string;
+}
+
+export interface InputReferenceChart {
+  title: string;
+  description?: string;
+  scale?: 'linear' | 'log';
+  bars: InputReferenceChartBar[];
+}
+
+export interface InputReferenceChartBar {
+  label: string;
+  value: number;
+  displayValue?: string;
+  note?: string;
+  highlight?: boolean;
 }
 
 export interface Scenario {
@@ -38,8 +69,7 @@ export interface Scenario {
   description: string;
   input_variables: string[];
   inputs: string[];
-  calculation_type: string;
-  operations: string;
+  formula: string;
   result_label: string;
   result_units: string;
   category: string;
@@ -53,10 +83,10 @@ export interface Scenario {
   calculate?: (...args: number[]) => number;
 }
 
-export interface Operation {
-  func: string;
-  args: (string | number)[];
-  name?: string;
+export interface ExpressionEvaluation {
+  rawValue: number | null;
+  usedVariables: string[];
+  error?: string;
 }
 
 /**
@@ -120,118 +150,28 @@ export function humanReadable(value: number | null | undefined): string {
  * Create a calculation function from scenario data
  */
 export function createCalculationFunction(scenario: Scenario): (...args: number[]) => number {
-  if (scenario.calculation_type === "operations") {
-    try {
-      const operations: Operation[] = JSON.parse(scenario.operations);
-      return createOperationsFunction(scenario.input_variables, operations);
-    } catch (error) {
-      console.error(`Error creating calculation function for ${scenario.title}:`, error);
-      return () => 0;
-    }
-  } else {
-    console.warn(`Unsupported calculation type for ${scenario.title}: ${scenario.calculation_type}`);
-    return () => 0;
-  }
-}
-
-/**
- * Create a function that processes a sequence of operations
- */
-function createOperationsFunction(inputVariables: string[], operations: Operation[]): (...args: number[]) => number {
   return function (...args: number[]): number {
     const context: Record<string, number> = {};
 
-    // Add input values to context
-    inputVariables.forEach((varName, index) => {
+    scenario.input_variables.forEach((varName, index) => {
       context[varName] = args[index];
     });
 
-    let result = 0;
-
-    // Process operations in sequence
-    for (const op of operations) {
-      const processedArgs = op.args.map(arg => {
-        if (typeof arg === 'string' && arg.startsWith('{') && arg.endsWith('}')) {
-          const varName = arg.slice(1, -1);
-          if (context[varName] !== undefined) {
-            return context[varName];
-          } else {
-            throw new Error(`Missing value for "${varName}" in calculation`);
-          }
-        }
-        return parseFloat(String(arg));
-      });
-
-      switch (op.func) {
-        case "multiply":
-          result = processedArgs.reduce((a, b) => a * b, 1);
-          break;
-        case "divide":
-          result = processedArgs[0] / processedArgs[1];
-          break;
-        case "add":
-          result = processedArgs.reduce((a, b) => a + b, 0);
-          break;
-        case "subtract":
-          result = processedArgs[0] - processedArgs[1];
-          break;
-        case "power":
-          result = Math.pow(processedArgs[0], processedArgs[1]);
-          break;
-        default:
-          throw new Error(`Unsupported operation: ${op.func}`);
-      }
-
-      if (op.name) {
-        context[op.name] = result;
-      }
+    const evaluation = evaluateFormulaExpression(scenario.formula, context) as ExpressionEvaluation;
+    if (evaluation.error || evaluation.rawValue === null) {
+      throw new Error(evaluation.error || `Unable to evaluate formula for ${scenario.title}`);
     }
 
-    return result;
+    return evaluation.rawValue;
   };
 }
 
-/**
- * Format operation for human readability
- */
-export function formatOperation(operationsJson: string, inputs: Record<string, Input>): string {
-  try {
-    const operations: Operation[] = JSON.parse(operationsJson);
+export function evaluateMathExpression(expression: string, inputs: Record<string, Input>): ExpressionEvaluation {
+  const values = Object.fromEntries(
+    Object.entries(inputs).map(([key, input]) => [key, input.value])
+  );
 
-    if (!operations || !operations.length) {
-      return 'No operations defined';
-    }
-
-    const descriptions = operations.map(op => {
-      const formattedArgs = op.args.map(arg => {
-        if (typeof arg === 'string' && arg.startsWith('{') && arg.endsWith('}')) {
-          const varName = arg.slice(1, -1);
-          return inputs[varName]?.nice_name || inputs[varName]?.title || formatLabel(varName);
-        }
-        return String(arg);
-      });
-
-      switch (op.func) {
-        case 'multiply':
-          return `Multiply ${formattedArgs.join(' x ')}`;
-        case 'divide':
-          return `Divide ${formattedArgs[0]} by ${formattedArgs[1]}`;
-        case 'add':
-          return `Add ${formattedArgs.join(' + ')}`;
-        case 'subtract':
-          return `Subtract ${formattedArgs[1]} from ${formattedArgs[0]}`;
-        case 'power':
-          return `Raise ${formattedArgs[0]} to the power of ${formattedArgs[1]}`;
-        default:
-          return `${op.func}(${formattedArgs.join(', ')})`;
-      }
-    });
-
-    return descriptions.map((desc, index) => `Step ${index + 1}: ${desc}`).join('\n');
-  } catch (error) {
-    console.error('Error formatting operation:', error);
-    return 'Error parsing operations';
-  }
+  return evaluateFormulaExpression(expression, values) as ExpressionEvaluation;
 }
 
 /**

@@ -13,6 +13,9 @@ importanceRank: 28
 importanceReason: "Multilingual instruction data deserves explicit visibility in post-training mixes."
 sourceName: "Tulu 3 SFT mixture card"
 sourceNote: "Aya contributes 100,000 multilingual instruction examples in the released mixture."
+sourceLocator: "Dataset card mixture summary table"
+sourceLocatorUrl: 'https://huggingface.co/datasets/allenai/tulu-3-sft-mixture'
+sourceExcerpt: "The Tulu 3 SFT card lists 100,000 Aya examples."
 sourceQuality: "official"
 confidence: 0.95
 lastReviewed: "2026-03-10"

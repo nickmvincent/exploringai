@@ -14,6 +14,9 @@ importanceRank: 14
 importanceReason: "Shows how thinly a large licensing payment spreads across a platform's users."
 sourceName: "Reddit investor relations"
 sourceNote: "Uses Reddit's Q4 2025 daily active uniques as the latest official public scale benchmark."
+sourceLocator: "Q4 2025 results highlights"
+sourceLocatorUrl: 'https://investor.redditinc.com/news-events/news-releases/news-details/2026/Reddit-Reports-Fourth-Quarter-and-Full-Year-2025-Results-Announces-1-Billion-Share-Repurchase-Program/default.aspx'
+sourceExcerpt: "Reddit reports 121.4 million daily active uniques for Q4 2025."
 sourceQuality: "official"
 confidence: 0.95
 lastReviewed: "2026-03-10"

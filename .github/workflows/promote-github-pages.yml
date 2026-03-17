@@ -37,6 +37,10 @@ jobs:
         working-directory: website
         run: npm ci
 
+      - name: Verify input citations
+        working-directory: website
+        run: npm run verify:citations -- --strict
+
       - name: Build stable site
         working-directory: website
         env:

@@ -13,6 +13,9 @@ importanceRank: 8
 importanceReason: "Connects model training debates to the scale of AI-company revenue."
 sourceName: "Reuters / OpenAI spokesperson"
 sourceNote: "Reuters reported OpenAI said its annualized revenue run rate reached $10B in June 2025, excluding Microsoft licensing and large one-off deals."
+sourceLocator: "Reported revenue-run-rate summary in Reuters coverage"
+sourceLocatorUrl: 'https://finance.yahoo.com/news/openais-annualized-revenue-hits-10-194345858.html'
+sourceExcerpt: "Reuters reported that OpenAI's annualized revenue run rate reached $10B in June 2025."
 sourceQuality: "reported"
 confidence: 0.72
 lastReviewed: "2026-03-10"

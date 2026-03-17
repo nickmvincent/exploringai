@@ -13,6 +13,9 @@ importanceRank: 9
 importanceReason: "Shows that frontier-model revenue is no longer confined to one company."
 sourceName: "Reuters / Anthropic"
 sourceNote: "Anthropic told Reuters in October 2025 that its annual revenue run rate was approaching $7B."
+sourceLocator: "Reported revenue-run-rate summary in Reuters coverage"
+sourceLocatorUrl: 'https://finance.yahoo.com/news/exclusive-anthropic-aims-nearly-triple-170234463.html'
+sourceExcerpt: "Reuters reported that Anthropic's annual revenue run rate was approaching $7B."
 sourceQuality: "reported"
 confidence: 0.72
 lastReviewed: "2026-03-10"

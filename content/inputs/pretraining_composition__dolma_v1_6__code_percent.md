@@ -13,6 +13,10 @@ importanceRank: 20
 importanceReason: "Code is a major category in modern pretraining mixtures and worth separating from prose."
 sourceName: "AllenAI Dolma dataset card"
 sourceNote: "Derived from the published The Stack token count in Dolma v1.6."
+sourceLocator: "Dataset card table of source-token counts for Dolma v1.6"
+sourceLocatorUrl: 'https://huggingface.co/datasets/allenai/dolma'
+sourceExcerpt: "The Dolma card lists 411B The Stack tokens out of 3,059B total tokens."
+derivationNote: "This input divides the The Stack token count by the 3,059B-token total."
 sourceQuality: "official"
 confidence: 0.95
 lastReviewed: "2026-03-10"

@@ -4,13 +4,8 @@ description: >-
   How much would it cost to pay for an eval dataset (say,
   {dataset_size__hle__questions}) assuming moderate expert hourly wages (say,
   {wage_data__phd__dollars_per_question})?
-input_variables:
-  - dataset_size__hle__questions
-  - wage_data__phd__dollars_per_question
-calculation_type: operations
-operations: >-
-  [{"func": "multiply", "args": ["{dataset_size__hle__questions}",
-  "{wage_data__phd__dollars_per_question}"]}]
+formula: >-
+  {dataset_size__hle__questions} * {wage_data__phd__dollars_per_question}
 result_label: Dataset Cost
 result_units: dollars
 category: Paying for new labour

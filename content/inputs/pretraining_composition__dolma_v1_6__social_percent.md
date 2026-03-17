@@ -13,6 +13,10 @@ importanceRank: 22
 importanceReason: "Social platforms are central to data-rights debates and should be visible as their own source class."
 sourceName: "AllenAI Dolma dataset card"
 sourceNote: "Derived from the published Reddit token count in Dolma v1.6."
+sourceLocator: "Dataset card table of source-token counts for Dolma v1.6"
+sourceLocatorUrl: 'https://huggingface.co/datasets/allenai/dolma'
+sourceExcerpt: "The Dolma card lists 89B Reddit tokens out of 3,059B total tokens."
+derivationNote: "This input divides the Reddit token count by the 3,059B-token total."
 sourceQuality: "official"
 confidence: 0.95
 lastReviewed: "2026-03-10"

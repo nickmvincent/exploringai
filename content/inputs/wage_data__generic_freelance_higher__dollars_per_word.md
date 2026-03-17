@@ -13,6 +13,9 @@ importanceRank: 17
 importanceReason: "Offers a paid-labor benchmark for replacing large corpora with commissioned writing."
 sourceName: "Editorial Freelancers Association 2024 rate chart"
 sourceNote: "Uses the high end of EFA's book-proposal per-word rate range as a conservative paid-writing proxy."
+sourceLocator: "EFA rate chart range for book-proposal writing"
+sourceLocatorUrl: 'https://www.the-efa.org/rates/'
+sourceExcerpt: "This benchmark uses the high end of the EFA's professional per-word writing range."
 sourceQuality: "industry"
 confidence: 0.6
 lastReviewed: "2026-03-10"

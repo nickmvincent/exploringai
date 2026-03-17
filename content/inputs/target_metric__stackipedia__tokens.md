@@ -13,6 +13,8 @@ importanceRank: 43
 importanceReason: "A project target is useful once readers understand the external scale benchmarks above."
 sourceName: "Project default"
 sourceNote: "Internal target for a hypothetical public-knowledge corpus, not an observed empirical statistic."
+sourceLocator: "Project-default planning target for Stackipedia"
+sourceExcerpt: "Stackipedia planning uses a target corpus size of 1B tokens."
 sourceQuality: "assumption"
 confidence: 0.25
 lastReviewed: "2026-03-10"

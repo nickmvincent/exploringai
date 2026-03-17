@@ -14,6 +14,10 @@ importanceRank: 16
 importanceReason: "Provides a concrete benchmark for compensating domain experts for evaluation work."
 sourceName: "Humanity's Last Exam paper and site"
 sourceNote: "A $500k prize pool spread across 2,500 final public questions implies about $200 per retained question, excluding organizer and reviewer labor."
+sourceLocator: "Paper and site description of the $500k prize pool and 2,500 final questions"
+sourceLocatorUrl: 'https://static.scale.com/uploads/654197dc94d34f66c0f5184e/Publication%20Ready%20Humanity%27s%20Last%20Exam.pdf'
+sourceExcerpt: "The benchmark combined a $500k prize pool with 2,500 final public questions."
+derivationNote: "This input divides the $500,000 prize pool by 2,500 retained questions to estimate dollars per question."
 sourceQuality: "primary"
 confidence: 0.85
 lastReviewed: "2026-03-10"

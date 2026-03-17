@@ -13,6 +13,10 @@ importanceRank: 26
 importanceReason: "Shows how much post-training data can come from synthetic curriculum-style sources."
 sourceName: "Tulu 3 SFT mixture card"
 sourceNote: "This combines the five Persona subsets in the released Tulu 3 SFT mixture."
+sourceLocator: "Dataset card mixture summary table"
+sourceLocatorUrl: 'https://huggingface.co/datasets/allenai/tulu-3-sft-mixture'
+sourceExcerpt: "The card lists Persona subset counts of 149,960, 49,980, 34,999, 20,000, and 29,980 examples."
+derivationNote: "This input sums Persona MATH, GSM, Python, Algebra, and IF examples from the released mixture."
 sourceQuality: "official"
 confidence: 0.95
 lastReviewed: "2026-03-10"

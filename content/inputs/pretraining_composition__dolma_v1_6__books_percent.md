@@ -13,6 +13,10 @@ importanceRank: 23
 importanceReason: "Books are a politically salient source category even when their token share is smaller than people expect."
 sourceName: "AllenAI Dolma dataset card"
 sourceNote: "Derived from the Project Gutenberg token count in Dolma v1.6."
+sourceLocator: "Dataset card table of source-token counts for Dolma v1.6"
+sourceLocatorUrl: 'https://huggingface.co/datasets/allenai/dolma'
+sourceExcerpt: "The Dolma card lists 6.0B Project Gutenberg tokens out of 3,059B total tokens."
+derivationNote: "This input divides the Project Gutenberg token count by the 3,059B-token total."
 sourceQuality: "official"
 confidence: 0.95
 lastReviewed: "2026-03-10"

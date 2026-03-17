@@ -14,6 +14,9 @@ importanceRank: 11
 importanceReason: "Adds an AI-infrastructure revenue benchmark from a company with unusually direct exposure to model demand."
 sourceName: "CoreWeave earnings release"
 sourceNote: "CoreWeave reported $5.131B of fiscal-year 2025 revenue."
+sourceLocator: "Fiscal year 2025 results highlights"
+sourceLocatorUrl: 'https://investors.coreweave.com/news/news-details/2026/CoreWeave-Reports-Strong-Fourth-Quarter-and-Fiscal-Year-2025-Results'
+sourceExcerpt: "CoreWeave reports $5.131B in fiscal-year 2025 revenue."
 sourceQuality: "official"
 confidence: 0.95
 lastReviewed: "2026-03-10"

@@ -13,6 +13,8 @@ importanceRank: 39
 importanceReason: "Useful for newsroom-level thought experiments, but less central than platform or population denominators."
 sourceName: "Historic public reporting"
 sourceNote: "This is a rough historical benchmark for WSJ/Dow Jones newsroom size, not a freshly disclosed audited count."
+sourceLocator: "Heuristic newsroom-size benchmark used for thought experiments"
+sourceExcerpt: "This input uses a rough 2,000-journalist benchmark for the WSJ and related Dow Jones newsroom."
 sourceQuality: "heuristic"
 confidence: 0.45
 lastReviewed: "2026-03-10"

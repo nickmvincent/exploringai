@@ -13,6 +13,8 @@ importanceRank: 40
 importanceReason: "Project-specific corpus assumptions matter, but only after the public reference points above."
 sourceName: "Project default"
 sourceNote: "Hypothetical default used for Stackipedia scenarios; no external public source is claimed."
+sourceLocator: "Project-default assumption for Stackipedia scenario design"
+sourceExcerpt: "Stackipedia scenarios assume a typical document length of 1,500 tokens."
 sourceQuality: "assumption"
 confidence: 0.25
 lastReviewed: "2026-03-10"

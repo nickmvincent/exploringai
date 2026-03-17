@@ -13,6 +13,9 @@ importanceRank: 13
 importanceReason: "A concrete public example of how valuable user-generated training data can be."
 sourceName: "Reuters"
 sourceNote: "Reuters reported the Google-Reddit licensing contract was worth about $60M per year."
+sourceLocator: "Reported deal-value summary in Reuters coverage"
+sourceLocatorUrl: 'https://tech.yahoo.com/ai/articles/exclusive-reddit-ai-content-licensing-041012503.html'
+sourceExcerpt: "Reuters reported that Google agreed to pay Reddit about $60M per year."
 sourceQuality: "reported"
 confidence: 0.72
 lastReviewed: "2026-03-10"

@@ -4,16 +4,9 @@ description: >-
   How much would it cost to pay for a brand new LLM-scale pre-training dataset
   (say, {dataset_size__llama3__tokens}) assuming moderate freelance writing
   wages (say, {wage_data__generic_freelance_higher__dollars_per_word})?
-input_variables:
-  - dataset_size__llama3__tokens
-  - training_detail__openai__words_per_token
-  - wage_data__generic_freelance_higher__dollars_per_word
-calculation_type: operations
-operations: >-
-  [{"func": "multiply", "args": ["{dataset_size__llama3__tokens}",
-  "{training_detail__openai__words_per_token}"], "name": "total_words"},
-  {"func": "multiply", "args": ["{total_words}",
-  "{wage_data__generic_freelance_higher__dollars_per_word}"]}]
+formula: >-
+  {dataset_size__llama3__tokens} * {training_detail__openai__words_per_token} *
+  {wage_data__generic_freelance_higher__dollars_per_word}
 result_label: Dataset Cost
 result_units: dollars
 category: Paying for new labour

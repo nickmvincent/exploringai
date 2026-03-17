@@ -13,6 +13,9 @@ importanceRank: 18
 importanceReason: "Provides a lower-bound labor benchmark for commissioned text."
 sourceName: "Editorial Freelancers Association 2024 rate chart"
 sourceNote: "Uses a low-end professional editorial benchmark as a rough floor for paid per-word labor."
+sourceLocator: "EFA rate chart lower-end per-word benchmark"
+sourceLocatorUrl: 'https://www.the-efa.org/rates/'
+sourceExcerpt: "This benchmark uses a low-end professional per-word rate from the EFA chart."
 sourceQuality: "industry"
 confidence: 0.6
 lastReviewed: "2026-03-10"

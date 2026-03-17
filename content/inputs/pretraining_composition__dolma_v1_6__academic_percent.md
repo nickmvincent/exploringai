@@ -13,6 +13,10 @@ importanceRank: 21
 importanceReason: "Academic content is a distinct source of high-density technical knowledge."
 sourceName: "AllenAI Dolma dataset card"
 sourceNote: "Derived from the published PeS2o paper count in Dolma v1.6."
+sourceLocator: "Dataset card table of source-token counts for Dolma v1.6"
+sourceLocatorUrl: 'https://huggingface.co/datasets/allenai/dolma'
+sourceExcerpt: "The Dolma card lists 70B PeS2o tokens out of 3,059B total tokens."
+derivationNote: "This input divides the PeS2o token count by the 3,059B-token total."
 sourceQuality: "official"
 confidence: 0.95
 lastReviewed: "2026-03-10"

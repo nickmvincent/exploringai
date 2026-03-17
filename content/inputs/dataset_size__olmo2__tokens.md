@@ -13,6 +13,9 @@ importanceRank: 34
 importanceReason: "Adds an additional open-model comparison point so one recipe is not carrying all the weight."
 sourceName: "AllenAI OLMo 2 model card"
 sourceNote: "AllenAI reports 5 trillion training tokens for OLMo 2."
+sourceLocator: "Model card training-data summary"
+sourceLocatorUrl: 'https://huggingface.co/allenai/OLMo-2-1124-7B'
+sourceExcerpt: "The OLMo 2 model card reports 5T training tokens."
 sourceQuality: "official"
 confidence: 0.95
 lastReviewed: "2026-03-10"

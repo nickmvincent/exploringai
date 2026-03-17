@@ -7,12 +7,15 @@ variable_name: inference_price__gpt_4_1_mini__input_dollars_per_1m_tokens
 variable_type: inference_price
 entity: gpt_4_1_mini
 units: dollars_per_1m_input_tokens
-source_url: 'https://platform.openai.com/docs/models/gpt-4.1-mini'
+source_url: 'https://platform.openai.com/docs/pricing'
 summary: "Public API price benchmark for GPT-4.1 mini input tokens."
 importanceRank: 6
 importanceReason: "A cheaper-model benchmark helps readers compare premium and cost-optimized inference tiers."
-sourceName: "OpenAI model docs"
+sourceName: "OpenAI pricing page"
 sourceNote: "GPT-4.1 mini input pricing is listed at $0.40 per 1M tokens."
+sourceLocator: "Pricing table entry for GPT-4.1 mini input tokens"
+sourceLocatorUrl: 'https://platform.openai.com/docs/pricing'
+sourceExcerpt: "The pricing page lists GPT-4.1 mini input tokens at $0.40 per 1M tokens."
 sourceQuality: "official"
 confidence: 0.95
 lastReviewed: "2026-03-10"
@@ -42,5 +45,5 @@ Public API pricing is a price-to-user benchmark, not OpenAI's internal marginal 
 
 ## Source
 
-- [https://platform.openai.com/docs/models/gpt-4.1-mini](https://platform.openai.com/docs/models/gpt-4.1-mini)
+- [https://platform.openai.com/docs/pricing](https://platform.openai.com/docs/pricing)
 - OpenAI lists GPT-4.1 mini input pricing at $0.40 per 1 million tokens.

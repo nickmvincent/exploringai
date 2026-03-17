@@ -13,6 +13,9 @@ importanceRank: 30
 importanceReason: "Useful for national-scale distribution or public-infrastructure comparisons."
 sourceName: "U.S. Census Bureau"
 sourceNote: "Uses the Census Bureau projection for the U.S. population on January 1, 2025."
+sourceLocator: "January 1, 2025 projection table in the Census press release"
+sourceLocatorUrl: 'https://www.census.gov/newsroom/press-releases/2024/population-new-years-day.html'
+sourceExcerpt: "The Census Bureau projects 341,145,670 U.S. residents on January 1, 2025."
 sourceQuality: "official"
 confidence: 0.95
 lastReviewed: "2026-03-10"

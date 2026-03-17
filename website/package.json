@@ -4,11 +4,18 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
+    "prebuild": "npm run verify:citations -- --strict && npm run content:check",
+    "prebuild:stable": "npm run verify:citations -- --strict && npm run content:check",
+    "prebuild:dev": "npm run verify:citations -- --strict && npm run content:check",
     "build": "astro build",
     "build:stable": "SITE_URL=https://exploringai.org PUBLIC_ALLOW_INDEXING=true astro build",
     "build:dev": "PUBLIC_ALLOW_INDEXING=false astro build",
+    "verify:citations": "node ../scripts/check-input-citations.mjs",
     "preview": "astro preview",
     "astro": "astro",
+    "content:check": "node ./scripts/content-check.mjs",
+    "new:input": "node ./scripts/new-content.mjs input",
+    "new:scenario": "node ./scripts/new-content.mjs scenario",
     "cf:dev": "wrangler pages dev dist",
     "cf:deploy": "wrangler pages deploy dist"
   },

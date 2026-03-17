@@ -13,6 +13,9 @@ importanceRank: 2
 importanceReason: "Lets readers translate abstract token counts into everyday language volume."
 sourceName: "OpenAI Help Center"
 sourceNote: "OpenAI's English rule of thumb is that one token is about three-quarters of a word."
+sourceLocator: "Help Center explanation of token-to-word conversion"
+sourceLocatorUrl: 'https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-do-i-count-them'
+sourceExcerpt: "OpenAI says one token corresponds to roughly three-quarters of a word in English."
 sourceQuality: "official"
 confidence: 0.95
 lastReviewed: "2026-03-10"

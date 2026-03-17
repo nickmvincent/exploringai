@@ -13,6 +13,10 @@ importanceRank: 33
 importanceReason: "Provides a concrete \"tokens per document\" benchmark from a large open corpus."
 sourceName: "RedPajama-Data repository"
 sourceNote: "Derived from the English deduplicated counts reported by the project: 20.5T tokens over 14.5B documents."
+sourceLocator: "Repository README summary of English deduplicated token and document counts"
+sourceLocatorUrl: 'https://github.com/togethercomputer/RedPajama-Data'
+sourceExcerpt: "The repository reports 20.5T English deduplicated tokens over 14.5B documents."
+derivationNote: "This input divides 20.5T tokens by 14.5B documents to estimate average tokens per contribution."
 sourceQuality: "primary"
 confidence: 0.85
 lastReviewed: "2026-03-10"

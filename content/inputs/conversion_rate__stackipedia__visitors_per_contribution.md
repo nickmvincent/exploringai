@@ -13,6 +13,8 @@ importanceRank: 42
 importanceReason: "A product-growth assumption rather than a broadly reusable public AI benchmark."
 sourceName: "Project default"
 sourceNote: "Hypothetical engagement assumption for Stackipedia."
+sourceLocator: "Project-default assumption for Stackipedia scenario design"
+sourceExcerpt: "Stackipedia scenarios assume about 50 visitors are needed to generate one contribution."
 sourceQuality: "assumption"
 confidence: 0.25
 lastReviewed: "2026-03-10"

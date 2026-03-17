@@ -13,6 +13,9 @@ importanceRank: 37
 importanceReason: "Shows that academic publishing is already part of the training-data economy."
 sourceName: "Informa market update"
 sourceNote: "Informa disclosed a $10M+ initial fee plus recurring payments; the stored value is a conservative floor, not the full contract total."
+sourceLocator: "Market update section on AI licensing agreement economics"
+sourceLocatorUrl: 'https://www.informa.com/globalassets/documents/investor-relations/2024/informa-plc---market-update.pdf'
+sourceExcerpt: "Informa disclosed a $10M-plus initial fee with recurring revenue to follow."
 sourceQuality: "official"
 confidence: 0.95
 lastReviewed: "2026-03-10"

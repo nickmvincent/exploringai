@@ -14,6 +14,9 @@ importanceRank: 35
 importanceReason: "A large publisher-licensing example that helps contextualize the upper end of disclosed deals."
 sourceName: "Reuters citing WSJ reporting"
 sourceNote: "Reported as worth more than $250M over five years; stored here as a round-number benchmark."
+sourceLocator: "Reported deal-value summary in Reuters coverage"
+sourceLocatorUrl: 'https://www.investing.com/news/stock-market-news/sam-altmans-openai-signs-content-agreement-with-news-corp-3453039'
+sourceExcerpt: "Reuters reported the OpenAI-News Corp agreement as worth more than $250M over five years."
 sourceQuality: "reported"
 confidence: 0.72
 lastReviewed: "2026-03-10"

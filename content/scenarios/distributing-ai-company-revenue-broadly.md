@@ -4,13 +4,8 @@ description: >-
   If we distribute AI revenue (say, {yearly_revenue__openai__dollars}) to some
   group of people (say, {group_size__world__people}), how much will each person
   get?
-input_variables:
-  - yearly_revenue__openai__dollars
-  - group_size__world__people
-calculation_type: operations
-operations: >-
-  [{"func": "divide", "args": ["{yearly_revenue__openai__dollars}",
-  "{group_size__world__people}"]}]
+formula: >-
+  {yearly_revenue__openai__dollars} / {group_size__world__people}
 result_label: Per Person Revenue
 result_units: dollars
 category: Distributing money
