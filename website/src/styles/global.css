@@ -278,6 +278,12 @@ input[type="number"] {
   background: rgba(255, 255, 255, 0.86);
 }
 
+.nav-link-active {
+  color: var(--primary-color);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: inset 0 0 0 1px rgba(43, 76, 111, 0.14);
+}
+
 #app {
   min-height: calc(100vh - var(--navbar-height));
 }
@@ -500,6 +506,44 @@ input[type="number"] {
   text-align: center;
 }
 
+.quickstart-banner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.2rem;
+  padding: 1rem 1.05rem;
+  border: 1px solid rgba(216, 222, 230, 0.92);
+  border-radius: 20px;
+  background:
+    linear-gradient(140deg, rgba(43, 76, 111, 0.06), rgba(255, 255, 255, 0) 55%),
+    rgba(255, 255, 255, 0.92);
+}
+
+.quickstart-step-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+}
+
+.quickstart-step {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.1rem;
+  padding: 0.42rem 0.72rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(216, 222, 230, 0.92);
+  color: var(--ink-soft);
+  font-family: var(--font-ui);
+  font-size: 0.9rem;
+}
+
+.quickstart-note {
+  margin: 0;
+  color: var(--dark-gray);
+  font-size: 0.92rem;
+}
+
 .scenarios-container {
   display: flex;
   flex-direction: column;
@@ -555,6 +599,23 @@ input[type="number"] {
 
 .free-scenario-header {
   align-items: stretch;
+}
+
+.free-scenario-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 0.9rem 1rem;
+  border-radius: 18px;
+  border: 1px solid rgba(216, 222, 230, 0.92);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.free-scenario-toggle-copy {
+  margin: 0;
+  color: var(--ink-soft);
 }
 
 .free-scenario-metadata {
@@ -887,6 +948,13 @@ input[type="number"] {
   grid-template-columns: minmax(0, 1fr) repeat(4, auto);
   gap: 0.5rem;
   margin-top: 0.55rem;
+}
+
+.input-readable-note {
+  margin: 0.65rem 0 0;
+  color: var(--dark-gray);
+  font-size: 0.88rem;
+  line-height: 1.45;
 }
 
 .scenario-input-footer,
@@ -1363,25 +1431,33 @@ input[type="number"] {
 
 @media (max-width: 860px) {
   :root {
-    --navbar-height: 128px;
+    --navbar-height: 104px;
   }
 
   .navbar {
     flex-direction: column;
     align-items: stretch;
-    gap: 0.75rem;
-    padding: 0.75rem 1rem;
+    gap: 0.55rem;
+    padding: 0.68rem 0.95rem;
   }
 
   .navbar-nav {
-    flex-wrap: wrap;
-    overflow: visible;
-    padding-bottom: 0;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 0.1rem;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .navbar-nav::-webkit-scrollbar {
+    display: none;
   }
 
   .nav-link {
     padding: 0.4rem 0.68rem;
     font-size: 0.95rem;
+    white-space: nowrap;
   }
 
   .main-content {
@@ -1392,6 +1468,11 @@ input[type="number"] {
   .page-toolbar-bottom,
   .library-toolbar {
     align-items: stretch;
+  }
+
+  .free-scenario-toggle-row {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .scenario-input-group-header,
@@ -1427,7 +1508,7 @@ input[type="number"] {
 
 @media (max-width: 640px) {
   :root {
-    --navbar-height: 152px;
+    --navbar-height: 96px;
   }
 
   .navbar-brand {
@@ -1468,6 +1549,10 @@ input[type="number"] {
     display: inline-flex;
     max-width: 100%;
     margin: 0.12rem 0.15rem;
+  }
+
+  .quickstart-step-list {
+    flex-direction: column;
   }
 
   .inline-select {

@@ -6,6 +6,35 @@ interface Props {
 const { title } = Astro.props;
 const allowIndexing = import.meta.env.PUBLIC_ALLOW_INDEXING !== 'false';
 const canonicalUrl = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString() : null;
+const currentPath = Astro.url.pathname;
+
+const navLinks = [
+  {
+    href: '/',
+    label: 'Home',
+    isActive: currentPath === '/',
+  },
+  {
+    href: '/calculator',
+    label: 'Calculator',
+    isActive: currentPath === '/calculator',
+  },
+  {
+    href: '/calculator?view=inputs',
+    label: 'Inputs',
+    isActive: false,
+  },
+  {
+    href: '/#resources',
+    label: 'Resources',
+    isActive: false,
+  },
+  {
+    href: '/discussions',
+    label: 'Discussions',
+    isActive: currentPath === '/discussions',
+  },
+] as const;
 ---
 
 <!doctype html>
@@ -26,11 +55,13 @@ const canonicalUrl = Astro.site ? new URL(Astro.url.pathname, Astro.site).toStri
     <nav class="navbar">
       <a class="navbar-brand" href="/">Exploring AI: Data Napkin Math</a>
       <ul class="navbar-nav">
-        <li><a class="nav-link" href="/#inputs">Inputs</a></li>
-        <li><a class="nav-link" href="/#calculations">Calculations</a></li>
-        <li><a class="nav-link" href="/#blogs">Blogs</a></li>
-        <li><a class="nav-link" href="/#papers">Papers</a></li>
-        <li><a class="nav-link" href="/#watch">Watch</a></li>
+        {navLinks.map((link) => (
+          <li>
+            <a class:list={['nav-link', link.isActive && 'nav-link-active']} href={link.href}>
+              {link.label}
+            </a>
+          </li>
+        ))}
         <li><a class="nav-link" href="https://github.com/nickmvincent/exploringai" target="_blank" rel="noreferrer">GitHub</a></li>
       </ul>
     </nav>
