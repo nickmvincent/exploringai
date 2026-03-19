@@ -1,641 +1,136 @@
 ---
-import { getCollection } from 'astro:content';
-import NapkinApp from '../components/NapkinApp.vue';
 import Layout from '../layouts/Layout.astro';
-import type { Input, Scenario } from '../lib/calculations';
-import { createCalculationFunction, formatValue, humanReadable } from '../lib/calculations';
-import { extractInputTokens } from '../lib/formulas.js';
-import { INPUT_FOCUS_GROUPS, getInputFocusGroupKey } from '../lib/input-groups';
+import { createCalculationFunction, humanReadable } from '../lib/calculations';
+import { loadNapkinData } from '../lib/napkin-data';
 
-function getEntryStem(entryId: string) {
-  const segments = entryId.split('/').filter(Boolean);
-  return segments[segments.length - 1] || entryId;
-}
+const { inputs, scenarios, inputCount, scenarioCount } = await loadNapkinData();
 
-const inputEntries = await getCollection('inputs');
-const scenarioEntries = await getCollection('scenarios');
-const blogEntries = await getCollection('blogs');
-const keyPaperEntries = await getCollection('keyPapers');
-const askEntries = await getCollection('asks');
-
-const BLOG_STATUS_LABELS = {
-  draft: 'Draft',
-  in_progress: 'Essay in progress',
-  published: 'Published',
-} as const;
-
-const KEY_PAPER_KIND_LABELS = {
-  position: 'Position',
-  policy: 'Policy',
-  empirical: 'Empirical',
-  legal: 'Legal',
-  tracker: 'Tracker',
-} as const;
-
-function sortByOrder<T extends { data: { sort_order?: number | null; title: string } }>(entries: T[]) {
-  return [...entries].sort((left, right) => {
-    const orderDelta = (left.data.sort_order ?? Number.MAX_SAFE_INTEGER) - (right.data.sort_order ?? Number.MAX_SAFE_INTEGER);
-    if (orderDelta !== 0) return orderDelta;
-    return left.data.title.localeCompare(right.data.title);
-  });
-}
-
-const scenarioReferences = scenarioEntries.map((entry) => ({
-  id: getEntryStem(entry.id),
-  title: entry.data.title,
-  category: entry.data.category,
-  inputVariables: entry.data.input_variables?.length ? entry.data.input_variables : extractInputTokens(entry.data.formula),
-}));
-
-const inputUsage = new Map<string, { id: string; title: string; category: string }[]>();
-for (const scenario of scenarioReferences) {
-  scenario.inputVariables.forEach((inputKey) => {
-    const existing = inputUsage.get(inputKey) ?? [];
-    existing.push({
-      id: scenario.id,
-      title: scenario.title,
-      category: scenario.category,
-    });
-    inputUsage.set(inputKey, existing);
-  });
-}
-
-const inputs: Record<string, Input> = {};
-for (const entry of inputEntries) {
-  const { data } = entry;
-  const variableName = data.variable_name ?? getEntryStem(entry.id);
-
-  if (inputs[variableName]) {
-    throw new Error(`Duplicate input id "${variableName}" found while building the input library.`);
-  }
-
-  inputs[variableName] = {
-    id: entry.id,
-    title: data.title,
-    value: data.value,
-    default_value: data.value,
-    scale: data.scale || 1,
-    display_units: data.display_units,
-    variable_name: variableName,
-    variable_type: data.variable_type,
-    entity: data.entity ?? undefined,
-    units: data.units,
-    source_url: data.source_url ?? undefined,
-    nice_name: data.title,
-    summary: data.summary ?? undefined,
-    importanceRank: data.importanceRank ?? undefined,
-    importanceReason: data.importanceReason ?? undefined,
-    sourceName: data.sourceName ?? undefined,
-    sourceNote: data.sourceNote ?? undefined,
-    sourceLocator: data.sourceLocator ?? undefined,
-    sourceLocatorUrl: data.sourceLocatorUrl ?? undefined,
-    sourceExcerpt: data.sourceExcerpt ?? undefined,
-    derivationNote: data.derivationNote ?? undefined,
-    sourcePublished: data.sourcePublished ?? undefined,
-    sourceQuality: data.sourceQuality ?? undefined,
-    confidence: data.confidence ?? undefined,
-    lastReviewed: data.lastReviewed ?? undefined,
-    featured: data.featured ?? false,
-    min: data.min ?? undefined,
-    max: data.max ?? undefined,
-    step: data.step ?? undefined,
-    comparisonImage: data.comparisonImage
-      ? {
-          src: data.comparisonImage.src,
-          alt: data.comparisonImage.alt,
-          caption: data.comparisonImage.caption ?? undefined,
-          href: data.comparisonImage.href ?? undefined,
-          label: data.comparisonImage.label ?? undefined,
-        }
-      : undefined,
-    referenceCharts: data.referenceCharts?.map((chart) => ({
-      title: chart.title,
-      description: chart.description ?? undefined,
-      scale: chart.scale ?? undefined,
-      bars: chart.bars.map((bar) => ({
-        label: bar.label,
-        value: bar.value,
-        displayValue: bar.displayValue ?? undefined,
-        note: bar.note ?? undefined,
-        highlight: bar.highlight ?? false,
-      })),
-    })),
-    usedIn: inputUsage.get(variableName) ?? [],
-  };
-}
-
-const scenarios: Scenario[] = scenarioEntries.map((entry) => {
-  const { data } = entry;
-  const inputVariables = data.input_variables?.length ? data.input_variables : extractInputTokens(data.formula);
-
-  return {
-    id: getEntryStem(entry.id),
-    title: data.title,
-    description: data.description,
-    input_variables: inputVariables,
-    inputs: inputVariables,
-    formula: data.formula,
-    result_label: data.result_label,
-    result_units: data.result_units,
-    category: data.category,
-    result: {
-      value: 'Loading...',
-      rawValue: null,
-      units: data.result_units,
-    },
-    showExplore: false,
-    showCalcDetails: false,
-  };
-});
-
-function getDecimalPlaces(step?: number) {
-  if (!step || step >= 1) return 0;
-  const decimalPart = String(step).split('.')[1] ?? '';
-  return Math.min(decimalPart.length, 6);
-}
-
-function formatInputNumber(input: Input) {
-  const displayedValue = formatValue(input.value, input.scale);
-  const formatter = new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: getDecimalPlaces(input.step),
-  });
-
-  return formatter.format(displayedValue);
-}
-
-const landingInputIds = [
-  'yearly_revenue__openai__dollars',
-  'deal_value__reddit_google__dollars',
-  'dataset_size__llama3__tokens',
-  'dataset_size__olmo3__tokens',
-  'training_detail__openai__words_per_token',
-  'dataset_size__hle__questions',
-  'deal_group_size__reddit__daily_active_users',
-  'group_size__world__people',
-  'post_training_size__tulu_3__sft_examples',
-  'pretraining_composition__dolma_v1_6__web_percent',
-];
-
-const landingInputs = landingInputIds
-  .map((id) => inputs[id])
-  .filter(Boolean)
-  .map((input) => ({
-    ...input,
-    displayValue: formatInputNumber(input),
-  }));
-
-const landingInputGroups = INPUT_FOCUS_GROUPS.map((group) => ({
-  ...group,
-  inputs: landingInputs.filter((input) => getInputFocusGroupKey(input) === group.key),
-})).filter((group) => group.inputs.length);
-
-function formatMultiple(value?: number | null) {
-  if (value === null || value === undefined || !Number.isFinite(value)) return null;
-  if (value >= 100) return `${Math.round(value).toLocaleString('en-US')}x`;
-  if (value >= 10) return `${value.toFixed(1)}x`;
-  return `${value.toFixed(2)}x`;
-}
-
-const commissioningScenario = scenarios.find((scenario) => scenario.id === 'commissioning-new-datasets');
-const commissioningScenarioRawValue = commissioningScenario
-  ? createCalculationFunction(commissioningScenario)(
-      ...commissioningScenario.input_variables.map((inputKey) => inputs[inputKey]?.value ?? 0)
-    )
-  : null;
-
-const openAiRevenue = inputs['yearly_revenue__openai__dollars']?.value;
-const anthropicRevenue = inputs['yearly_revenue__anthropic__dollars']?.value;
-const combinedAiRevenue =
-  [openAiRevenue, anthropicRevenue]
-    .filter((value): value is number => typeof value === 'number' && Number.isFinite(value))
-    .reduce((sum, value) => sum + value, 0) || null;
-
-const blogPlaceholder = {
-  commissioningCost:
-    commissioningScenarioRawValue !== null
-      ? `${humanReadable(commissioningScenarioRawValue)} ${commissioningScenario?.result_units ?? ''}`.trim()
-      : 'Unavailable',
-  openAiRevenue:
-    openAiRevenue !== undefined
-      ? `${humanReadable(openAiRevenue)} ${inputs['yearly_revenue__openai__dollars']?.units ?? ''}`.trim()
-      : 'Unavailable',
-  anthropicRevenue:
-    anthropicRevenue !== undefined
-      ? `${humanReadable(anthropicRevenue)} ${inputs['yearly_revenue__anthropic__dollars']?.units ?? ''}`.trim()
-      : 'Unavailable',
-  combinedRevenue:
-    combinedAiRevenue !== null
-      ? `${humanReadable(combinedAiRevenue)} dollars`
-      : 'Unavailable',
-  multipleVsCombined:
-    commissioningScenarioRawValue !== null && combinedAiRevenue !== null
-      ? formatMultiple(commissioningScenarioRawValue / combinedAiRevenue)
-      : null,
-};
-
-const featuredBlogEntry = sortByOrder(
-  blogEntries.filter((entry) => (entry.data.visibility ?? 'public') === 'public')
-)[0];
-
-const featuredBlog = featuredBlogEntry
-  ? {
-      title: featuredBlogEntry.data.title,
-      excerpt: featuredBlogEntry.data.excerpt,
-      statusLabel: BLOG_STATUS_LABELS[featuredBlogEntry.data.status],
-    }
-  : {
-      title: 'Commissioning a new frontier dataset versus current AI revenue',
-      excerpt:
-        'A working note on the tension between replacement-cost estimates for commissioned training data and the current revenue anchors for frontier AI companies.',
-      statusLabel: BLOG_STATUS_LABELS.in_progress,
-    };
-
-const curatedPaperHighlights = sortByOrder(
-  keyPaperEntries.filter((entry) => (entry.data.visibility ?? 'public') === 'public')
-).map((entry) => ({
-  title: entry.data.title,
-  anchor: entry.data.anchor,
-  blurb: entry.data.relevance,
-  quality: KEY_PAPER_KIND_LABELS[entry.data.kind],
-  links: [
-    ...(entry.data.source_url
-      ? [
-          {
-            href: entry.data.source_url,
-            label: 'Read source',
-          },
-        ]
-      : []),
-    ...((entry.data.links ?? []).map((link) => ({
-      href: link.href,
-      label: link.label,
-    }))),
-  ],
-}));
-
-const paperHighlightIds = [
-  'dataset_size__hle__questions',
-  'pretraining_composition__dolma_v1_6__academic_percent',
-  'post_training_size__tulu_3__sft_examples',
-  'dataset_size__llama3__tokens',
-];
-
-const paperHighlights = paperHighlightIds
-  .map((id) => inputs[id])
-  .filter(Boolean)
-  .map((input) => ({
-    title: input.sourceName || input.title,
-    blurb: input.sourceNote || input.summary || input.importanceReason || 'Reference source highlighted in the input library.',
-    anchor: input.title,
-    quality: input.sourceQuality,
-    links: input.source_url
-      ? [
-          {
-            href: input.source_url,
-            label: 'Read source',
-          },
-        ]
-      : [],
-  }));
-
-const allPaperHighlights = [...curatedPaperHighlights, ...paperHighlights];
-const homePaperHighlights = allPaperHighlights.slice(0, 6);
-
-const watchIndicators = [
-  'AI company earnings calls, SEC filings, and updated revenue run rates.',
-  'Publisher and platform licensing deals, especially renewals with disclosed terms.',
-  'Open-model releases that publish training mix, corpus size, or post-training composition.',
-  'Benchmark growth and contributor-compensation norms for expert evaluation work.',
-  'Inference price movement across flagship and mini model tiers.',
-];
-
-const ourAsks = sortByOrder(
-  askEntries.filter((entry) => (entry.data.visibility ?? 'public') === 'public')
-).map((entry) => entry.data.summary || entry.data.title);
-
-function getScenarioRawValue(scenarioId: string) {
+function formatScenarioPreview(scenarioId: string) {
   const scenario = scenarios.find((entry) => entry.id === scenarioId);
-  if (!scenario) return null;
+  if (!scenario) return 'Unavailable';
 
-  return createCalculationFunction(scenario)(
+  const rawValue = createCalculationFunction(scenario)(
     ...scenario.input_variables.map((inputKey) => inputs[inputKey]?.value ?? 0)
   );
+
+  return `${humanReadable(rawValue)} ${scenario.result_units}`.trim();
 }
 
-function formatScenarioPreview(scenarioId: string, units: string) {
-  const rawValue = getScenarioRawValue(scenarioId);
-  if (rawValue === null || !Number.isFinite(rawValue)) return 'Unavailable';
-  return `${humanReadable(rawValue)} ${units}`.trim();
-}
+const exampleSummaries = {
+  'distributing-ai-company-revenue-broadly':
+    'Start with current AI revenue and ask what it amounts to per person when spread across a large population.',
+  'distributing-money-from-data-deals':
+    'Use a disclosed platform deal to see what a payout looks like once it is distributed across users.',
+  'producing-an-expert-evaluation-set':
+    'Estimate what it would cost to pay experts for a benchmark or evaluation dataset.',
+  'commissioning-new-datasets':
+    'Ask what a genuinely new, LLM-scale dataset might cost if the underlying labour were paid for directly.',
+} as const;
 
-const starterScenarios = [
-  {
-    id: 'distributing-ai-company-revenue-broadly',
-    eyebrow: 'Revenue distribution',
-    title: 'What does current AI revenue amount to per person?',
-    description: 'Start with the simplest public benchmark: company revenue divided across a very large group.',
-    result: formatScenarioPreview('distributing-ai-company-revenue-broadly', 'dollars per person'),
-  },
-  {
-    id: 'distributing-money-from-data-deals',
-    eyebrow: 'Data deals',
-    title: 'How much could platform payouts add up to per user?',
-    description: 'Use a disclosed deal to see how tiny or meaningful per-person payouts become once spread broadly.',
-    result: formatScenarioPreview('distributing-money-from-data-deals', 'dollars per person'),
-  },
-  {
-    id: 'producing-an-expert-evaluation-set',
-    eyebrow: 'New labor',
-    title: 'What would it cost to pay experts for evaluation data?',
-    description: 'Open a labor-forward scenario that puts benchmark creation and expert compensation in view.',
-    result: formatScenarioPreview('producing-an-expert-evaluation-set', 'dollars'),
-  },
-];
+const exampleOrder = [
+  'distributing-ai-company-revenue-broadly',
+  'distributing-money-from-data-deals',
+  'producing-an-expert-evaluation-set',
+  'commissioning-new-datasets',
+] as const;
 
-const heroStats = [
-  `${scenarioEntries.length} curated scenarios`,
-  `${inputEntries.length} editable inputs`,
-  `${allPaperHighlights.length} cited sources and trackers`,
+type ExampleCard = {
+  id: (typeof exampleOrder)[number];
+  title: string;
+  category: string;
+  resultLabel: string;
+  result: string;
+  summary: string;
+};
+
+const examples = exampleOrder
+  .map((id) => {
+    const scenario = scenarios.find((entry) => entry.id === id);
+    if (!scenario) return null;
+
+    return {
+      id,
+      title: scenario.title,
+      category: scenario.category,
+      resultLabel: scenario.result_label,
+      result: formatScenarioPreview(id),
+      summary: exampleSummaries[id],
+    };
+  })
+  .filter((example): example is ExampleCard => Boolean(example));
+
+const homeStats = [
+  `${scenarioCount} public scenarios`,
+  `${inputCount} shared inputs with source notes`,
+  'Share links preserve every edit',
 ];
 ---
 
-<Layout title="Exploring AI: Data Napkin Math">
-  <main class="home-shell">
-    <section class="landing-hero">
-      <div class="hero-grid">
-        <div class="hero-copy">
-          <p class="section-kicker">Interactive calculator</p>
-          <h1>Exploring AI: Data Napkin Math</h1>
-          <p class="hero-text">
-            Interactive napkin math, back-of-the-envelope estimates, and ballpark figures for training-data
-            value, compensation, and distribution questions. Start with a concrete public benchmark, then
-            inspect the assumptions and share the exact state you used.
-          </p>
-          <p class="hero-support">
-            The full workspace brings the calculator, inputs library, inspector, trust filters, and
-            shareable URLs into one place.
-          </p>
-          <ul class="hero-stats list-unstyled">
-            {heroStats.map((item) => <li>{item}</li>)}
-          </ul>
-          <div class="hero-actions">
-            <a class="hero-link hero-link-primary" href="/calculator">Open full calculator</a>
-            <a class="hero-link" href="/calculator?view=inputs">Open inputs library</a>
-            <a class="hero-link" href="/#resources">Read sources and asks</a>
-          </div>
-        </div>
-
-        <aside class="hero-panel" aria-labelledby="hero-start-title">
-          <div class="hero-panel-header">
-            <p class="section-kicker">Start With A Question</p>
-            <h2 id="hero-start-title">Three fast entry points</h2>
-            <p>Pick a scenario that gets you to a concrete answer in one click, then tune the assumptions.</p>
-          </div>
-
-          <div class="starter-grid">
-            {starterScenarios.map((starter) => (
-              <a class="starter-card" href={`/calculator?scenario=${starter.id}`}>
-                <span class="mini-badge starter-badge">{starter.eyebrow}</span>
-                <h3>{starter.title}</h3>
-                <p>{starter.description}</p>
-                <div class="starter-result">
-                  <span>Current default</span>
-                  <strong>{starter.result}</strong>
-                </div>
-              </a>
-            ))}
-          </div>
-        </aside>
-      </div>
-    </section>
-
-    <section id="inputs" class="landing-section section-inputs">
-      <div class="section-header section-header-inline">
-        <div>
-          <p class="section-kicker">Section 1</p>
-          <h2>Featured inputs</h2>
-          <p>
-            Start with plain numbers from public sources, grouped by the kind of question you want to ask.
-            This home page surfaces a few anchor inputs; the full editable library lives in the calculator workspace.
-          </p>
-        </div>
-
-        <div class="section-actions">
-          <a class="section-link section-link-primary" href="/calculator?view=inputs">Open full inputs library</a>
-        </div>
-      </div>
-
-      <div class="input-topic-nav" aria-label="Input categories">
-        {landingInputGroups.map((group) => (
-          <a class="input-topic-link" href={`#input-topic-${group.key}`}>
-            {group.prompt}
-          </a>
-        ))}
-      </div>
-
-      <div class="input-topic-list">
-        {landingInputGroups.map((group) => (
-          <section class="input-topic-section" id={`input-topic-${group.key}`}>
-            <div class="input-topic-header">
-              <div>
-                <p class="section-kicker input-topic-kicker">{group.prompt}</p>
-                <h3>{group.label}</h3>
-              </div>
-              <p>{group.description}</p>
-            </div>
-
-            <div class="number-grid">
-              {group.inputs.map((input) => (
-                <article class="number-card">
-                  <div class="number-card-top">
-                    <span class="mini-badge">{input.sourceQuality === 'primary' ? 'Primary' : 'Official'}</span>
-                    {input.lastReviewed && <span class="number-meta">Reviewed {input.lastReviewed}</span>}
-                  </div>
-                  <h3>{input.title}</h3>
-                  <div class="number-value">{input.displayValue}</div>
-                  <div class="number-units">{input.display_units}</div>
-                  <p class="number-summary">{input.summary || input.importanceReason}</p>
-                  <div class="number-footer">
-                    <span>Used in {input.usedIn?.length || 0} scenarios</span>
-                    {input.source_url && (
-                      <a href={input.source_url} target="_blank" rel="noreferrer">
-                        Source
-                      </a>
-                    )}
-                  </div>
-                </article>
-              ))}
-            </div>
-          </section>
-        ))}
-      </div>
-
-      <p class="section-note">
-        Need the full set? Open the library to search by scenario, filter to official or primary sources,
-        and inspect every cited assumption in one place.
+<Layout
+  title="Exploring AI: Data Napkin Math"
+  description="Estimate AI payouts, dataset costs, and benchmark expenses with transparent scenarios, shared inputs, and editable public assumptions."
+>
+  <main id="site-main" class="home-shell">
+    <section class="home-hero">
+      <p class="section-kicker">Exploring AI: Data Napkin Math</p>
+      <h1>Estimate payouts, dataset costs, and benchmark expenses from editable public assumptions.</h1>
+      <p class="hero-copy">
+        Start from a concrete public example, inspect the shared assumptions behind it, and change the
+        numbers directly when you want to test a different benchmark or distribution question.
       </p>
+
+      <div class="hero-actions">
+        <a class="hero-link hero-link-primary" href="/scenarios">Open scenarios</a>
+        <a class="hero-link" href="/inputs">Open inputs library</a>
+      </div>
+
+      <ul class="hero-stats list-unstyled">
+        {homeStats.map((item) => <li>{item}</li>)}
+      </ul>
     </section>
 
-    <section id="calculations" class="landing-section">
-      <div class="section-header section-header-inline">
-        <div>
-          <p class="section-kicker">Section 2</p>
-          <h2>Calculator preview</h2>
-          <p>
-            Try the live scenarios right here, then open the full workspace when you want the entire
-            inputs library, source filters, inspector details, and shareable state.
-          </p>
-        </div>
-
-        <div class="section-actions">
-          <a class="section-link section-link-primary" href="/calculator">Open full calculator</a>
-        </div>
+    <section class="examples-section">
+      <div class="section-header">
+        <p class="section-kicker">Examples</p>
+        <h2>Start with one of these questions</h2>
+        <p>Each example opens the full scenario with the public defaults loaded, ready for edits and source inspection.</p>
       </div>
 
-      <div class="preview-callout">
-        <p>
-          <strong>Best path for first-time readers:</strong> pick a starter scenario, tweak one or two
-          assumptions, then inspect the source notes or switch to the inputs library for deeper work.
-        </p>
-
-        <div class="preview-actions">
-          <a class="hero-link hero-link-primary" href="/calculator">Open workspace</a>
-          <a class="hero-link" href="/calculator?view=inputs&quality=official">Browse official inputs</a>
-        </div>
-      </div>
-
-      <div class="calculator-shell">
-        <NapkinApp
-          client:load
-          initialInputs={inputs}
-          initialScenarios={scenarios}
-          initialView="scenarios"
-          showInputLibrary={false}
-          showHeader={false}
-          showAbout={false}
-        />
-      </div>
-    </section>
-
-    <section id="resources" class="landing-section section-resources">
-      <div class="section-header section-header-inline">
-        <div>
-          <p class="section-kicker">Section 3</p>
-          <h2>Read, cite, and follow the numbers</h2>
-          <p>
-            Keep the calculator close to the evidence: working notes, highlighted papers, live indicators,
-            and concrete asks all sit in one supporting section instead of competing with the calculator.
-          </p>
-        </div>
-
-        <div class="section-actions">
-          <a class="section-link" href="/discussions">Open discussions</a>
-          <a
-            class="section-link"
-            href="https://github.com/nickmvincent/exploringai"
-            target="_blank"
-            rel="noreferrer"
-          >
-            GitHub repository
+      <div class="example-grid">
+        {examples.map((example) => (
+          <a class="example-card" href={`/scenarios?scenario=${example.id}`}>
+            <span class="example-category">{example.category}</span>
+            <h3>{example.title}</h3>
+            <p>{example.summary}</p>
+            <div class="example-result">
+              <span>{example.resultLabel}</span>
+              <strong>{example.result}</strong>
+            </div>
           </a>
-        </div>
+        ))}
       </div>
+    </section>
 
-      <div class="resource-stack">
-        <article class="essay-card resource-featured-card">
-          <div class="essay-header">
-            <span class="mini-badge essay-status">{featuredBlog.statusLabel}</span>
-            <div class="resource-link-row">
-              <a href="/calculator">Open calculator</a>
-              <a href="/discussions">Discuss it</a>
-            </div>
-          </div>
-          <h3>{featuredBlog.title}</h3>
-          <p>{featuredBlog.excerpt}</p>
+    <section class="path-grid" aria-label="Full site sections">
+      <article class="path-card">
+        <p class="section-kicker">Full page</p>
+        <h2>Scenarios</h2>
+        <p>
+          Work through the public examples, change the assumptions in place, and watch how each result
+          moves as the shared inputs change.
+        </p>
+        <a class="hero-link hero-link-primary" href="/scenarios">Browse all scenarios</a>
+      </article>
 
-          <div class="placeholder-metric-grid">
-            <div class="placeholder-metric">
-              <span>Commissioning estimate</span>
-              <strong>{blogPlaceholder.commissioningCost}</strong>
-            </div>
-            <div class="placeholder-metric">
-              <span>OpenAI annualized revenue</span>
-              <strong>{blogPlaceholder.openAiRevenue}</strong>
-            </div>
-            <div class="placeholder-metric">
-              <span>Anthropic annualized revenue</span>
-              <strong>{blogPlaceholder.anthropicRevenue}</strong>
-            </div>
-            <div class="placeholder-metric">
-              <span>Combined revenue anchor</span>
-              <strong>{blogPlaceholder.combinedRevenue}</strong>
-            </div>
-          </div>
-
-          <p>
-            At the current defaults, the commissioning estimate is roughly
-            {blogPlaceholder.multipleVsCombined ? ` ${blogPlaceholder.multipleVsCombined} ` : ' '}
-            the combined OpenAI-plus-Anthropic revenue anchor. That mismatch is the core tension this
-            placeholder post should unpack.
-          </p>
-        </article>
-        <div class="resource-columns">
-          <div class="resource-column">
-            <div class="resource-column-header">
-              <p class="section-kicker">Reading list</p>
-              <h3>Highlighted papers and trackers</h3>
-              <p>These are the sources doing real work for the numbers on this site.</p>
-            </div>
-
-            <div class="paper-grid">
-              {homePaperHighlights.map((paper) => (
-                <article class="paper-card">
-                  <div class="paper-card-top">
-                    <span class="mini-badge">{paper.quality ? paper.quality : 'Reference'}</span>
-                    {paper.links.length > 0 && (
-                      <div class="paper-card-links">
-                        {paper.links.map((link) => (
-                          <a href={link.href} target="_blank" rel="noreferrer">
-                            {link.label}
-                          </a>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  <h3>{paper.title}</h3>
-                  <p class="paper-anchor">{paper.anchor}</p>
-                  <p>{paper.blurb}</p>
-                </article>
-              ))}
-            </div>
-          </div>
-
-          <div class="resource-column">
-            <div class="resource-column-header">
-              <p class="section-kicker">Watch list</p>
-              <h3>Indicators and asks</h3>
-              <p>The calculator stays useful only if disclosures and public reporting improve around it.</p>
-            </div>
-
-            <div class="watch-grid">
-              <article class="watch-card watch-card-indicators">
-                <h3>Indicators we want to watch</h3>
-                <ul>
-                  {watchIndicators.map((item) => <li>{item}</li>)}
-                </ul>
-              </article>
-
-              <article class="watch-card watch-card-asks">
-                <h3>Our asks</h3>
-                <ul>
-                  {ourAsks.map((item) => <li>{item}</li>)}
-                </ul>
-              </article>
-            </div>
-          </div>
-        </div>
-      </div>
+      <article class="path-card">
+        <p class="section-kicker">Library</p>
+        <h2>Inputs</h2>
+        <p>
+          Browse the underlying inputs directly, filter by question type or source quality, and inspect the
+          citations, review notes, and scenario usage behind each number.
+        </p>
+        <a class="hero-link" href="/inputs">Browse inputs library</a>
+      </article>
     </section>
   </main>
 </Layout>
@@ -643,242 +138,129 @@ const heroStats = [
 <style>
   .home-shell {
     width: 100%;
-    max-width: 1180px;
+    max-width: 1100px;
     margin: 0 auto;
     padding: 2rem 1.5rem 4rem;
   }
 
-  .landing-hero,
-  .landing-section {
+  .home-hero,
+  .examples-section,
+  .path-card {
     border: 1px solid rgba(216, 222, 230, 0.92);
-    border-radius: 26px;
-    background: rgba(255, 255, 255, 0.8);
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.84);
     box-shadow: 0 16px 32px rgba(31, 39, 51, 0.08);
   }
 
-  .landing-hero {
+  .home-hero {
     padding: 2rem;
     background:
-      radial-gradient(circle at 10% 10%, rgba(255, 255, 255, 0.82), transparent 34%),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.76), rgba(247, 249, 252, 0.92)),
-      rgba(255, 255, 255, 0.84);
+      radial-gradient(circle at 12% 10%, rgba(255, 255, 255, 0.88), transparent 36%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(247, 249, 252, 0.94)),
+      rgba(255, 255, 255, 0.88);
   }
 
-  .hero-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.95fr);
-    gap: 1.4rem;
-    align-items: start;
-  }
-
-  .hero-copy h1 {
-    margin-bottom: 0.8rem;
+  .home-hero h1 {
+    max-width: 780px;
+    margin-bottom: 0.9rem;
     color: var(--primary-color);
-    font-size: clamp(2.4rem, 5vw, 3.8rem);
+    font-size: clamp(2.5rem, 5vw, 4rem);
     line-height: 1.02;
   }
 
-  .hero-text,
-  .hero-support,
-  .section-note,
-  .resource-column-header p {
+  .hero-copy,
+  .section-header p,
+  .example-card p,
+  .path-card p {
     color: var(--ink-soft);
   }
 
-  .hero-text {
-    max-width: 720px;
+  .hero-copy {
+    max-width: 52rem;
+    margin-bottom: 0;
     font-size: 1.08rem;
   }
 
-  .hero-support {
-    max-width: 44rem;
-    margin-bottom: 0;
-  }
-
-  .hero-stats {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.7rem;
-    margin-top: 1rem;
-  }
-
-  .hero-stats li {
-    display: inline-flex;
-    align-items: center;
-    min-height: 2.15rem;
-    padding: 0.38rem 0.74rem;
-    border-radius: 999px;
-    border: 1px solid rgba(216, 222, 230, 0.92);
-    background: rgba(255, 255, 255, 0.9);
-    color: var(--ink-soft);
-    font-family: var(--font-ui);
-    font-size: 0.92rem;
-  }
-
   .hero-actions,
-  .section-actions,
-  .preview-actions,
-  .resource-link-row {
+  .hero-stats,
+  .path-grid {
     display: flex;
-    gap: 0.8rem;
+    gap: 0.9rem;
     flex-wrap: wrap;
   }
 
   .hero-actions {
-    margin-top: 1.25rem;
+    margin-top: 1.35rem;
   }
 
-  .hero-link,
-  .section-link {
+  .hero-link {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 2.6rem;
-    padding: 0.62rem 0.98rem;
+    min-height: 2.7rem;
+    padding: 0.64rem 1rem;
     border-radius: 999px;
     border: 1px solid rgba(216, 222, 230, 0.92);
+    background: rgba(255, 255, 255, 0.92);
     color: var(--ink-soft);
     font-family: var(--font-ui);
     text-decoration: none;
-    background: rgba(255, 255, 255, 0.9);
     transition:
       transform 0.18s ease,
       background-color 0.18s ease,
-      border-color 0.18s ease,
-      color 0.18s ease;
+      color 0.18s ease,
+      border-color 0.18s ease;
   }
 
   .hero-link:hover,
-  .section-link:hover,
-  .starter-card:hover {
+  .example-card:hover {
     transform: translateY(-1px);
   }
 
-  .hero-link:hover,
-  .section-link:hover {
+  .hero-link:hover {
     color: var(--primary-color);
   }
 
-  .hero-link-primary,
-  .section-link-primary {
+  .hero-link-primary {
     color: var(--white);
     background: linear-gradient(135deg, var(--primary-color), #3a618c);
     border-color: transparent;
   }
 
-  .hero-link-primary:hover,
-  .section-link-primary:hover {
+  .hero-link-primary:hover {
     color: var(--white);
     background: linear-gradient(135deg, var(--primary-hover), var(--primary-color));
   }
 
-  .hero-panel {
-    padding: 1.1rem;
+  .hero-stats {
+    margin-top: 1.15rem;
+  }
+
+  .hero-stats li {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.1rem;
+    padding: 0.4rem 0.78rem;
+    border-radius: 999px;
     border: 1px solid rgba(216, 222, 230, 0.92);
-    border-radius: 24px;
-    background:
-      linear-gradient(160deg, rgba(43, 76, 111, 0.06), rgba(255, 255, 255, 0) 55%),
-      rgba(255, 255, 255, 0.94);
-    box-shadow: 0 18px 34px rgba(31, 39, 51, 0.08);
-  }
-
-  .hero-panel-header {
-    margin-bottom: 0.95rem;
-  }
-
-  .hero-panel-header h2,
-  .resource-column-header h3 {
-    margin-bottom: 0.35rem;
-  }
-
-  .hero-panel-header p,
-  .starter-card p {
-    margin-bottom: 0;
-    color: var(--ink-soft);
-  }
-
-  .starter-grid,
-  .number-grid,
-  .paper-grid {
-    display: grid;
-    gap: 1rem;
-  }
-
-  .starter-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .starter-card {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    padding: 1rem;
-    border: 1px solid rgba(216, 222, 230, 0.92);
-    border-radius: 18px;
-    text-decoration: none;
-    background: rgba(255, 255, 255, 0.92);
-    box-shadow: 0 10px 22px rgba(31, 39, 51, 0.06);
-    transition:
-      transform 0.18s ease,
-      border-color 0.18s ease,
-      box-shadow 0.18s ease;
-  }
-
-  .starter-card:hover {
-    border-color: rgba(43, 76, 111, 0.24);
-    box-shadow: 0 14px 26px rgba(31, 39, 51, 0.08);
-  }
-
-  .starter-card h3 {
-    margin-bottom: 0;
-    color: var(--black);
-    font-size: 1.15rem;
-    line-height: 1.18;
-  }
-
-  .starter-result {
-    display: flex;
-    flex-direction: column;
-    gap: 0.22rem;
-    padding-top: 0.7rem;
-    border-top: 1px solid rgba(216, 222, 230, 0.92);
-  }
-
-  .starter-result span {
+    background: rgba(255, 255, 255, 0.94);
     color: var(--dark-gray);
     font-family: var(--font-ui);
-    font-size: 0.8rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
+    font-size: 0.92rem;
   }
 
-  .starter-result strong {
-    color: var(--primary-color);
-    font-family: var(--font-heading);
-    font-size: 1.2rem;
-  }
-
-  .landing-section {
-    margin-top: 1.5rem;
-    padding: 1.4rem;
+  .examples-section {
+    margin-top: 1.4rem;
+    padding: 1.5rem;
   }
 
   .section-header {
-    max-width: 760px;
-    margin-bottom: 1.25rem;
-  }
-
-  .section-header-inline {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 1rem;
-    max-width: none;
+    max-width: 680px;
+    margin-bottom: 1.2rem;
   }
 
   .section-kicker {
-    margin-bottom: 0.4rem;
+    margin-bottom: 0.42rem;
     color: var(--dark-gray);
     font-family: var(--font-ui);
     text-transform: uppercase;
@@ -887,389 +269,121 @@ const heroStats = [
     font-weight: 700;
   }
 
-  .section-header h2 {
-    margin-bottom: 0.5rem;
+  .section-header h2,
+  .path-card h2 {
+    margin-bottom: 0.45rem;
     color: var(--black);
-    font-size: clamp(1.8rem, 3vw, 2.6rem);
+    font-size: clamp(1.8rem, 3vw, 2.5rem);
   }
 
-  .section-header p {
-    margin-bottom: 0;
-    color: var(--ink-soft);
-  }
-
-  .section-note {
-    margin: 1rem 0 0;
-    padding: 0.95rem 1rem;
-    border-radius: 16px;
-    border: 1px solid rgba(216, 222, 230, 0.92);
-    background: rgba(247, 249, 252, 0.75);
-  }
-
-  .preview-callout {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 1rem;
-    padding: 1rem 1.05rem;
-    border-radius: 20px;
-    border: 1px solid rgba(216, 222, 230, 0.92);
-    background:
-      linear-gradient(140deg, rgba(43, 76, 111, 0.08), rgba(255, 255, 255, 0) 55%),
-      rgba(255, 255, 255, 0.92);
-  }
-
-  .preview-callout p {
-    margin: 0;
-    color: var(--ink-soft);
-  }
-
-  .input-topic-nav {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-    margin-bottom: 1.15rem;
-  }
-
-  .input-topic-link {
-    display: inline-flex;
-    align-items: center;
-    min-height: 2.35rem;
-    padding: 0.52rem 0.85rem;
-    border-radius: 999px;
-    border: 1px solid rgba(216, 222, 230, 0.92);
-    color: var(--ink-soft);
-    font-family: var(--font-ui);
-    text-decoration: none;
-    background: rgba(255, 255, 255, 0.88);
-    transition: transform 0.18s ease, border-color 0.18s ease, color 0.18s ease;
-  }
-
-  .input-topic-link:hover {
-    color: var(--primary-color);
-    border-color: rgba(43, 76, 111, 0.2);
-  }
-
-  .input-topic-list,
-  .resource-stack {
-    display: flex;
-    flex-direction: column;
-    gap: 1.15rem;
-  }
-
-  .input-topic-section {
-    padding: 1rem;
-    border-radius: 22px;
-    border: 1px solid rgba(216, 222, 230, 0.92);
-    background:
-      linear-gradient(180deg, rgba(247, 249, 252, 0.58), rgba(255, 255, 255, 0.92)),
-      rgba(255, 255, 255, 0.9);
-  }
-
-  .input-topic-header {
-    display: grid;
-    grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
-    gap: 1rem;
-    align-items: end;
-    margin-bottom: 0.95rem;
-  }
-
-  .input-topic-kicker {
-    margin-bottom: 0.3rem;
-  }
-
-  .input-topic-header h3 {
+  .section-header p,
+  .path-card p {
     margin-bottom: 0;
   }
 
-  .input-topic-header p {
-    margin-bottom: 0;
-    color: var(--ink-soft);
-  }
-
-  .number-grid {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  }
-
-  .paper-grid {
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  }
-
-  .watch-grid,
-  .resource-columns {
+  .example-grid {
     display: grid;
     gap: 1rem;
-  }
-
-  .watch-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .resource-columns {
-    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.95fr);
-  }
-
-  .resource-column {
+  .example-card {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-  }
-
-  .resource-featured-card {
-    margin-bottom: 0;
-  }
-
-  .number-card,
-  .watch-card {
-    display: flex;
-    flex-direction: column;
-    gap: 0.7rem;
-    min-height: 100%;
-    padding: 1rem;
+    gap: 0.8rem;
+    padding: 1.2rem;
     border: 1px solid rgba(216, 222, 230, 0.92);
     border-radius: 20px;
-    background: rgba(255, 255, 255, 0.88);
+    background: rgba(255, 255, 255, 0.94);
+    color: inherit;
+    text-decoration: none;
+    box-shadow: 0 10px 22px rgba(31, 39, 51, 0.06);
+    transition:
+      transform 0.18s ease,
+      border-color 0.18s ease,
+      box-shadow 0.18s ease;
   }
 
-  .essay-card {
-    display: grid;
-    gap: 1rem;
-    padding: 1.35rem;
-    border: 1px solid rgba(216, 222, 230, 0.92);
-    border-radius: 24px;
-    background:
-      linear-gradient(120deg, rgba(43, 76, 111, 0.06), rgba(255, 255, 255, 0) 44%),
-      rgba(255, 255, 255, 0.94);
-    box-shadow: 0 18px 34px rgba(31, 39, 51, 0.08);
+  .example-card:hover {
+    border-color: rgba(43, 76, 111, 0.24);
+    box-shadow: 0 14px 26px rgba(31, 39, 51, 0.08);
   }
 
-  .paper-card {
-    display: flex;
-    flex-direction: column;
-    gap: 0.8rem;
-    min-height: 100%;
-    padding: 1.1rem 1.15rem 1.2rem;
-    border: 1px solid rgba(216, 222, 230, 0.92);
-    border-left: 4px solid rgba(43, 76, 111, 0.18);
-    border-radius: 22px;
-    background:
-      linear-gradient(180deg, rgba(247, 249, 252, 0.86), rgba(255, 255, 255, 0.96)),
-      rgba(255, 255, 255, 0.92);
+  .example-card h3 {
+    margin-bottom: 0;
+    color: var(--black);
+    font-size: 1.22rem;
+    line-height: 1.18;
   }
 
-  .watch-card-indicators {
-    background:
-      linear-gradient(180deg, rgba(241, 246, 252, 0.92), rgba(255, 255, 255, 0.94)),
-      rgba(255, 255, 255, 0.92);
-  }
-
-  .watch-card-asks,
-  .section-resources {
-    background:
-      linear-gradient(180deg, rgba(248, 250, 253, 0.9), rgba(255, 255, 255, 0.96)),
-      rgba(255, 255, 255, 0.94);
-  }
-
-  .number-card-top,
-  .essay-header,
-  .paper-card-top,
-  .number-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.8rem;
-    flex-wrap: wrap;
-  }
-
-  .mini-badge {
-    display: inline-flex;
-    align-items: center;
-    min-height: 1.8rem;
-    padding: 0.24rem 0.56rem;
-    border-radius: 999px;
-    color: var(--primary-color);
-    background: rgba(43, 76, 111, 0.08);
-    font-family: var(--font-ui);
-    font-size: 0.8rem;
-    text-transform: capitalize;
-  }
-
-  .number-meta,
-  .number-footer,
-  .paper-anchor {
-    color: var(--dark-gray);
-    font-size: 0.9rem;
-  }
-
-  .number-card h3,
-  .essay-card h3,
-  .paper-card h3,
-  .watch-card h3 {
+  .example-card p {
     margin-bottom: 0;
   }
 
-  .essay-card h3 {
-    max-width: 20ch;
-    font-size: clamp(1.6rem, 3vw, 2.15rem);
-    line-height: 1.08;
-  }
-
-  .essay-status {
-    background: rgba(43, 76, 111, 0.1);
-  }
-
-  .number-value {
-    color: var(--primary-color);
-    font-family: var(--font-heading);
-    font-size: 2rem;
-    line-height: 1;
-  }
-
-  .number-summary,
-  .essay-card p,
-  .paper-card p,
-  .watch-card li {
-    color: var(--ink-soft);
-  }
-
-  .number-footer a,
-  .essay-header a,
-  .paper-card-top a {
-    color: var(--primary-color);
-    text-decoration: none;
-  }
-
-  .number-footer a:hover,
-  .essay-header a:hover,
-  .paper-card-top a:hover {
-    text-decoration: underline;
-  }
-
-  .paper-card-links {
+  .example-category {
     display: inline-flex;
+    width: fit-content;
     align-items: center;
-    justify-content: flex-end;
-    gap: 0.75rem;
-    flex-wrap: wrap;
+    padding: 0.24rem 0.62rem;
+    border-radius: 999px;
+    background: rgba(43, 76, 111, 0.08);
+    color: var(--primary-color);
+    font-family: var(--font-ui);
+    font-size: 0.82rem;
+    font-weight: 700;
   }
 
-  .placeholder-metric-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 0.85rem;
+  .example-result {
+    display: flex;
+    flex-direction: column;
+    gap: 0.18rem;
+    margin-top: auto;
+    padding-top: 0.8rem;
+    border-top: 1px solid rgba(216, 222, 230, 0.92);
   }
 
-  .placeholder-metric {
-    padding: 0.9rem 1rem;
-    border: 1px solid rgba(216, 222, 230, 0.92);
-    border-radius: 16px;
-    background: rgba(247, 249, 252, 0.72);
-  }
-
-  .placeholder-metric span {
-    display: block;
-    margin-bottom: 0.35rem;
+  .example-result span {
     color: var(--dark-gray);
     font-family: var(--font-ui);
-    font-size: 0.8rem;
+    font-size: 0.82rem;
     font-weight: 700;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
   }
 
-  .placeholder-metric strong {
+  .example-result strong {
     color: var(--primary-color);
     font-family: var(--font-heading);
-    font-size: 1.3rem;
-    line-height: 1.15;
+    font-size: 1.24rem;
   }
 
-  .calculator-shell {
-    border-radius: 20px;
-    overflow: hidden;
+  .path-grid {
+    margin-top: 1.4rem;
+    align-items: stretch;
   }
 
-  .watch-card ul {
-    margin: 0;
-    padding-left: 1.2rem;
+  .path-card {
+    flex: 1 1 320px;
+    padding: 1.5rem;
   }
 
-  .watch-card li + li {
-    margin-top: 0.6rem;
+  .path-card .hero-link {
+    margin-top: 1.1rem;
   }
 
-  #inputs,
-  #calculations,
-  #resources {
-    scroll-margin-top: calc(var(--navbar-height) + 1rem);
-  }
-
-  @media (max-width: 1080px) {
-    .hero-grid,
-    .resource-columns,
-    .preview-callout {
-      grid-template-columns: 1fr;
-      display: grid;
-    }
-  }
-
-  @media (max-width: 920px) {
-    .section-header-inline,
-    .watch-grid,
-    .input-topic-header {
-      display: grid;
-      grid-template-columns: 1fr;
-    }
-
-    .section-actions,
-    .preview-actions {
-      justify-content: flex-start;
-    }
-  }
-
-  @media (max-width: 640px) {
+  @media (max-width: 760px) {
     .home-shell {
       padding: 1.5rem 1rem 3rem;
     }
 
-    .landing-hero,
-    .landing-section {
-      border-radius: 22px;
-      padding: 1.2rem;
+    .home-hero,
+    .examples-section,
+    .path-card {
+      border-radius: 20px;
     }
 
-    .hero-actions,
-    .section-actions,
-    .preview-actions,
-    .number-grid,
-    .paper-grid,
-    .watch-grid,
-    .resource-columns {
+    .example-grid {
       grid-template-columns: 1fr;
-    }
-
-    .hero-actions,
-    .section-actions,
-    .preview-actions {
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;
-    }
-
-    .hero-link,
-    .section-link {
-      width: 100%;
-    }
-
-    .input-topic-section,
-    .hero-panel {
-      padding: 0.9rem;
-    }
-
-    .starter-card {
-      padding: 0.9rem;
     }
   }
 </style>

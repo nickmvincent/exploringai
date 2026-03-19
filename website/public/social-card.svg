@@ -1,0 +1,36 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Exploring AI: Data Napkin Math</title>
+  <desc id="desc">Transparent, editable scenarios and shared inputs for AI value, data, and distribution questions.</desc>
+  <defs>
+    <linearGradient id="bg" x1="96" y1="64" x2="1120" y2="566" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F7F5EF"/>
+      <stop offset="1" stop-color="#EDF2F7"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="160" y1="120" x2="969" y2="470" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2B4C6F"/>
+      <stop offset="1" stop-color="#4B7AA8"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" rx="36" fill="url(#bg)"/>
+  <rect x="52" y="52" width="1096" height="526" rx="30" fill="white" fill-opacity="0.86" stroke="#D8DEE6" stroke-width="2"/>
+  <rect x="92" y="92" width="270" height="42" rx="21" fill="#EAF0F6"/>
+  <text x="116" y="119" fill="#2B4C6F" font-family="'Source Sans 3', sans-serif" font-size="22" font-weight="700" letter-spacing="0.08em">EXPLORING AI</text>
+  <text x="92" y="214" fill="#1F2733" font-family="'Source Serif 4', serif" font-size="62" font-weight="700">
+    <tspan x="92" dy="0">Data Napkin Math</tspan>
+  </text>
+  <text x="92" y="292" fill="#3C4655" font-family="'Source Serif 4', serif" font-size="32">
+    <tspan x="92" dy="0">Transparent, editable scenarios for questions about</tspan>
+    <tspan x="92" dy="44">AI value, dataset costs, payouts, and shared assumptions.</tspan>
+  </text>
+  <rect x="92" y="382" width="264" height="60" rx="30" fill="url(#accent)"/>
+  <text x="132" y="420" fill="white" font-family="'Source Sans 3', sans-serif" font-size="26" font-weight="700">Scenarios and Inputs</text>
+  <rect x="730" y="132" width="334" height="122" rx="24" fill="#F7F9FC" stroke="#D8DEE6"/>
+  <text x="762" y="178" fill="#5A6270" font-family="'Source Sans 3', sans-serif" font-size="18" font-weight="700" letter-spacing="0.08em">PUBLIC SCENARIOS</text>
+  <text x="762" y="224" fill="#1F2733" font-family="'Source Serif 4', serif" font-size="38" font-weight="700">4 curated examples</text>
+  <rect x="730" y="272" width="334" height="122" rx="24" fill="#F7F9FC" stroke="#D8DEE6"/>
+  <text x="762" y="318" fill="#5A6270" font-family="'Source Sans 3', sans-serif" font-size="18" font-weight="700" letter-spacing="0.08em">SHARED INPUTS</text>
+  <text x="762" y="364" fill="#1F2733" font-family="'Source Serif 4', serif" font-size="38" font-weight="700">71 source-backed inputs</text>
+  <rect x="730" y="412" width="334" height="122" rx="24" fill="#F7F9FC" stroke="#D8DEE6"/>
+  <text x="762" y="458" fill="#5A6270" font-family="'Source Sans 3', sans-serif" font-size="18" font-weight="700" letter-spacing="0.08em">SHAREABLE STATE</text>
+  <text x="762" y="504" fill="#1F2733" font-family="'Source Serif 4', serif" font-size="38" font-weight="700">Links preserve edits</text>
+</svg>

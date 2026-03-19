@@ -13,6 +13,7 @@
     "verify:citations": "node ../scripts/check-input-citations.mjs",
     "preview": "astro preview",
     "astro": "astro",
+    "test": "node --test --experimental-strip-types tests/**/*.test.ts",
     "content:check": "node ./scripts/content-check.mjs",
     "new:input": "node ./scripts/new-content.mjs input",
     "new:scenario": "node ./scripts/new-content.mjs scenario",

@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import InputComparisonFigure from './InputComparisonFigure.vue';
+import InputLibraryCard from './InputLibraryCard.vue';
 import InputReferenceCharts from './InputReferenceCharts.vue';
+import ScenarioInputCard from './ScenarioInputCard.vue';
 import type { Input, Scenario } from '../lib/calculations';
 import {
   createCalculationFunction,
@@ -13,6 +14,10 @@ import {
 } from '../lib/calculations';
 import { INPUT_UNITS, SCENARIO_CATEGORIES } from '../lib/content-vocab.js';
 import { INPUT_FOCUS_GROUPS, getInputFocusGroup, getInputFocusGroupKey } from '../lib/input-groups';
+import {
+  getInputTitle,
+} from '../lib/input-ui';
+import { parseEntries, serializeEntries } from '../lib/url-state';
 
 type ViewMode = 'scenarios' | 'inputs';
 type FreeScenarioState = {
@@ -59,20 +64,60 @@ const props = withDefaults(defineProps<{
   initialInputs: Record<string, Input>;
   initialScenarios: Scenario[];
   initialView?: ViewMode;
+  showScenarioLibrary?: boolean;
   showInputLibrary?: boolean;
   showHeader?: boolean;
   showAbout?: boolean;
+  pageEyebrow?: string;
+  pageTitle?: string;
+  pageDescription?: string;
 }>(), {
   initialView: 'scenarios',
+  showScenarioLibrary: true,
   showInputLibrary: true,
   showHeader: true,
   showAbout: true,
+  pageEyebrow: 'Interactive calculator',
+  pageTitle: 'Exploring AI: Data Napkin Math',
+  pageDescription:
+    'Interactive napkin math, back-of-the-envelope estimates, and ballpark figures for training-data value, compensation, and distribution questions. How will the proceeds and benefits of AI be distributed?',
 });
+const VIEW_TAB_IDS: Record<ViewMode, string> = {
+  scenarios: 'view-tab-scenarios',
+  inputs: 'view-tab-inputs',
+};
+const VIEW_PANEL_IDS: Record<ViewMode, string> = {
+  scenarios: 'napkinMath',
+  inputs: 'inputLibrary',
+};
+const INSPECTOR_DIALOG_ID = 'input-inspector-dialog';
+const INSPECTOR_TITLE_ID = 'input-inspector-title';
+const INSPECTOR_DESCRIPTION_ID = 'input-inspector-description';
+
+function getDefaultView(): ViewMode {
+  if (!props.showScenarioLibrary && props.showInputLibrary) {
+    return 'inputs';
+  }
+
+  return 'scenarios';
+}
+
+function resolveRequestedView(view?: ViewMode | null): ViewMode {
+  if (view === 'inputs' && props.showInputLibrary) {
+    return 'inputs';
+  }
+
+  if (view === 'scenarios' && props.showScenarioLibrary) {
+    return 'scenarios';
+  }
+
+  return getDefaultView();
+}
 
 const rightPanelOpen = ref(false);
 const selectedInputKey = ref<string | null>(null);
 const selectedScenario = ref('All');
-const activeView = ref<ViewMode>(props.showInputLibrary ? props.initialView : 'scenarios');
+const activeView = ref<ViewMode>(resolveRequestedView(props.initialView));
 const inputSearch = ref('');
 const selectedInputFocus = ref('All');
 const selectedSourceQuality = ref('All');
@@ -88,6 +133,9 @@ const inputDrafts = ref<Record<string, string>>({});
 const freeScenario = ref<FreeScenarioState>({ ...FREE_SCENARIO_DEFAULTS });
 const freeScenarioInputPicker = ref('');
 const freeScenarioExpressionField = ref<HTMLTextAreaElement | null>(null);
+const mainContentRef = ref<HTMLElement | null>(null);
+const inspectorDrawerRef = ref<HTMLElement | null>(null);
+const inspectorCloseButtonRef = ref<HTMLButtonElement | null>(null);
 
 const shareButtonLabel = ref('Copy current view');
 const freeScenarioCopyLabel = ref('Copy Scenario Markdown');
@@ -96,6 +144,17 @@ const isApplyingUrlState = ref(false);
 
 let shareResetTimeout: ReturnType<typeof setTimeout> | null = null;
 let freeScenarioCopyResetTimeout: ReturnType<typeof setTimeout> | null = null;
+let inspectorReturnFocusTarget: HTMLElement | null = null;
+
+const hasScenarioView = computed(() => props.showScenarioLibrary);
+const hasInputView = computed(() => props.showInputLibrary);
+const hasViewTabs = computed(() => hasScenarioView.value && hasInputView.value);
+const isScenarioViewVisible = computed(() => {
+  return hasScenarioView.value && (!hasInputView.value || activeView.value === 'scenarios');
+});
+const isInputViewVisible = computed(() => {
+  return hasInputView.value && (!hasScenarioView.value || activeView.value === 'inputs');
+});
 
 const selectedInputDetails = computed(() => {
   return selectedInputKey.value ? inputs.value[selectedInputKey.value] : null;
@@ -271,18 +330,25 @@ const freeScenarioHasDraft = computed(() => {
   );
 });
 const hasCustomizedState = computed(() => {
-  return Boolean(
-    changedInputKeys.value.length ||
+  const hasScenarioCustomizations = props.showScenarioLibrary && (
     hasNonDefaultFills.value ||
     selectedScenario.value !== 'All' ||
     calcDetailsState.value.length ||
-    freeScenarioHasDraft.value ||
-    (props.showInputLibrary && activeView.value !== 'scenarios') ||
-    (props.showInputLibrary && inputSearch.value.trim()) ||
-    (props.showInputLibrary && selectedInputFocus.value !== 'All') ||
-    (props.showInputLibrary && selectedSourceQuality.value !== 'All') ||
-    (props.showInputLibrary && selectedInputType.value !== 'All') ||
-    (props.showInputLibrary && featuredOnly.value)
+    freeScenarioHasDraft.value
+  );
+  const hasInputLibraryCustomizations = props.showInputLibrary && (
+    inputSearch.value.trim() ||
+    selectedInputFocus.value !== 'All' ||
+    selectedSourceQuality.value !== 'All' ||
+    selectedInputType.value !== 'All' ||
+    featuredOnly.value
+  );
+
+  return Boolean(
+    changedInputKeys.value.length ||
+    hasScenarioCustomizations ||
+    hasInputLibraryCustomizations ||
+    (hasViewTabs.value && activeView.value !== 'scenarios')
   );
 });
 const freeScenarioEvaluation = computed(() => evaluateMathExpression(freeScenario.value.expression, inputs.value));
@@ -309,6 +375,28 @@ const freeScenarioSuggestedFilename = computed(() => `${slugifyScenarioId(
   freeScenario.value.title || FREE_SCENARIO_DEFAULTS.title
 )}.md`);
 const freeScenarioMarkdown = computed(() => buildFreeScenarioMarkdown());
+
+function getViewModes(): ViewMode[] {
+  const views: ViewMode[] = [];
+
+  if (props.showScenarioLibrary) {
+    views.push('scenarios');
+  }
+
+  if (props.showInputLibrary) {
+    views.push('inputs');
+  }
+
+  return views;
+}
+
+function getViewTabId(view: ViewMode): string {
+  return VIEW_TAB_IDS[view];
+}
+
+function getViewPanelId(view: ViewMode): string {
+  return VIEW_PANEL_IDS[view];
+}
 
 function normalizeFieldNumber(value: number): string {
   if (!Number.isFinite(value)) return '';
@@ -627,7 +715,7 @@ function resetAllInputs() {
     input.value = input.default_value;
   });
 
-  activeView.value = 'scenarios';
+  activeView.value = getDefaultView();
   selectedScenario.value = 'All';
   selectedInputKey.value = null;
   rightPanelOpen.value = false;
@@ -691,9 +779,88 @@ function toggleFreeScenarioOpen() {
   }
 }
 
-function showDetails(key: string) {
+function rememberInspectorReturnFocus(target?: HTMLElement | null) {
+  if (target) {
+    inspectorReturnFocusTarget = target;
+    return;
+  }
+
+  if (document.activeElement instanceof HTMLElement) {
+    inspectorReturnFocusTarget = document.activeElement;
+  }
+}
+
+function getFocusableElements(container: HTMLElement | null): HTMLElement[] {
+  if (!container) return [];
+
+  const selectors = [
+    'a[href]',
+    'button:not([disabled])',
+    'input:not([disabled])',
+    'select:not([disabled])',
+    'textarea:not([disabled])',
+    '[tabindex]:not([tabindex="-1"])',
+  ];
+
+  return Array.from(container.querySelectorAll<HTMLElement>(selectors.join(',')))
+    .filter((element) => !element.hasAttribute('disabled') && element.getAttribute('aria-hidden') !== 'true');
+}
+
+function setElementInert(element: HTMLElement | null, isInert: boolean) {
+  if (!element) return;
+
+  if (isInert) {
+    element.setAttribute('inert', '');
+    element.setAttribute('aria-hidden', 'true');
+    return;
+  }
+
+  element.removeAttribute('inert');
+  element.removeAttribute('aria-hidden');
+}
+
+function syncInspectorEnvironment(isOpen: boolean) {
+  if (typeof document === 'undefined') return;
+
+  const navbar = document.querySelector<HTMLElement>('.navbar');
+  document.body.classList.toggle('body-scroll-locked', isOpen);
+  setElementInert(mainContentRef.value, isOpen);
+  setElementInert(navbar, isOpen);
+}
+
+function handleViewTabKeydown(event: KeyboardEvent) {
+  const views = getViewModes();
+  if (views.length < 2) return;
+
+  const currentIndex = views.indexOf(activeView.value);
+  if (currentIndex === -1) return;
+
+  let nextIndex = currentIndex;
+
+  if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+    nextIndex = (currentIndex + 1) % views.length;
+  } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+    nextIndex = (currentIndex - 1 + views.length) % views.length;
+  } else if (event.key === 'Home') {
+    nextIndex = 0;
+  } else if (event.key === 'End') {
+    nextIndex = views.length - 1;
+  } else {
+    return;
+  }
+
+  event.preventDefault();
+  const nextView = views[nextIndex];
+  setActiveView(nextView);
+  void nextTick(() => {
+    document.getElementById(getViewTabId(nextView))?.focus();
+  });
+}
+
+function showDetails(key: string, trigger?: HTMLElement | null) {
   if (!inputs.value[key]) return;
 
+  rememberInspectorReturnFocus(trigger);
   selectedInputKey.value = key;
   rightPanelOpen.value = true;
 }
@@ -702,8 +869,57 @@ function closeInspector() {
   rightPanelOpen.value = false;
 }
 
+function toggleInspector(trigger?: HTMLElement | null) {
+  if (!selectedInputKey.value) return;
+
+  if (!rightPanelOpen.value) {
+    rememberInspectorReturnFocus(trigger);
+    rightPanelOpen.value = true;
+    return;
+  }
+
+  closeInspector();
+}
+
+function handleInspectorKeydown(event: KeyboardEvent) {
+  if (!rightPanelOpen.value) return;
+
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    closeInspector();
+    return;
+  }
+
+  if (event.key !== 'Tab') {
+    return;
+  }
+
+  const focusableElements = getFocusableElements(inspectorDrawerRef.value);
+  if (!focusableElements.length) {
+    event.preventDefault();
+    inspectorCloseButtonRef.value?.focus();
+    return;
+  }
+
+  const first = focusableElements[0];
+  const last = focusableElements[focusableElements.length - 1];
+  const activeElement = document.activeElement;
+
+  if (event.shiftKey && activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+}
+
 function setActiveView(view: ViewMode) {
   if (!props.showInputLibrary && view === 'inputs') {
+    return;
+  }
+
+  if (!props.showScenarioLibrary && view === 'scenarios') {
     return;
   }
 
@@ -818,6 +1034,18 @@ function resetInputFilters() {
 }
 
 async function jumpToScenario(scenarioId: string, category?: string) {
+  if (!props.showScenarioLibrary) {
+    const targetParams = buildUrlSearchParams({
+      includeInspect: false,
+      scenarioId,
+      category: category && uniqueCategories.value.includes(category) ? category : 'All',
+      view: 'scenarios',
+    });
+    const targetUrl = `/scenarios${targetParams.toString() ? `?${targetParams.toString()}` : ''}`;
+    window.location.assign(targetUrl);
+    return;
+  }
+
   activeView.value = 'scenarios';
   selectedScenario.value = category && uniqueCategories.value.includes(category) ? category : 'All';
   await nextTick();
@@ -827,43 +1055,29 @@ async function jumpToScenario(scenarioId: string, category?: string) {
   });
 }
 
-function serializeEntries(entries: [string, string][]) {
-  return entries
-    .map(([key, value]) => `${encodeURIComponent(key)}:${encodeURIComponent(value)}`)
-    .join(',');
-}
-
-function parseEntries(serialized: string | null) {
-  const result: Record<string, string> = {};
-  if (!serialized) return result;
-
-  serialized.split(',').forEach((entry) => {
-    if (!entry) return;
-    const separator = entry.indexOf(':');
-    if (separator === -1) return;
-
-    const key = decodeURIComponent(entry.slice(0, separator));
-    const value = decodeURIComponent(entry.slice(separator + 1));
-    result[key] = value;
-  });
-
-  return result;
-}
-
-function syncUrlState() {
-  if (!hasMounted.value || isApplyingUrlState.value) return;
-
+function buildUrlSearchParams(options?: {
+  category?: string | null;
+  includeInspect?: boolean;
+  scenarioId?: string | null;
+  view?: ViewMode | null;
+}) {
   const params = new URLSearchParams();
+  const requestedView = resolveRequestedView(options?.view ?? activeView.value);
+  const requestedCategory = options?.category ?? selectedScenario.value;
 
-  if (props.showInputLibrary && activeView.value !== 'scenarios') {
-    params.set('view', activeView.value);
+  if (hasViewTabs.value && requestedView !== 'scenarios') {
+    params.set('view', requestedView);
   }
 
-  if (selectedScenario.value !== 'All') {
-    params.set('category', selectedScenario.value);
+  if (options?.scenarioId) {
+    params.set('scenario', options.scenarioId);
   }
 
-  if (rightPanelOpen.value && selectedInputKey.value) {
+  if ((props.showScenarioLibrary || options?.scenarioId || requestedCategory) && requestedCategory && requestedCategory !== 'All') {
+    params.set('category', requestedCategory);
+  }
+
+  if (options?.includeInspect !== false && rightPanelOpen.value && selectedInputKey.value) {
     params.set('inspect', selectedInputKey.value);
   }
 
@@ -896,7 +1110,7 @@ function syncUrlState() {
     );
   }
 
-  if (hasNonDefaultFills.value) {
+  if (props.showScenarioLibrary && hasNonDefaultFills.value) {
     params.set(
       'fills',
       serializeEntries(
@@ -905,38 +1119,45 @@ function syncUrlState() {
     );
   }
 
-  if (calcDetailsState.value.length) {
+  if (props.showScenarioLibrary && calcDetailsState.value.length) {
     params.set('details', calcDetailsState.value.join(','));
   }
 
-  if (freeScenario.value.expression.trim()) {
+  if (props.showScenarioLibrary && freeScenario.value.expression.trim()) {
     params.set('custom_expr', freeScenario.value.expression);
   }
 
-  if (freeScenario.value.title !== FREE_SCENARIO_DEFAULTS.title) {
+  if (props.showScenarioLibrary && freeScenario.value.title !== FREE_SCENARIO_DEFAULTS.title) {
     params.set('custom_title', freeScenario.value.title);
   }
 
-  if (freeScenario.value.description.trim()) {
+  if (props.showScenarioLibrary && freeScenario.value.description.trim()) {
     params.set('custom_desc', freeScenario.value.description);
   }
 
-  if (freeScenario.value.category !== FREE_SCENARIO_DEFAULTS.category) {
+  if (props.showScenarioLibrary && freeScenario.value.category !== FREE_SCENARIO_DEFAULTS.category) {
     params.set('custom_category', freeScenario.value.category);
   }
 
-  if (freeScenario.value.resultLabel !== FREE_SCENARIO_DEFAULTS.resultLabel) {
+  if (props.showScenarioLibrary && freeScenario.value.resultLabel !== FREE_SCENARIO_DEFAULTS.resultLabel) {
     params.set('custom_label', freeScenario.value.resultLabel);
   }
 
-  if (freeScenario.value.resultUnits !== FREE_SCENARIO_DEFAULTS.resultUnits) {
+  if (props.showScenarioLibrary && freeScenario.value.resultUnits !== FREE_SCENARIO_DEFAULTS.resultUnits) {
     params.set('custom_units', freeScenario.value.resultUnits);
   }
 
-  if (freeScenario.value.showCalcDetails) {
+  if (props.showScenarioLibrary && freeScenario.value.showCalcDetails) {
     params.set('custom_details', '1');
   }
 
+  return params;
+}
+
+function syncUrlState() {
+  if (!hasMounted.value || isApplyingUrlState.value) return;
+
+  const params = buildUrlSearchParams();
   const nextUrl = `${window.location.pathname}${params.toString() ? `?${params.toString()}` : ''}`;
   window.history.replaceState({}, '', nextUrl);
 }
@@ -946,16 +1167,20 @@ function applyUrlStateFromLocation() {
 
   try {
     const params = new URLSearchParams(window.location.search);
-    const scenarioId = params.get('scenario');
+    const scenarioId = props.showScenarioLibrary ? params.get('scenario') : null;
     const requestedScenario = scenarioId
       ? scenariosData.value.find((scenario) => scenario.id === scenarioId)
       : null;
 
-    activeView.value = props.showInputLibrary && params.get('view') === 'inputs' ? 'inputs' : 'scenarios';
+    activeView.value = resolveRequestedView(params.get('view') === 'inputs' ? 'inputs' : 'scenarios');
 
     const category = params.get('category');
-    selectedScenario.value = requestedScenario?.category
-      || (category && uniqueCategories.value.includes(category) ? category : 'All');
+    selectedScenario.value = props.showScenarioLibrary
+      ? (
+          requestedScenario?.category
+          || (category && uniqueCategories.value.includes(category) ? category : 'All')
+        )
+      : 'All';
 
     inputSearch.value = props.showInputLibrary ? (params.get('q') ?? '') : '';
     selectedInputFocus.value = props.showInputLibrary && inputFocusOptions.value.some((group) => group.key === params.get('focus'))
@@ -968,19 +1193,21 @@ function applyUrlStateFromLocation() {
       ? (params.get('type') as string)
       : 'All';
     featuredOnly.value = props.showInputLibrary && params.get('featured') === '1';
-    freeScenario.value = {
-      title: params.get('custom_title') ?? FREE_SCENARIO_DEFAULTS.title,
-      description: params.get('custom_desc') ?? FREE_SCENARIO_DEFAULTS.description,
-      category:
-        SCENARIO_CATEGORIES.includes(params.get('custom_category') ?? '')
-          ? (params.get('custom_category') as string)
-          : FREE_SCENARIO_DEFAULTS.category,
-      expression: params.get('custom_expr') ?? FREE_SCENARIO_DEFAULTS.expression,
-      resultLabel: params.get('custom_label') ?? FREE_SCENARIO_DEFAULTS.resultLabel,
-      resultUnits: params.get('custom_units') ?? FREE_SCENARIO_DEFAULTS.resultUnits,
-      showCalcDetails: params.get('custom_details') === '1',
-    };
-    freeScenarioOpen.value = Boolean(
+    freeScenario.value = props.showScenarioLibrary
+      ? {
+          title: params.get('custom_title') ?? FREE_SCENARIO_DEFAULTS.title,
+          description: params.get('custom_desc') ?? FREE_SCENARIO_DEFAULTS.description,
+          category:
+            SCENARIO_CATEGORIES.includes(params.get('custom_category') ?? '')
+              ? (params.get('custom_category') as string)
+              : FREE_SCENARIO_DEFAULTS.category,
+          expression: params.get('custom_expr') ?? FREE_SCENARIO_DEFAULTS.expression,
+          resultLabel: params.get('custom_label') ?? FREE_SCENARIO_DEFAULTS.resultLabel,
+          resultUnits: params.get('custom_units') ?? FREE_SCENARIO_DEFAULTS.resultUnits,
+          showCalcDetails: params.get('custom_details') === '1',
+        }
+      : { ...FREE_SCENARIO_DEFAULTS };
+    freeScenarioOpen.value = props.showScenarioLibrary && Boolean(
       params.get('custom_expr')
       || params.get('custom_desc')
       || params.get('custom_title')
@@ -990,12 +1217,14 @@ function applyUrlStateFromLocation() {
     );
 
     initializeFillSelections();
-    const fillState = parseEntries(params.get('fills'));
-    Object.entries(fillState).forEach(([key, value]) => {
-      if (isCompatibleFill(key, value)) {
-        fillSelections.value[key] = value;
-      }
-    });
+    if (props.showScenarioLibrary) {
+      const fillState = parseEntries(params.get('fills'));
+      Object.entries(fillState).forEach(([key, value]) => {
+        if (isCompatibleFill(key, value)) {
+          fillSelections.value[key] = value;
+        }
+      });
+    }
     applyCardVariantChange();
 
     const valueState = parseEntries(params.get('values'));
@@ -1008,7 +1237,9 @@ function applyUrlStateFromLocation() {
       }
     });
 
-    const openDetails = new Set((params.get('details') ?? '').split(',').filter(Boolean));
+    const openDetails = props.showScenarioLibrary
+      ? new Set((params.get('details') ?? '').split(',').filter(Boolean))
+      : new Set<string>();
     scenariosData.value.forEach((scenario) => {
       scenario.showCalcDetails = openDetails.has(scenario.id);
     });
@@ -1083,6 +1314,21 @@ function handlePopState() {
   applyUrlStateFromLocation();
 }
 
+watch(rightPanelOpen, async (isOpen) => {
+  syncInspectorEnvironment(isOpen);
+
+  if (isOpen) {
+    await nextTick();
+    inspectorCloseButtonRef.value?.focus();
+    return;
+  }
+
+  const returnTarget = inspectorReturnFocusTarget;
+  inspectorReturnFocusTarget = null;
+  await nextTick();
+  returnTarget?.focus();
+});
+
 watch(
   [
     activeView,
@@ -1125,6 +1371,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   window.removeEventListener('popstate', handlePopState);
+  syncInspectorEnvironment(false);
 
   if (shareResetTimeout) {
     clearTimeout(shareResetTimeout);
@@ -1141,41 +1388,45 @@ onBeforeUnmount(() => {
     <div v-if="rightPanelOpen" class="drawer-backdrop" @click="closeInspector"></div>
 
     <div class="app-layout">
-      <main class="main-content">
+      <main id="site-main" ref="mainContentRef" class="main-content">
         <header v-if="props.showHeader" id="headerContent" class="page-header">
-          <p class="eyebrow">Interactive calculator</p>
-          <h1>Exploring AI: Data Napkin Math</h1>
-          <p>
-            Interactive napkin math, back-of-the-envelope estimates, and ballpark figures for training-data
-            value, compensation, and distribution questions. How will the proceeds and benefits of AI be
-            distributed?
-          </p>
+          <p class="eyebrow">{{ props.pageEyebrow }}</p>
+          <h1>{{ props.pageTitle }}</h1>
+          <p>{{ props.pageDescription }}</p>
         </header>
 
         <section class="page-toolbar" aria-label="Page controls">
-          <div class="page-toolbar-top" :class="{ 'single-view': !props.showInputLibrary }">
+          <div class="page-toolbar-top" :class="{ 'single-view': !hasViewTabs }">
             <div
-              v-if="props.showInputLibrary"
+              v-if="hasViewTabs"
               class="view-tabs"
               role="tablist"
               aria-label="Main views"
             >
               <button
                 class="view-tab"
+                :id="getViewTabId('scenarios')"
                 :class="{ active: activeView === 'scenarios' }"
+                :aria-controls="getViewPanelId('scenarios')"
                 :aria-selected="activeView === 'scenarios'"
                 role="tab"
+                :tabindex="activeView === 'scenarios' ? 0 : -1"
                 type="button"
+                @keydown="handleViewTabKeydown"
                 @click="setActiveView('scenarios')"
               >
                 Scenarios
               </button>
               <button
                 class="view-tab"
+                :id="getViewTabId('inputs')"
                 :class="{ active: activeView === 'inputs' }"
+                :aria-controls="getViewPanelId('inputs')"
                 :aria-selected="activeView === 'inputs'"
                 role="tab"
+                :tabindex="activeView === 'inputs' ? 0 : -1"
                 type="button"
+                @keydown="handleViewTabKeydown"
                 @click="setActiveView('inputs')"
               >
                 Inputs Library
@@ -1194,8 +1445,11 @@ onBeforeUnmount(() => {
               <button
                 v-if="canToggleInspector"
                 class="btn btn-outline-primary btn-sm"
+                :aria-controls="INSPECTOR_DIALOG_ID"
+                :aria-expanded="rightPanelOpen"
+                aria-haspopup="dialog"
                 type="button"
-                @click="rightPanelOpen = !rightPanelOpen"
+                @click="toggleInspector($event.currentTarget as HTMLElement)"
               >
                 {{ inspectorToggleLabel }}
               </button>
@@ -1210,7 +1464,7 @@ onBeforeUnmount(() => {
             </div>
           </div>
 
-          <div v-if="activeView === 'scenarios' || !props.showInputLibrary" class="page-toolbar-bottom">
+          <div v-if="isScenarioViewVisible" class="page-toolbar-bottom">
             <p class="toolbar-note">
               <strong>{{ filteredScenarios.length }}</strong>
               curated {{ pluralize(filteredScenarios.length, 'scenario') }} shown, plus one open-ended builder at the end.
@@ -1232,7 +1486,7 @@ onBeforeUnmount(() => {
             </div>
           </div>
 
-          <div v-else class="library-toolbar">
+          <div v-else-if="isInputViewVisible" class="library-toolbar">
             <div class="input-focus-toolbar">
               <span class="input-focus-label">Browse by question</span>
               <div class="input-focus-chip-row">
@@ -1301,9 +1555,18 @@ onBeforeUnmount(() => {
           </div>
         </section>
 
-        <section v-if="activeView === 'scenarios' || !props.showInputLibrary" id="napkinMath">
+        <section
+          v-if="hasScenarioView"
+          v-show="isScenarioViewVisible"
+          :id="getViewPanelId('scenarios')"
+          :aria-hidden="!isScenarioViewVisible"
+          aria-describedby="napkinMath-description"
+          :aria-labelledby="getViewTabId('scenarios')"
+          role="tabpanel"
+          tabindex="0"
+        >
           <h2 class="section-title">Scenarios</h2>
-          <p class="section-description">
+          <p id="napkinMath-description" class="section-description">
             Change the assumptions directly on each card. Inline comparison menus let you swap in
             related public benchmarks without leaving the page, and every input card links to its cited source.
           </p>
@@ -1493,88 +1756,25 @@ onBeforeUnmount(() => {
                     </div>
 
                     <div class="scenario-input-grid">
-                      <div
+                      <ScenarioInputCard
                         v-for="entry in group.entries"
                         :key="entry.key"
-                        class="scenario-input-card"
-                        :class="{ changed: isInputChanged(entry.key) }"
-                      >
-                        <div class="scenario-input-header">
-                          <div>
-                            <h4>{{ entry.input.title || formatLabel(entry.key) }}</h4>
-                            <p class="scenario-input-summary">
-                              {{ entry.input.summary || entry.input.importanceReason }}
-                            </p>
-                          </div>
-
-                          <div class="scenario-input-badges">
-                            <span class="input-quality-badge">
-                              {{ formatSourceQuality(entry.input.sourceQuality) }}
-                            </span>
-                            <span v-if="isInputChanged(entry.key)" class="changed-badge">Modified</span>
-                          </div>
-                        </div>
-
-                        <label class="scenario-input-label">
-                          {{ entry.input.display_units }}
-                        </label>
-
-                        <InputComparisonFigure
-                          v-if="entry.input.comparisonImage"
-                          :comparison-image="entry.input.comparisonImage"
-                        />
-
-                        <InputReferenceCharts
-                          v-if="entry.input.referenceCharts?.length"
-                          :reference-charts="entry.input.referenceCharts"
-                        />
-
-                        <div class="scenario-input-controls">
-                          <input
-                            type="number"
-                            class="form-control"
-                            :value="getFieldValue(entry.key)"
-                            :step="getInputStep(entry.input)"
-                            :min="entry.input.min ?? undefined"
-                            :max="entry.input.max ?? undefined"
-                            @focus="beginEditingValue(entry.key)"
-                            @input="updateDraftValue(entry.key, ($event.target as HTMLInputElement).value)"
-                            @blur="commitDraftValue(entry.key)"
-                            @keydown="handleValueKeydown(entry.key, $event)"
-                          />
-                          <button class="btn btn-outline-secondary" type="button" @click="adjustValue(entry.key, 0.1)">
-                            x0.1
-                          </button>
-                          <button class="btn btn-outline-secondary" type="button" @click="adjustValue(entry.key, 10)">
-                            x10
-                          </button>
-                          <button
-                            class="btn btn-outline-secondary"
-                            type="button"
-                            :disabled="!isInputChanged(entry.key)"
-                            @click="resetValue(entry.key)"
-                          >
-                            Reset
-                          </button>
-                          <button class="btn btn-secondary" type="button" @click="showDetails(entry.key)">
-                            Inspect
-                          </button>
-                        </div>
-
-                        <p v-if="getInputReadableNote(entry.key)" class="input-readable-note">
-                          {{ getInputReadableNote(entry.key) }}
-                        </p>
-
-                        <div class="scenario-input-footer">
-                          <span v-if="entry.input.usedIn?.length" class="input-usage">
-                            Used in {{ entry.input.usedIn?.length }}
-                            {{ pluralize(entry.input.usedIn?.length || 0, 'scenario') }}
-                          </span>
-                          <span v-if="entry.input.confidence !== undefined" class="confidence-text">
-                            {{ formatConfidence(entry.input.confidence) }}
-                          </span>
-                        </div>
-                      </div>
+                        :changed="isInputChanged(entry.key)"
+                        :confidence-label="formatConfidence(entry.input.confidence)"
+                        :entry="entry"
+                        :field-value="getFieldValue(entry.key)"
+                        :readable-note="getInputReadableNote(entry.key)"
+                        scope="free"
+                        :source-quality-label="formatSourceQuality(entry.input.sourceQuality)"
+                        :step="getInputStep(entry.input)"
+                        @adjust="adjustValue(entry.key, $event)"
+                        @begin-edit="beginEditingValue(entry.key)"
+                        @commit="commitDraftValue(entry.key)"
+                        @inspect="showDetails(entry.key, $event)"
+                        @keydown="handleValueKeydown(entry.key, $event)"
+                        @reset="resetValue(entry.key)"
+                        @update-draft="updateDraftValue(entry.key, $event)"
+                      />
                     </div>
                   </div>
                 </div>
@@ -1660,6 +1860,7 @@ onBeforeUnmount(() => {
                         >
                           <select
                             class="inline-select"
+                            :aria-label="`Swap benchmark for ${getInputTitle(segment.variable!, inputs[segment.variable!])}`"
                             title="Swap benchmark"
                             :value="fillSelections[segment.variable!] || segment.variable"
                             @change="onVariableChange(segment.variable!, ($event.target as HTMLSelectElement).value)"
@@ -1700,88 +1901,25 @@ onBeforeUnmount(() => {
                   </div>
 
                   <div class="scenario-input-grid">
-                    <div
+                    <ScenarioInputCard
                       v-for="entry in group.entries"
                       :key="entry.key"
-                      class="scenario-input-card"
-                      :class="{ changed: isInputChanged(entry.key) }"
-                    >
-                      <div class="scenario-input-header">
-                        <div>
-                          <h4>{{ entry.input.title || formatLabel(entry.key) }}</h4>
-                          <p class="scenario-input-summary">
-                            {{ entry.input.summary || entry.input.importanceReason }}
-                          </p>
-                        </div>
-
-                        <div class="scenario-input-badges">
-                          <span class="input-quality-badge">
-                            {{ formatSourceQuality(entry.input.sourceQuality) }}
-                          </span>
-                          <span v-if="isInputChanged(entry.key)" class="changed-badge">Modified</span>
-                        </div>
-                      </div>
-
-                      <label class="scenario-input-label">
-                        {{ entry.input.display_units }}
-                      </label>
-
-                      <InputComparisonFigure
-                        v-if="entry.input.comparisonImage"
-                        :comparison-image="entry.input.comparisonImage"
-                      />
-
-                      <InputReferenceCharts
-                        v-if="entry.input.referenceCharts?.length"
-                        :reference-charts="entry.input.referenceCharts"
-                      />
-
-                      <div class="scenario-input-controls">
-                        <input
-                          type="number"
-                          class="form-control"
-                          :value="getFieldValue(entry.key)"
-                          :step="getInputStep(entry.input)"
-                          :min="entry.input.min ?? undefined"
-                          :max="entry.input.max ?? undefined"
-                          @focus="beginEditingValue(entry.key)"
-                          @input="updateDraftValue(entry.key, ($event.target as HTMLInputElement).value)"
-                          @blur="commitDraftValue(entry.key)"
-                          @keydown="handleValueKeydown(entry.key, $event)"
-                        />
-                        <button class="btn btn-outline-secondary" type="button" @click="adjustValue(entry.key, 0.1)">
-                          x0.1
-                        </button>
-                        <button class="btn btn-outline-secondary" type="button" @click="adjustValue(entry.key, 10)">
-                          x10
-                        </button>
-                        <button
-                          class="btn btn-outline-secondary"
-                          type="button"
-                          :disabled="!isInputChanged(entry.key)"
-                          @click="resetValue(entry.key)"
-                        >
-                          Reset
-                        </button>
-                        <button class="btn btn-secondary" type="button" @click="showDetails(entry.key)">
-                          Inspect
-                        </button>
-                      </div>
-
-                      <p v-if="getInputReadableNote(entry.key)" class="input-readable-note">
-                        {{ getInputReadableNote(entry.key) }}
-                      </p>
-
-                      <div class="scenario-input-footer">
-                        <span v-if="entry.input.usedIn?.length" class="input-usage">
-                          Used in {{ entry.input.usedIn?.length }}
-                          {{ pluralize(entry.input.usedIn?.length || 0, 'scenario') }}
-                        </span>
-                        <span v-if="entry.input.confidence !== undefined" class="confidence-text">
-                          {{ formatConfidence(entry.input.confidence) }}
-                        </span>
-                      </div>
-                    </div>
+                      :changed="isInputChanged(entry.key)"
+                      :confidence-label="formatConfidence(entry.input.confidence)"
+                      :entry="entry"
+                      :field-value="getFieldValue(entry.key)"
+                      :readable-note="getInputReadableNote(entry.key)"
+                      scope="scenario"
+                      :source-quality-label="formatSourceQuality(entry.input.sourceQuality)"
+                      :step="getInputStep(entry.input)"
+                      @adjust="adjustValue(entry.key, $event)"
+                      @begin-edit="beginEditingValue(entry.key)"
+                      @commit="commitDraftValue(entry.key)"
+                      @inspect="showDetails(entry.key, $event)"
+                      @keydown="handleValueKeydown(entry.key, $event)"
+                      @reset="resetValue(entry.key)"
+                      @update-draft="updateDraftValue(entry.key, $event)"
+                    />
                   </div>
                 </div>
               </div>
@@ -1825,9 +1963,18 @@ onBeforeUnmount(() => {
           </datalist>
         </section>
 
-        <section v-else-if="props.showInputLibrary" id="inputLibrary">
+        <section
+          v-if="hasInputView"
+          v-show="isInputViewVisible"
+          :id="getViewPanelId('inputs')"
+          :aria-hidden="!isInputViewVisible"
+          aria-describedby="inputLibrary-description"
+          :aria-labelledby="getViewTabId('inputs')"
+          role="tabpanel"
+          tabindex="0"
+        >
           <h2 class="section-title">Inputs Library</h2>
-          <p class="section-description">
+          <p id="inputLibrary-description" class="section-description">
             Search, filter, and edit the shared assumptions. Each change immediately updates every
             scenario that depends on that input, and the library is grouped around the kinds of
             questions people usually start with while still linking back to the sources behind the numbers.
@@ -1848,122 +1995,25 @@ onBeforeUnmount(() => {
               </div>
 
               <div class="inputs-library">
-                <article
+                <InputLibraryCard
                   v-for="entry in group.entries"
                   :key="entry.key"
-                  class="input-library-card"
-                  :class="{ featured: entry.input.featured }"
-                >
-                  <div class="input-library-header">
-                    <div class="input-rank">
-                      <span class="input-rank-number">#{{ entry.input.importanceRank || '-' }}</span>
-                      <span class="input-rank-label">Importance</span>
-                    </div>
-
-                    <div class="input-library-badges">
-                      <span class="input-quality-badge">
-                        {{ formatSourceQuality(entry.input.sourceQuality) }}
-                      </span>
-                      <span v-if="entry.input.featured" class="featured-badge">Featured</span>
-                    </div>
-                  </div>
-
-                  <h3>{{ entry.input.title || formatLabel(entry.key) }}</h3>
-                  <p class="input-library-summary">
-                    {{ entry.input.summary || entry.input.importanceReason }}
-                  </p>
-
-                  <InputComparisonFigure
-                    v-if="entry.input.comparisonImage"
-                    :comparison-image="entry.input.comparisonImage"
-                  />
-
-                  <InputReferenceCharts
-                    v-if="entry.input.referenceCharts?.length"
-                    :reference-charts="entry.input.referenceCharts"
-                  />
-
-                  <div class="input-library-value-row">
-                    <input
-                      type="number"
-                      class="form-control"
-                      :value="getFieldValue(entry.key)"
-                      :step="getInputStep(entry.input)"
-                      :min="entry.input.min ?? undefined"
-                      :max="entry.input.max ?? undefined"
-                      @focus="beginEditingValue(entry.key)"
-                      @input="updateDraftValue(entry.key, ($event.target as HTMLInputElement).value)"
-                      @blur="commitDraftValue(entry.key)"
-                      @keydown="handleValueKeydown(entry.key, $event)"
-                    />
-                    <span class="input-library-units">{{ entry.input.display_units }}</span>
-                  </div>
-
-                  <p v-if="getInputReadableNote(entry.key)" class="input-readable-note input-library-readable-note">
-                    {{ getInputReadableNote(entry.key) }}
-                  </p>
-
-                  <div class="input-library-quick-actions">
-                    <button class="btn btn-outline-secondary btn-sm" type="button" @click="adjustValue(entry.key, 0.1)">
-                      x0.1
-                    </button>
-                    <button class="btn btn-outline-secondary btn-sm" type="button" @click="adjustValue(entry.key, 10)">
-                      x10
-                    </button>
-                    <button
-                      class="btn btn-outline-secondary btn-sm"
-                      type="button"
-                      :disabled="!isInputChanged(entry.key)"
-                      @click="resetValue(entry.key)"
-                    >
-                      Reset
-                    </button>
-                    <button class="btn btn-outline-primary btn-sm" type="button" @click="showDetails(entry.key)">
-                      Inspect
-                    </button>
-                    <a
-                      v-if="entry.input.source_url || entry.input.sourceLocatorUrl"
-                      class="btn btn-outline-secondary btn-sm"
-                      :href="entry.input.sourceLocatorUrl || entry.input.source_url"
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      Source
-                    </a>
-                  </div>
-
-                  <div class="input-library-meta">
-                    <span>{{ formatLabel(entry.input.variable_type) }}</span>
-                    <span v-if="entry.input.entity">{{ formatLabel(entry.input.entity) }}</span>
-                    <span v-if="entry.input.confidence !== undefined">{{ formatConfidence(entry.input.confidence) }}</span>
-                  </div>
-
-                  <p v-if="entry.input.importanceReason" class="input-library-reason">
-                    <strong>Why it matters:</strong> {{ entry.input.importanceReason }}
-                  </p>
-
-                  <div class="input-library-source">
-                    <strong>{{ entry.input.sourceName || 'Source status' }}</strong>
-                    <span v-if="entry.input.lastReviewed">Reviewed {{ entry.input.lastReviewed }}</span>
-                  </div>
-
-                  <p v-if="entry.input.sourceNote" class="input-library-note">
-                    {{ entry.input.sourceNote }}
-                  </p>
-
-                  <div v-if="entry.input.usedIn?.length" class="input-library-usage">
-                    <span class="usage-label">Used in</span>
-                    <button
-                      v-for="scenario in entry.input.usedIn"
-                      :key="scenario.id"
-                      class="scenario-link-chip"
-                      type="button"
-                      @click="jumpToScenario(scenario.id, scenario.category)"
-                    >
-                      {{ scenario.title }}
-                    </button>
-                  </div>
-                </article>
+                  :changed="isInputChanged(entry.key)"
+                  :confidence-label="formatConfidence(entry.input.confidence)"
+                  :entry="entry"
+                  :field-value="getFieldValue(entry.key)"
+                  :readable-note="getInputReadableNote(entry.key)"
+                  :source-quality-label="formatSourceQuality(entry.input.sourceQuality)"
+                  :step="getInputStep(entry.input)"
+                  @adjust="adjustValue(entry.key, $event)"
+                  @begin-edit="beginEditingValue(entry.key)"
+                  @commit="commitDraftValue(entry.key)"
+                  @inspect="showDetails(entry.key, $event)"
+                  @jump="(scenarioId, category) => jumpToScenario(scenarioId, category)"
+                  @keydown="handleValueKeydown(entry.key, $event)"
+                  @reset="resetValue(entry.key)"
+                  @update-draft="updateDraftValue(entry.key, $event)"
+                />
               </div>
             </section>
           </div>
@@ -1995,16 +2045,36 @@ onBeforeUnmount(() => {
         </section>
       </main>
 
-      <aside class="inspector-drawer" :class="{ open: rightPanelOpen }">
+      <aside
+        :id="INSPECTOR_DIALOG_ID"
+        ref="inspectorDrawerRef"
+        class="inspector-drawer"
+        :class="{ open: rightPanelOpen }"
+        :aria-describedby="INSPECTOR_DESCRIPTION_ID"
+        :aria-hidden="!rightPanelOpen"
+        :aria-labelledby="INSPECTOR_TITLE_ID"
+        aria-modal="true"
+        role="dialog"
+        @keydown="handleInspectorKeydown"
+      >
         <div class="inspector-shell">
           <div class="panel-header">
-            <h2>Inspector</h2>
-            <button class="btn btn-sm btn-outline-secondary" type="button" @click="closeInspector">
+            <h2 :id="INSPECTOR_TITLE_ID">Inspector</h2>
+            <button
+              ref="inspectorCloseButtonRef"
+              class="btn btn-sm btn-outline-secondary"
+              type="button"
+              @click="closeInspector"
+            >
               Close
             </button>
           </div>
 
           <div class="inspector-content">
+            <p :id="INSPECTOR_DESCRIPTION_ID" class="visually-hidden">
+              Review the selected input, inspect its sources, and jump to any scenario that uses it.
+            </p>
+
             <div v-if="!selectedInputDetails" class="inspector-empty">
               Select any "Inspect" button to see the source note, external link, and scenario usage for that input.
             </div>

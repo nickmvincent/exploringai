@@ -1,11 +1,16 @@
 ---
 interface Props {
   title: string;
+  description?: string;
 }
 
-const { title } = Astro.props;
+const {
+  title,
+  description = 'Interactive napkin math for AI training-data value, compensation benchmarks, and distribution scenarios.',
+} = Astro.props;
 const allowIndexing = import.meta.env.PUBLIC_ALLOW_INDEXING !== 'false';
 const canonicalUrl = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString() : null;
+const socialImageUrl = Astro.site ? new URL('/social-card.svg', Astro.site).toString() : null;
 const currentPath = Astro.url.pathname;
 
 const navLinks = [
@@ -15,24 +20,14 @@ const navLinks = [
     isActive: currentPath === '/',
   },
   {
-    href: '/calculator',
-    label: 'Calculator',
-    isActive: currentPath === '/calculator',
+    href: '/scenarios',
+    label: 'Scenarios',
+    isActive: currentPath === '/scenarios',
   },
   {
-    href: '/calculator?view=inputs',
+    href: '/inputs',
     label: 'Inputs',
-    isActive: false,
-  },
-  {
-    href: '/#resources',
-    label: 'Resources',
-    isActive: false,
-  },
-  {
-    href: '/discussions',
-    label: 'Discussions',
-    isActive: currentPath === '/discussions',
+    isActive: currentPath === '/inputs',
   },
 ] as const;
 ---
@@ -42,22 +37,36 @@ const navLinks = [
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      name="description"
-      content="Interactive napkin math for AI training-data value, compensation benchmarks, and distribution scenarios."
-    />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#2b4c6f" />
     {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
     {!allowIndexing && <meta name="robots" content="noindex, nofollow" />}
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    {canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
+    {socialImageUrl && <meta property="og:image" content={socialImageUrl} />}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    {socialImageUrl && <meta name="twitter:image" content={socialImageUrl} />}
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title}</title>
   </head>
   <body>
-    <nav class="navbar">
+    <a class="skip-link" href="#site-main">Skip to main content</a>
+    <nav class="navbar" aria-label="Primary">
       <a class="navbar-brand" href="/">Exploring AI: Data Napkin Math</a>
       <ul class="navbar-nav">
         {navLinks.map((link) => (
           <li>
-            <a class:list={['nav-link', link.isActive && 'nav-link-active']} href={link.href}>
+            <a
+              class:list={['nav-link', link.isActive && 'nav-link-active']}
+              aria-current={link.isActive ? 'page' : undefined}
+              href={link.href}
+            >
               {link.label}
             </a>
           </li>
@@ -66,6 +75,25 @@ const navLinks = [
       </ul>
     </nav>
     <slot />
+    <footer class="site-footer">
+      <div class="site-footer-inner">
+        <div class="site-footer-copy">
+          <strong>Exploring AI: Data Napkin Math</strong>
+          <p>Transparent, editable scenarios for public debates about AI value, benchmarks, and distribution.</p>
+        </div>
+
+        <nav class="site-footer-links" aria-label="Footer">
+          <a href="/scenarios">Scenarios</a>
+          <a href="/inputs">Inputs Library</a>
+          <a href="https://github.com/nickmvincent/exploringai" target="_blank" rel="noreferrer">GitHub</a>
+          <a href="https://github.com/nickmvincent/exploringai/issues" target="_blank" rel="noreferrer">Report an issue</a>
+        </nav>
+
+        <p class="site-footer-note">
+          Shared inputs carry source notes and review context, and build checks verify the citation fields used by the public scenarios.
+        </p>
+      </div>
+    </footer>
   </body>
 </html>
 

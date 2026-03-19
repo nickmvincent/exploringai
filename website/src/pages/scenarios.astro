@@ -1,0 +1,23 @@
+---
+import NapkinApp from '../components/NapkinApp.vue';
+import Layout from '../layouts/Layout.astro';
+import { loadNapkinData } from '../lib/napkin-data';
+
+const { inputs, scenarios } = await loadNapkinData();
+---
+
+<Layout
+  title="Scenarios - Exploring AI: Data Napkin Math"
+  description="Work through public AI distribution, dataset, and evaluation scenarios with editable shared inputs and source-backed assumptions."
+>
+  <NapkinApp
+    client:load
+    initialInputs={inputs}
+    initialScenarios={scenarios}
+    showInputLibrary={false}
+    showAbout={false}
+    pageEyebrow="Full page scenarios"
+    pageTitle="Scenarios"
+    pageDescription="Start with a concrete public example, adjust the shared assumptions directly, and see how payouts, dataset costs, or benchmark estimates change."
+  />
+</Layout>
