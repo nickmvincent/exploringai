@@ -1,5 +1,5 @@
 ---
-const targetPath = '/scenarios';
+const targetPath = '/';
 ---
 
 <!doctype html>
@@ -7,12 +7,12 @@ const targetPath = '/scenarios';
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Redirecting to Scenarios</title>
+    <title>Redirecting to Calculator</title>
     <meta name="robots" content="noindex, nofollow" />
     <link rel="canonical" href={targetPath} />
     <meta http-equiv="refresh" content={`0;url=${targetPath}`} />
     <script is:inline>
-      const target = new URL('/scenarios', window.location.origin);
+      const target = new URL('/', window.location.origin);
       target.search = window.location.search;
       target.hash = window.location.hash;
       window.location.replace(target.toString());
@@ -60,10 +60,10 @@ const targetPath = '/scenarios';
   </head>
   <body>
     <main>
-      <h1>Redirecting to Scenarios</h1>
+      <h1>Redirecting to Calculator</h1>
       <p>
-        The calculator now lives on the Scenarios page.
-        <a href={targetPath}>Continue to Scenarios</a>.
+        The calculator now lives on the home page.
+        <a href={targetPath}>Continue to the calculator</a>.
       </p>
     </main>
   </body>

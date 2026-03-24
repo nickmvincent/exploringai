@@ -16,18 +16,18 @@ const currentPath = Astro.url.pathname;
 const navLinks = [
   {
     href: '/',
-    label: 'Home',
+    label: 'Calculator',
     isActive: currentPath === '/',
   },
   {
-    href: '/scenarios',
-    label: 'Scenarios',
-    isActive: currentPath === '/scenarios',
+    href: '/inputs',
+    label: 'Inputs Library',
+    isActive: currentPath === '/inputs',
   },
   {
-    href: '/inputs',
-    label: 'Inputs',
-    isActive: currentPath === '/inputs',
+    href: '/resources',
+    label: 'Resources',
+    isActive: currentPath === '/resources',
   },
 ] as const;
 ---
@@ -71,7 +71,11 @@ const navLinks = [
             </a>
           </li>
         ))}
-        <li><a class="nav-link" href="https://github.com/nickmvincent/exploringai" target="_blank" rel="noreferrer">GitHub</a></li>
+        <li>
+          <a class="nav-link" href="https://github.com/nickmvincent/exploringai" target="_blank" rel="noreferrer">
+            Discussions
+          </a>
+        </li>
       </ul>
     </nav>
     <slot />
@@ -83,8 +87,10 @@ const navLinks = [
         </div>
 
         <nav class="site-footer-links" aria-label="Footer">
-          <a href="/scenarios">Scenarios</a>
+          <a href="/">Calculator</a>
           <a href="/inputs">Inputs Library</a>
+          <a href="/resources">Resources</a>
+          <a href="https://github.com/nickmvincent/exploringai" target="_blank" rel="noreferrer">Discussions</a>
           <a href="https://github.com/nickmvincent/exploringai" target="_blank" rel="noreferrer">GitHub</a>
           <a href="https://github.com/nickmvincent/exploringai/issues" target="_blank" rel="noreferrer">Report an issue</a>
         </nav>

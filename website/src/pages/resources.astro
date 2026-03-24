@@ -1,0 +1,427 @@
+---
+import { getCollection, render } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+
+const publicOnly = <T extends { data: { visibility?: string | null } }>(entry: T) =>
+  !entry.data.visibility || entry.data.visibility === 'public';
+const bySortOrder = <T extends { data: { sort_order?: number | null; title: string } }>(a: T, b: T) => {
+  const orderA = a.data.sort_order ?? Number.MAX_SAFE_INTEGER;
+  const orderB = b.data.sort_order ?? Number.MAX_SAFE_INTEGER;
+  if (orderA !== orderB) return orderA - orderB;
+  return a.data.title.localeCompare(b.data.title);
+};
+
+const essayEntries = (await getCollection('blogs'))
+  .filter(publicOnly)
+  .sort(bySortOrder);
+const askEntries = (await getCollection('asks'))
+  .filter(publicOnly)
+  .sort(bySortOrder);
+const keyPaperEntries = (await getCollection('keyPapers'))
+  .filter(publicOnly)
+  .sort(bySortOrder);
+
+const essays = await Promise.all(
+  essayEntries.map(async (entry) => {
+    const { Content } = await render(entry);
+    return { entry, Content };
+  })
+);
+
+const asks = await Promise.all(
+  askEntries.map(async (entry) => {
+    const { Content } = await render(entry);
+    return { entry, Content };
+  })
+);
+
+const keyPaperKindLabels: Record<string, string> = {
+  tracker: 'Trackers and live references',
+  position: 'Position papers',
+  policy: 'Policy and legal analysis',
+  empirical: 'Empirical work',
+  legal: 'Primary-source filings',
+};
+
+const groupedExternalResources = Object.entries(
+  keyPaperEntries.reduce(
+    (groups, entry) => {
+      if (!groups[entry.data.kind]) {
+        groups[entry.data.kind] = [];
+      }
+
+      groups[entry.data.kind].push(entry);
+      return groups;
+    },
+    {} as Record<string, typeof keyPaperEntries>
+  )
+).sort(([kindA], [kindB]) => {
+  const order = ['tracker', 'position', 'policy', 'empirical', 'legal'];
+  return order.indexOf(kindA) - order.indexOf(kindB);
+});
+
+const statusLabels: Record<string, string> = {
+  published: 'Published',
+  in_progress: 'In progress',
+  draft: 'Draft',
+};
+---
+
+<Layout
+  title="Resources - Exploring AI: Data Napkin Math"
+  description="Project essays, working notes, concrete asks, and the external papers and filings behind the calculator."
+>
+  <main id="site-main" class="resources-page">
+    <header class="resources-hero">
+      <p class="eyebrow">Resources</p>
+      <h1>Project notes first, source material underneath.</h1>
+      <p>
+        This page keeps our own essays and asks near the top, then collects the external papers,
+        trackers, and filings that anchor the calculator’s inputs and arguments.
+      </p>
+    </header>
+
+    <section class="resource-section" aria-labelledby="essays-heading">
+      <div class="resource-section-header">
+        <div>
+          <p class="resource-kicker">Our writing</p>
+          <h2 id="essays-heading">Essays and working notes</h2>
+        </div>
+        <p>Interpretive notes, open questions, and longer-form walkthroughs connected to the calculator.</p>
+      </div>
+
+      {essays.length ? (
+        <div class="essay-list">
+          {essays.map(({ entry, Content }) => (
+            <article class="essay-card">
+              <div class="essay-card-header">
+                <div>
+                  <div class="essay-meta-row">
+                    <span class="resource-status">{statusLabels[entry.data.status] || entry.data.status}</span>
+                    {entry.data.related_scenario_ids?.[0] && (
+                      <a class="resource-link-chip" href={`/?scenario=${entry.data.related_scenario_ids[0]}`}>
+                        Open related scenario
+                      </a>
+                    )}
+                  </div>
+                  <h3>{entry.data.title}</h3>
+                </div>
+                <p class="essay-excerpt">{entry.data.excerpt}</p>
+              </div>
+              <div class="essay-body">
+                <Content />
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div class="resource-empty">No public essays are published yet.</div>
+      )}
+    </section>
+
+    <section class="resource-section" aria-labelledby="asks-heading">
+      <div class="resource-section-header">
+        <div>
+          <p class="resource-kicker">Project asks</p>
+          <h2 id="asks-heading">What we want made legible</h2>
+        </div>
+        <p>Short, concrete asks that would make these estimates easier to ground in public evidence.</p>
+      </div>
+
+      <div class="ask-grid">
+        {asks.map(({ entry, Content }) => (
+          <article class="ask-card">
+            <h3>{entry.data.title}</h3>
+            <div class="ask-body">
+              <Content />
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="resource-section resource-section-external" aria-labelledby="external-heading">
+      <div class="resource-section-header">
+        <div>
+          <p class="resource-kicker">External sources</p>
+          <h2 id="external-heading">Papers, trackers, and filings</h2>
+        </div>
+        <p>Public sources that matter for the shared inputs, the calculator scenarios, or the surrounding policy argument.</p>
+      </div>
+
+      <div class="external-group-stack">
+        {groupedExternalResources.map(([kind, entries]) => (
+          <section class="external-group">
+            <div class="external-group-header">
+              <h3>{keyPaperKindLabels[kind] || kind}</h3>
+              <span>{entries.length} references</span>
+            </div>
+
+            <div class="external-grid">
+              {entries.map((entry) => (
+                <article class="external-card">
+                  <div class="external-card-header">
+                    <div>
+                      <p class="external-anchor">{entry.data.anchor}</p>
+                      <h4>{entry.data.title}</h4>
+                    </div>
+                    {entry.data.source_url && (
+                      <a class="resource-link-chip" href={entry.data.source_url} target="_blank" rel="noreferrer">
+                        Open source
+                      </a>
+                    )}
+                  </div>
+
+                  <p class="external-relevance">{entry.data.relevance}</p>
+
+                  {entry.data.key_inputs?.length ? (
+                    <ul class="external-input-list">
+                      {entry.data.key_inputs.map((input) => <li>{input}</li>)}
+                    </ul>
+                  ) : null}
+
+                  {entry.data.links?.length ? (
+                    <div class="external-link-row">
+                      {entry.data.links.map((link) => (
+                        <a class="resource-link-chip" href={link.href} target="_blank" rel="noreferrer">
+                          {link.label}
+                        </a>
+                      ))}
+                    </div>
+                  ) : null}
+                </article>
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+    </section>
+  </main>
+</Layout>
+
+<style>
+  .resources-page {
+    width: 100%;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  .resources-hero,
+  .resource-section,
+  .resource-empty {
+    border: 1px solid rgba(216, 222, 230, 0.92);
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.84);
+    box-shadow: 0 16px 32px rgba(31, 39, 51, 0.08);
+  }
+
+  .resources-hero {
+    padding: 2rem;
+    background:
+      radial-gradient(circle at 12% 14%, rgba(255, 255, 255, 0.88), transparent 36%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(247, 249, 252, 0.94)),
+      rgba(255, 255, 255, 0.88);
+  }
+
+  .resources-hero h1 {
+    margin-bottom: 0.8rem;
+    color: var(--primary-color);
+    font-size: clamp(2.4rem, 5vw, 3.8rem);
+    line-height: 1.04;
+  }
+
+  .resources-hero p:last-child,
+  .resource-section-header p,
+  .essay-excerpt,
+  .external-relevance,
+  .resource-empty {
+    color: var(--ink-soft);
+  }
+
+  .resource-section {
+    margin-top: 1.4rem;
+    padding: 1.4rem;
+  }
+
+  .resource-section-header {
+    display: grid;
+    grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.15rem;
+    align-items: end;
+  }
+
+  .resource-section-header h2,
+  .essay-card h3,
+  .ask-card h3,
+  .external-card h4 {
+    margin-bottom: 0;
+  }
+
+  .resource-kicker,
+  .external-anchor {
+    margin-bottom: 0.35rem;
+    color: var(--dark-gray);
+    font-family: var(--font-ui);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .essay-list,
+  .external-group-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .essay-card,
+  .ask-card,
+  .external-card {
+    border: 1px solid rgba(216, 222, 230, 0.92);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.86);
+    box-shadow: 0 12px 24px rgba(31, 39, 51, 0.06);
+  }
+
+  .essay-card,
+  .ask-card,
+  .external-card,
+  .external-group {
+    overflow: hidden;
+  }
+
+  .essay-card {
+    padding: 1.25rem;
+  }
+
+  .essay-card-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
+    gap: 1rem;
+    align-items: start;
+    margin-bottom: 1rem;
+  }
+
+  .essay-meta-row,
+  .external-link-row {
+    display: flex;
+    gap: 0.55rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.55rem;
+  }
+
+  .resource-status,
+  .resource-link-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2rem;
+    padding: 0.35rem 0.72rem;
+    border-radius: 999px;
+    font-family: var(--font-ui);
+    font-size: 0.9rem;
+    text-decoration: none;
+  }
+
+  .resource-status {
+    color: var(--primary-color);
+    background: rgba(43, 76, 111, 0.08);
+  }
+
+  .resource-link-chip {
+    color: var(--ink-soft);
+    border: 1px solid rgba(216, 222, 230, 0.92);
+    background: rgba(255, 255, 255, 0.92);
+  }
+
+  .resource-link-chip:hover {
+    color: var(--primary-color);
+    border-color: rgba(43, 76, 111, 0.24);
+  }
+
+  .essay-body,
+  .ask-body {
+    color: var(--black);
+  }
+
+  .essay-body :global(p:last-child),
+  .ask-body :global(p:last-child) {
+    margin-bottom: 0;
+  }
+
+  .ask-grid,
+  .external-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+
+  .ask-card,
+  .external-card {
+    padding: 1.1rem;
+  }
+
+  .external-group {
+    border: 1px solid rgba(216, 222, 230, 0.92);
+    border-radius: 22px;
+    background: rgba(247, 249, 252, 0.62);
+    padding: 1rem;
+  }
+
+  .external-group-header,
+  .external-card-header {
+    display: flex;
+    gap: 0.9rem;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .external-group-header {
+    margin-bottom: 0.9rem;
+  }
+
+  .external-group-header span {
+    color: var(--dark-gray);
+    font-family: var(--font-ui);
+    font-size: 0.92rem;
+  }
+
+  .external-input-list {
+    margin: 0.9rem 0 0;
+    padding-left: 1.15rem;
+    color: var(--ink-soft);
+  }
+
+  .external-input-list li + li {
+    margin-top: 0.35rem;
+  }
+
+  .resource-empty {
+    padding: 1.25rem;
+    text-align: center;
+  }
+
+  @media (max-width: 860px) {
+    .resources-page {
+      padding: 1.5rem 1rem 3rem;
+    }
+
+    .resource-section-header,
+    .essay-card-header {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .resources-hero,
+    .resource-section,
+    .essay-card,
+    .ask-card,
+    .external-card,
+    .resource-empty {
+      border-radius: 20px;
+    }
+  }
+</style>

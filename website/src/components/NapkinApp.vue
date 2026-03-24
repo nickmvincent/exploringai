@@ -20,6 +20,7 @@ import {
 import { parseEntries, serializeEntries } from '../lib/url-state';
 
 type ViewMode = 'scenarios' | 'inputs';
+type InputCatalogView = 'spreadsheet' | 'cards';
 type FreeScenarioState = {
   title: string;
   description: string;
@@ -36,6 +37,7 @@ type GroupedInputEntry = {
 type GroupedInputSection = {
   key: string;
   chipLabel: string;
+  shortDescription: string;
   prompt: string;
   label: string;
   description: string;
@@ -114,10 +116,15 @@ function resolveRequestedView(view?: ViewMode | null): ViewMode {
   return getDefaultView();
 }
 
+function resolveRequestedInputCatalogView(view?: string | null): InputCatalogView {
+  return view === 'cards' ? 'cards' : 'spreadsheet';
+}
+
 const rightPanelOpen = ref(false);
 const selectedInputKey = ref<string | null>(null);
 const selectedScenario = ref('All');
 const activeView = ref<ViewMode>(resolveRequestedView(props.initialView));
+const inputLibraryView = ref<InputCatalogView>('spreadsheet');
 const inputSearch = ref('');
 const selectedInputFocus = ref('All');
 const selectedSourceQuality = ref('All');
@@ -337,6 +344,7 @@ const hasCustomizedState = computed(() => {
     freeScenarioHasDraft.value
   );
   const hasInputLibraryCustomizations = props.showInputLibrary && (
+    inputLibraryView.value !== 'spreadsheet' ||
     inputSearch.value.trim() ||
     selectedInputFocus.value !== 'All' ||
     selectedSourceQuality.value !== 'All' ||
@@ -716,6 +724,7 @@ function resetAllInputs() {
   });
 
   activeView.value = getDefaultView();
+  inputLibraryView.value = 'spreadsheet';
   selectedScenario.value = 'All';
   selectedInputKey.value = null;
   rightPanelOpen.value = false;
@@ -926,6 +935,18 @@ function setActiveView(view: ViewMode) {
   activeView.value = view;
 }
 
+function setInputLibraryView(view: InputCatalogView) {
+  inputLibraryView.value = view;
+}
+
+function getInputCatalogGroupId(view: InputCatalogView, groupKey: string) {
+  return `inputs-${view}-group-${groupKey}`;
+}
+
+function getInputCatalogGroupHref(groupKey: string) {
+  return `#${getInputCatalogGroupId(inputLibraryView.value, groupKey)}`;
+}
+
 function toggleCategory(category: string) {
   selectedScenario.value = category;
 }
@@ -1041,7 +1062,7 @@ async function jumpToScenario(scenarioId: string, category?: string) {
       category: category && uniqueCategories.value.includes(category) ? category : 'All',
       view: 'scenarios',
     });
-    const targetUrl = `/scenarios${targetParams.toString() ? `?${targetParams.toString()}` : ''}`;
+    const targetUrl = `/${targetParams.toString() ? `?${targetParams.toString()}` : ''}`;
     window.location.assign(targetUrl);
     return;
   }
@@ -1083,6 +1104,10 @@ function buildUrlSearchParams(options?: {
 
   if (props.showInputLibrary && inputSearch.value.trim()) {
     params.set('q', inputSearch.value.trim());
+  }
+
+  if (props.showInputLibrary && inputLibraryView.value !== 'spreadsheet') {
+    params.set('layout', inputLibraryView.value);
   }
 
   if (props.showInputLibrary && selectedInputFocus.value !== 'All') {
@@ -1173,6 +1198,9 @@ function applyUrlStateFromLocation() {
       : null;
 
     activeView.value = resolveRequestedView(params.get('view') === 'inputs' ? 'inputs' : 'scenarios');
+    inputLibraryView.value = props.showInputLibrary
+      ? resolveRequestedInputCatalogView(params.get('layout'))
+      : 'spreadsheet';
 
     const category = params.get('category');
     selectedScenario.value = props.showScenarioLibrary
@@ -1332,6 +1360,7 @@ watch(rightPanelOpen, async (isOpen) => {
 watch(
   [
     activeView,
+    inputLibraryView,
     selectedScenario,
     selectedInputKey,
     rightPanelOpen,
@@ -1487,30 +1516,6 @@ onBeforeUnmount(() => {
           </div>
 
           <div v-else-if="isInputViewVisible" class="library-toolbar">
-            <div class="input-focus-toolbar">
-              <span class="input-focus-label">Browse by question</span>
-              <div class="input-focus-chip-row">
-                <button
-                  class="input-focus-chip"
-                  :class="{ active: selectedInputFocus === 'All' }"
-                  type="button"
-                  @click="selectedInputFocus = 'All'"
-                >
-                  Show everything
-                </button>
-                <button
-                  v-for="group in inputFocusOptions"
-                  :key="group.key"
-                  class="input-focus-chip"
-                  :class="{ active: selectedInputFocus === group.key }"
-                  type="button"
-                  @click="selectedInputFocus = group.key"
-                >
-                  {{ group.prompt }}
-                </button>
-              </div>
-            </div>
-
             <label class="search-field">
               <span class="visually-hidden">Search inputs</span>
               <input
@@ -1520,6 +1525,36 @@ onBeforeUnmount(() => {
                 placeholder="Search by title, source, scenario, or variable"
               />
             </label>
+
+            <div class="view-tabs input-library-view-switch" aria-label="Inputs library view">
+              <button
+                class="view-tab"
+                :class="{ active: inputLibraryView === 'spreadsheet' }"
+                type="button"
+                @click="setInputLibraryView('spreadsheet')"
+              >
+                Spreadsheet
+              </button>
+              <button
+                class="view-tab"
+                :class="{ active: inputLibraryView === 'cards' }"
+                type="button"
+                @click="setInputLibraryView('cards')"
+              >
+                Cards
+              </button>
+            </div>
+
+            <select
+              v-model="selectedInputFocus"
+              aria-label="Filter inputs by category"
+              class="form-select form-select-sm"
+            >
+              <option value="All">All categories</option>
+              <option v-for="group in inputFocusOptions" :key="group.key" :value="group.key">
+                {{ group.label }}
+              </option>
+            </select>
 
             <select v-model="selectedInputType" aria-label="Filter inputs by type" class="form-select form-select-sm">
               <option value="All">All types</option>
@@ -1550,7 +1585,8 @@ onBeforeUnmount(() => {
 
             <p class="toolbar-note">
               Showing {{ filteredInputs.length }} of {{ sortedInputs.length }}
-              {{ pluralize(sortedInputs.length, 'input') }}.
+              {{ pluralize(sortedInputs.length, 'input') }} across
+              {{ groupedFilteredInputs.length }} {{ pluralize(groupedFilteredInputs.length, 'category') }}.
             </p>
           </div>
         </section>
@@ -1561,9 +1597,9 @@ onBeforeUnmount(() => {
           :id="getViewPanelId('scenarios')"
           :aria-hidden="!isScenarioViewVisible"
           aria-describedby="napkinMath-description"
-          :aria-labelledby="getViewTabId('scenarios')"
-          role="tabpanel"
-          tabindex="0"
+          :aria-labelledby="hasViewTabs ? getViewTabId('scenarios') : undefined"
+          :role="hasViewTabs ? 'tabpanel' : undefined"
+          :tabindex="hasViewTabs ? 0 : undefined"
         >
           <h2 class="section-title">Scenarios</h2>
           <p id="napkinMath-description" class="section-description">
@@ -1969,53 +2005,234 @@ onBeforeUnmount(() => {
           :id="getViewPanelId('inputs')"
           :aria-hidden="!isInputViewVisible"
           aria-describedby="inputLibrary-description"
-          :aria-labelledby="getViewTabId('inputs')"
-          role="tabpanel"
-          tabindex="0"
+          :aria-labelledby="hasViewTabs ? getViewTabId('inputs') : undefined"
+          :role="hasViewTabs ? 'tabpanel' : undefined"
+          :tabindex="hasViewTabs ? 0 : undefined"
         >
           <h2 class="section-title">Inputs Library</h2>
           <p id="inputLibrary-description" class="section-description">
-            Search, filter, and edit the shared assumptions. Each change immediately updates every
-            scenario that depends on that input, and the library is grouped around the kinds of
-            questions people usually start with while still linking back to the sources behind the numbers.
+            Search, filter, and edit the shared assumptions in either a spreadsheet or cards view.
+            Each input appears once inside a category, and every edit still updates the calculator results
+            anywhere that shared variable is used.
           </p>
 
-          <div v-if="groupedFilteredInputs.length" class="inputs-library-group-list">
-            <section
-              v-for="group in groupedFilteredInputs"
-              :key="group.key"
-              class="inputs-library-group"
-            >
-              <div class="inputs-library-group-header">
-                <div>
-                  <span class="scenario-input-group-kicker">{{ group.prompt }}</span>
-                  <h3>{{ group.label }}</h3>
-                </div>
-                <p>{{ group.description }}</p>
+          <div v-if="groupedFilteredInputs.length" class="input-catalog-shell">
+            <aside class="input-catalog-sidebar">
+              <div class="input-catalog-sidebar-inner">
+                <p class="eyebrow">Categories</p>
+                <h3 class="input-catalog-sidebar-title">Jump by input category</h3>
+                <p class="input-catalog-sidebar-copy">
+                  Each input appears once under its main category, with the same edit controls available
+                  in both spreadsheet and card layouts.
+                </p>
+
+                <nav class="input-catalog-nav" aria-label="Input categories">
+                  <a
+                    v-for="group in groupedFilteredInputs"
+                    :key="`jump-${group.key}`"
+                    class="input-catalog-link"
+                    :href="getInputCatalogGroupHref(group.key)"
+                  >
+                    <span class="input-catalog-link-topline">
+                      <span class="input-catalog-link-title">{{ group.label }}</span>
+                      <span class="input-catalog-link-count">{{ group.entries.length }}</span>
+                    </span>
+                    <span class="input-catalog-link-copy">{{ group.shortDescription }}</span>
+                  </a>
+                </nav>
+              </div>
+            </aside>
+
+            <div class="input-catalog-main">
+              <div v-if="inputLibraryView === 'spreadsheet'" class="input-catalog-group-stack">
+                <section
+                  v-for="group in groupedFilteredInputs"
+                  :id="getInputCatalogGroupId('spreadsheet', group.key)"
+                  :key="`spreadsheet-${group.key}`"
+                  class="inputs-library-group input-catalog-group"
+                >
+                  <div class="inputs-library-group-header">
+                    <div>
+                      <span class="scenario-input-group-kicker">{{ group.chipLabel }}</span>
+                      <h3>{{ group.label }}</h3>
+                    </div>
+                    <p>{{ group.description }}</p>
+                  </div>
+
+                  <div class="input-spreadsheet-wrap">
+                    <table class="input-spreadsheet-table">
+                      <thead>
+                        <tr>
+                          <th>Input</th>
+                          <th>Current value</th>
+                          <th>Metadata</th>
+                          <th>Source and usage</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr
+                          v-for="entry in group.entries"
+                          :key="entry.key"
+                          class="input-spreadsheet-row"
+                        >
+                          <td class="input-spreadsheet-main" data-label="Input">
+                            <div class="input-spreadsheet-titleline">
+                              <button
+                                class="input-spreadsheet-title"
+                                type="button"
+                                @click="showDetails(entry.key, $event.currentTarget as HTMLElement)"
+                              >
+                                {{ getInputTitle(entry.key, entry.input) }}
+                              </button>
+                              <span class="input-meta-chip">#{{ entry.input.importanceRank || '-' }}</span>
+                            </div>
+                            <p class="input-spreadsheet-summary">
+                              {{ entry.input.summary || entry.input.importanceReason }}
+                            </p>
+                          </td>
+
+                          <td class="input-spreadsheet-value" data-label="Current value">
+                            <div class="input-spreadsheet-value-row">
+                              <input
+                                class="form-control form-control-sm"
+                                type="number"
+                                :aria-label="`Current value for ${getInputTitle(entry.key, entry.input)}`"
+                                :value="getFieldValue(entry.key)"
+                                :step="getInputStep(entry.input)"
+                                :min="entry.input.min ?? undefined"
+                                :max="entry.input.max ?? undefined"
+                                @focus="beginEditingValue(entry.key)"
+                                @input="updateDraftValue(entry.key, ($event.target as HTMLInputElement).value)"
+                                @blur="commitDraftValue(entry.key)"
+                                @keydown="handleValueKeydown(entry.key, $event)"
+                              />
+                              <span class="input-spreadsheet-units">{{ entry.input.display_units }}</span>
+                            </div>
+                            <p v-if="getInputReadableNote(entry.key)" class="input-readable-note">
+                              {{ getInputReadableNote(entry.key) }}
+                            </p>
+                            <div class="input-spreadsheet-quick-actions">
+                              <button class="btn btn-outline-secondary btn-sm" type="button" @click="adjustValue(entry.key, 0.1)">
+                                x0.1
+                              </button>
+                              <button class="btn btn-outline-secondary btn-sm" type="button" @click="adjustValue(entry.key, 10)">
+                                x10
+                              </button>
+                              <button
+                                class="btn btn-outline-secondary btn-sm"
+                                type="button"
+                                :disabled="!isInputChanged(entry.key)"
+                                @click="resetValue(entry.key)"
+                              >
+                                Reset
+                              </button>
+                            </div>
+                          </td>
+
+                          <td class="input-spreadsheet-meta" data-label="Metadata">
+                            <div class="input-spreadsheet-chip-row">
+                              <span
+                                class="quality-pill"
+                                :data-tone="getSourceQualityTone(entry.input.sourceQuality)"
+                              >
+                                {{ formatSourceQuality(entry.input.sourceQuality) }}
+                              </span>
+                              <span v-if="entry.input.featured" class="input-meta-chip">Featured</span>
+                            </div>
+                            <div class="input-spreadsheet-copy-list">
+                              <span>{{ formatLabel(entry.input.variable_type) }}</span>
+                              <span v-if="entry.input.entity">{{ formatLabel(entry.input.entity) }}</span>
+                              <span v-if="formatConfidence(entry.input.confidence)">
+                                Confidence {{ formatConfidence(entry.input.confidence) }}
+                              </span>
+                            </div>
+                          </td>
+
+                          <td class="input-spreadsheet-source" data-label="Source and usage">
+                            <div class="input-spreadsheet-source-row">
+                              <strong>{{ entry.input.sourceName || 'Source note' }}</strong>
+                              <span v-if="entry.input.lastReviewed">Reviewed {{ entry.input.lastReviewed }}</span>
+                            </div>
+                            <p v-if="entry.input.sourceNote" class="input-spreadsheet-summary">
+                              {{ entry.input.sourceNote }}
+                            </p>
+                            <div class="input-spreadsheet-link-row">
+                              <button
+                                class="btn btn-outline-primary btn-sm"
+                                type="button"
+                                @click="showDetails(entry.key, $event.currentTarget as HTMLElement)"
+                              >
+                                Inspect
+                              </button>
+                              <a
+                                v-if="entry.input.source_url || entry.input.sourceLocatorUrl"
+                                class="btn btn-outline-secondary btn-sm"
+                                :href="entry.input.sourceLocatorUrl || entry.input.source_url"
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                Source
+                              </a>
+                            </div>
+                            <div v-if="entry.input.usedIn?.length" class="input-spreadsheet-usage">
+                              <span class="usage-label">Used in</span>
+                              <button
+                                v-for="scenario in entry.input.usedIn"
+                                :key="scenario.id"
+                                class="scenario-link-chip"
+                                type="button"
+                                @click="jumpToScenario(scenario.id, scenario.category)"
+                              >
+                                {{ scenario.title }}
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
               </div>
 
-              <div class="inputs-library">
-                <InputLibraryCard
-                  v-for="entry in group.entries"
-                  :key="entry.key"
-                  :changed="isInputChanged(entry.key)"
-                  :confidence-label="formatConfidence(entry.input.confidence)"
-                  :entry="entry"
-                  :field-value="getFieldValue(entry.key)"
-                  :readable-note="getInputReadableNote(entry.key)"
-                  :source-quality-label="formatSourceQuality(entry.input.sourceQuality)"
-                  :step="getInputStep(entry.input)"
-                  @adjust="adjustValue(entry.key, $event)"
-                  @begin-edit="beginEditingValue(entry.key)"
-                  @commit="commitDraftValue(entry.key)"
-                  @inspect="showDetails(entry.key, $event)"
-                  @jump="(scenarioId, category) => jumpToScenario(scenarioId, category)"
-                  @keydown="handleValueKeydown(entry.key, $event)"
-                  @reset="resetValue(entry.key)"
-                  @update-draft="updateDraftValue(entry.key, $event)"
-                />
+              <div v-else class="input-catalog-group-stack">
+                <section
+                  v-for="group in groupedFilteredInputs"
+                  :id="getInputCatalogGroupId('cards', group.key)"
+                  :key="`cards-${group.key}`"
+                  class="inputs-library-group input-catalog-group"
+                >
+                  <div class="inputs-library-group-header">
+                    <div>
+                      <span class="scenario-input-group-kicker">{{ group.chipLabel }}</span>
+                      <h3>{{ group.label }}</h3>
+                    </div>
+                    <p>{{ group.description }}</p>
+                  </div>
+
+                  <div class="inputs-library">
+                    <InputLibraryCard
+                      v-for="entry in group.entries"
+                      :key="entry.key"
+                      :changed="isInputChanged(entry.key)"
+                      :confidence-label="formatConfidence(entry.input.confidence)"
+                      :entry="entry"
+                      :field-value="getFieldValue(entry.key)"
+                      :readable-note="getInputReadableNote(entry.key)"
+                      :source-quality-label="formatSourceQuality(entry.input.sourceQuality)"
+                      :step="getInputStep(entry.input)"
+                      @adjust="adjustValue(entry.key, $event)"
+                      @begin-edit="beginEditingValue(entry.key)"
+                      @commit="commitDraftValue(entry.key)"
+                      @inspect="showDetails(entry.key, $event)"
+                      @jump="(scenarioId, category) => jumpToScenario(scenarioId, category)"
+                      @keydown="handleValueKeydown(entry.key, $event)"
+                      @reset="resetValue(entry.key)"
+                      @update-draft="updateDraftValue(entry.key, $event)"
+                    />
+                  </div>
+                </section>
               </div>
-            </section>
+            </div>
           </div>
 
           <div v-else class="empty-state">
@@ -2037,8 +2254,11 @@ onBeforeUnmount(() => {
                 small set of shared inputs.
               </p>
               <p>
-                To participate in the discussion about better defaults or additional scenarios, visit the
-                <a href="https://github.com/nickmvincent/exploringai" target="_blank" rel="noreferrer">GitHub repository</a>.
+                The
+                <a href="/resources">resources page</a>
+                keeps our essays and external references in one place, and the
+                <a href="https://github.com/nickmvincent/exploringai" target="_blank" rel="noreferrer">GitHub repository</a>
+                is where ongoing updates live.
               </p>
             </div>
           </details>
