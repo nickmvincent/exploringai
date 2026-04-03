@@ -7,6 +7,10 @@ export function getEntryStem(entryId: string) {
   return segments[segments.length - 1] || entryId;
 }
 
+function getUniqueInputVariables(inputVariables: string[]) {
+  return [...new Set(inputVariables.filter(Boolean))];
+}
+
 export async function loadNapkinData() {
   const inputEntries = await getCollection('inputs');
   const scenarioEntries = await getCollection('scenarios');
@@ -15,18 +19,22 @@ export async function loadNapkinData() {
     id: getEntryStem(entry.id),
     title: entry.data.title,
     category: entry.data.category,
-    inputVariables: entry.data.input_variables?.length ? entry.data.input_variables : extractInputTokens(entry.data.formula),
+    inputVariables: getUniqueInputVariables(
+      entry.data.input_variables?.length ? entry.data.input_variables : extractInputTokens(entry.data.formula),
+    ),
   }));
 
   const inputUsage = new Map<string, { id: string; title: string; category: string }[]>();
   for (const scenario of scenarioReferences) {
     scenario.inputVariables.forEach((inputKey) => {
       const existing = inputUsage.get(inputKey) ?? [];
-      existing.push({
-        id: scenario.id,
-        title: scenario.title,
-        category: scenario.category,
-      });
+      if (!existing.some((usage) => usage.id === scenario.id)) {
+        existing.push({
+          id: scenario.id,
+          title: scenario.title,
+          category: scenario.category,
+        });
+      }
       inputUsage.set(inputKey, existing);
     });
   }
@@ -97,7 +105,9 @@ export async function loadNapkinData() {
 
   const scenarios: Scenario[] = scenarioEntries.map((entry) => {
     const { data } = entry;
-    const inputVariables = data.input_variables?.length ? data.input_variables : extractInputTokens(data.formula);
+    const inputVariables = getUniqueInputVariables(
+      data.input_variables?.length ? data.input_variables : extractInputTokens(data.formula),
+    );
 
     return {
       id: getEntryStem(entry.id),

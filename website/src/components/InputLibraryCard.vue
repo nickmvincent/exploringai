@@ -19,6 +19,7 @@ type InputLibraryEntry = {
 const props = defineProps<{
   entry: InputLibraryEntry;
   changed: boolean;
+  compact?: boolean;
   fieldValue: string;
   step?: number;
   readableNote?: string | null;
@@ -55,7 +56,7 @@ function getInspectValueLabel(): string {
 </script>
 
 <template>
-  <article class="input-library-card" :class="{ featured: entry.input.featured }">
+  <article class="input-library-card" :class="{ compact: props.compact }">
     <div class="input-library-header">
       <div class="input-rank">
         <span class="input-rank-number">#{{ entry.input.importanceRank || '-' }}</span>
@@ -63,10 +64,8 @@ function getInspectValueLabel(): string {
       </div>
 
       <div class="input-library-badges">
-        <span class="input-quality-badge">
-          {{ sourceQualityLabel }}
-        </span>
-        <span v-if="entry.input.featured" class="featured-badge">Featured</span>
+        <span class="input-quality-badge">{{ sourceQualityLabel }}</span>
+        <span v-if="entry.input.featured" class="input-quality-badge input-quality-badge-muted">Featured</span>
       </div>
     </div>
 
@@ -76,12 +75,12 @@ function getInspectValueLabel(): string {
     </p>
 
     <InputComparisonFigure
-      v-if="entry.input.comparisonImage"
+      v-if="!props.compact && entry.input.comparisonImage"
       :comparison-image="entry.input.comparisonImage"
     />
 
     <InputReferenceCharts
-      v-if="entry.input.referenceCharts?.length"
+      v-if="!props.compact && entry.input.referenceCharts?.length"
       :reference-charts="entry.input.referenceCharts"
     />
 
@@ -116,6 +115,7 @@ function getInspectValueLabel(): string {
 
     <div class="input-library-quick-actions">
       <button
+        v-if="!props.compact"
         class="btn btn-outline-secondary btn-sm"
         type="button"
         :aria-label="getAdjustValueLabel(0.1)"
@@ -124,6 +124,7 @@ function getInspectValueLabel(): string {
         x0.1
       </button>
       <button
+        v-if="!props.compact"
         class="btn btn-outline-secondary btn-sm"
         type="button"
         :aria-label="getAdjustValueLabel(10)"
@@ -167,20 +168,20 @@ function getInspectValueLabel(): string {
       <span v-if="confidenceLabel">{{ confidenceLabel }}</span>
     </div>
 
-    <p v-if="entry.input.importanceReason" class="input-library-reason">
+    <p v-if="!props.compact && entry.input.importanceReason" class="input-library-reason">
       <strong>Why it matters:</strong> {{ entry.input.importanceReason }}
     </p>
 
-    <div class="input-library-source">
+    <div v-if="!props.compact" class="input-library-source">
       <strong>{{ entry.input.sourceName || 'Source status' }}</strong>
       <span v-if="entry.input.lastReviewed">Reviewed {{ entry.input.lastReviewed }}</span>
     </div>
 
-    <p v-if="entry.input.sourceNote" class="input-library-note">
+    <p v-if="!props.compact && entry.input.sourceNote" class="input-library-note">
       {{ entry.input.sourceNote }}
     </p>
 
-    <div v-if="entry.input.usedIn?.length" class="input-library-usage">
+    <div v-if="!props.compact && entry.input.usedIn?.length" class="input-library-usage">
       <span class="usage-label">Used in</span>
       <button
         v-for="scenario in entry.input.usedIn"
@@ -211,10 +212,12 @@ function getInspectValueLabel(): string {
   border-color: rgba(43, 76, 111, 0.22);
 }
 
-.input-library-card.featured {
+.input-library-card.compact {
+  gap: 0.8rem;
+  padding: 0.95rem;
   background:
-    linear-gradient(180deg, rgba(43, 76, 111, 0.06), rgba(255, 255, 255, 0)),
-    rgba(255, 255, 255, 0.9);
+    linear-gradient(180deg, rgba(43, 76, 111, 0.04), rgba(255, 255, 255, 0)),
+    rgba(255, 255, 255, 0.92);
 }
 
 .input-library-header {
@@ -222,6 +225,12 @@ function getInspectValueLabel(): string {
   align-items: flex-start;
   justify-content: space-between;
   gap: 0.9rem;
+}
+
+.input-library-card h3,
+.input-library-summary,
+.input-library-note {
+  margin: 0;
 }
 
 .input-rank {
@@ -251,32 +260,29 @@ function getInspectValueLabel(): string {
   flex-wrap: wrap;
 }
 
-.input-quality-badge,
-.featured-badge {
+.input-quality-badge {
   display: inline-flex;
   align-items: center;
-  min-height: 1.8rem;
-  padding: 0.2rem 0.58rem;
-  border-radius: 999px;
-  font-size: 0.8rem;
+  font-size: 0.82rem;
+  font-weight: 600;
   white-space: nowrap;
-}
-
-.input-quality-badge {
   color: var(--ink-soft);
-  background: rgba(255, 255, 255, 0.94);
-  border: 1px solid rgba(216, 222, 230, 0.92);
 }
 
-.featured-badge {
-  color: var(--primary-color);
-  background: rgba(43, 76, 111, 0.08);
+.input-quality-badge-muted {
+  color: var(--dark-gray);
 }
 
 .input-library-value-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 0.45rem;
+  padding: 0.82rem 0.88rem;
+  border: 1px solid rgba(216, 222, 230, 0.92);
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(43, 76, 111, 0.05), rgba(255, 255, 255, 0.96)),
+    rgba(255, 255, 255, 0.96);
 }
 
 .input-library-units,
@@ -301,13 +307,14 @@ function getInspectValueLabel(): string {
 .input-library-meta span {
   display: inline-flex;
   align-items: center;
-  min-height: 2rem;
-  padding: 0.28rem 0.62rem;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(216, 222, 230, 0.92);
   color: var(--dark-gray);
   font-size: 0.85rem;
+}
+
+.input-library-meta span + span::before,
+.input-library-badges span + span::before {
+  content: ' / ';
+  color: rgba(31, 39, 51, 0.32);
 }
 
 .input-library-reason {
@@ -318,6 +325,7 @@ function getInspectValueLabel(): string {
   display: flex;
   justify-content: space-between;
   gap: 0.8rem;
+  padding-top: 0.2rem;
   color: var(--dark-gray);
   font-size: 0.92rem;
   flex-wrap: wrap;

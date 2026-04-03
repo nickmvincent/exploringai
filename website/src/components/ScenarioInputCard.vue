@@ -163,23 +163,21 @@ function getInspectValueLabel(): string {
 <style scoped>
 .scenario-input-card {
   padding: 1rem;
-  border: 1px solid rgba(216, 222, 230, 0.92);
-  border-radius: 18px;
+  border: 1px solid rgba(31, 39, 51, 0.12);
+  border-radius: 2px;
   background: rgba(255, 255, 255, 0.84);
   transition:
-    transform 0.18s ease,
     border-color 0.18s ease,
     box-shadow 0.18s ease;
 }
 
 .scenario-input-card:hover {
-  transform: translateY(-2px);
-  border-color: rgba(43, 76, 111, 0.22);
+  border-color: rgba(31, 39, 51, 0.22);
 }
 
 .scenario-input-card.changed {
-  border-color: rgba(43, 76, 111, 0.28);
-  box-shadow: 0 12px 24px rgba(43, 76, 111, 0.1);
+  border-color: rgba(31, 39, 51, 0.28);
+  box-shadow: none;
 }
 
 .scenario-input-header {
@@ -206,20 +204,22 @@ function getInspectValueLabel(): string {
   align-items: center;
   min-height: 1.8rem;
   padding: 0.2rem 0.58rem;
-  border-radius: 999px;
-  font-size: 0.8rem;
+  border-radius: 2px;
+  font-size: 0.74rem;
   white-space: nowrap;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .input-quality-badge {
   color: var(--ink-soft);
-  background: rgba(255, 255, 255, 0.94);
-  border: 1px solid rgba(216, 222, 230, 0.92);
+  background: rgba(251, 249, 243, 0.94);
+  border: 1px solid rgba(31, 39, 51, 0.14);
 }
 
 .changed-badge {
-  color: var(--white);
-  background: var(--dark-gray);
+  color: var(--black);
+  background: rgba(31, 39, 51, 0.08);
 }
 
 .scenario-input-label {
