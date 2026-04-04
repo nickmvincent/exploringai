@@ -262,11 +262,13 @@ const filteredScenarios = computed(() => {
 const scenarioToolbarSummary = computed(() => {
   const filteredCount = filteredScenarios.value.length;
   const totalCount = scenariosData.value.length;
-  const categorySummary = selectedScenario.value === 'All'
-    ? 'across all categories'
-    : `in ${selectedScenario.value}`;
+  const totalLabel = `${totalCount} ${pluralize(totalCount, 'scenario')}`;
 
-  return `Showing ${filteredCount} of ${totalCount} ${pluralize(totalCount, 'scenario')} ${categorySummary}.`;
+  if (selectedScenario.value === 'All') {
+    return totalLabel;
+  }
+
+  return `${filteredCount} of ${totalLabel} in ${selectedScenario.value}`;
 });
 
 const sortedInputs = computed(() => {
@@ -1758,6 +1760,26 @@ onBeforeUnmount(() => {
               </div>
             </div>
 
+            <div v-if="isScenarioViewVisible" class="page-toolbar-group page-toolbar-group-fill">
+              <p class="page-toolbar-label">Scenario categories</p>
+              <div class="chip-row" role="group" aria-label="Filter scenarios by category">
+                <button
+                  v-for="category in scenarioCategoryOptions"
+                  :key="category.value"
+                  class="category-chip"
+                  :class="{ active: selectedScenario === category.value }"
+                  :aria-label="`${category.label}: ${category.count} ${pluralize(category.count, 'scenario')}`"
+                  :aria-pressed="selectedScenario === category.value"
+                  type="button"
+                  @click="toggleCategory(category.value)"
+                >
+                  <span>{{ category.label }}</span>
+                  <span class="page-chip-count" aria-hidden="true">{{ category.count }}</span>
+                </button>
+              </div>
+              <p class="toolbar-note">{{ scenarioToolbarSummary }}</p>
+            </div>
+
             <div class="page-toolbar-group page-toolbar-group-actions">
               <p class="page-toolbar-label">Actions</p>
               <div class="toolbar-actions">
@@ -1794,31 +1816,6 @@ onBeforeUnmount(() => {
                   @click="resetAllInputs"
                 >
                   Reset all changes
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div v-if="isScenarioViewVisible" class="page-toolbar-bottom">
-            <div class="page-toolbar-group page-toolbar-group-fill">
-              <div class="page-toolbar-heading">
-                <p class="page-toolbar-label">Scenario categories</p>
-                <p class="toolbar-note">{{ scenarioToolbarSummary }}</p>
-              </div>
-
-              <div class="chip-row" role="group" aria-label="Filter scenarios by category">
-                <button
-                  v-for="category in scenarioCategoryOptions"
-                  :key="category.value"
-                  class="category-chip"
-                  :class="{ active: selectedScenario === category.value }"
-                  :aria-label="`${category.label}: ${category.count} ${pluralize(category.count, 'scenario')}`"
-                  :aria-pressed="selectedScenario === category.value"
-                  type="button"
-                  @click="toggleCategory(category.value)"
-                >
-                  <span>{{ category.label }}</span>
-                  <span class="page-chip-count" aria-hidden="true">{{ category.count }}</span>
                 </button>
               </div>
             </div>

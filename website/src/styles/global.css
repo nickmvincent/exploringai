@@ -467,19 +467,19 @@ input[type="number"] {
 
 .page-toolbar-group {
   display: flex;
-  flex-direction: column;
-  gap: 0.42rem;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
   min-width: 0;
 }
 
 .page-toolbar-group-actions {
-  flex: 1 1 420px;
-  align-items: flex-end;
+  flex: 0 1 auto;
   margin-left: auto;
 }
 
 .page-toolbar-group-fill {
-  flex: 1 1 100%;
+  flex: 1 1 420px;
 }
 
 .page-toolbar-label {
@@ -490,14 +490,7 @@ input[type="number"] {
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-}
-
-.page-toolbar-heading {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.75rem;
-  flex-wrap: wrap;
+  white-space: nowrap;
 }
 
 .page-toolbar-top {
@@ -506,13 +499,6 @@ input[type="number"] {
 
 .page-toolbar-top.single-view {
   justify-content: flex-start;
-}
-
-.page-toolbar-bottom {
-  justify-content: flex-start;
-  margin-top: 0;
-  padding-top: 0.95rem;
-  border-top: 1px solid rgba(31, 39, 51, 0.14);
 }
 
 .chip-row {
@@ -1990,7 +1976,6 @@ input[type="number"] {
   }
 
   .page-toolbar-top,
-  .page-toolbar-bottom,
   .library-toolbar {
     align-items: stretch;
   }
@@ -1998,12 +1983,9 @@ input[type="number"] {
   .page-toolbar-group,
   .page-toolbar-group-actions {
     width: 100%;
+    flex-direction: column;
     align-items: stretch;
     margin-left: 0;
-  }
-
-  .page-toolbar-heading {
-    align-items: flex-start;
   }
 
   .scenario-card-header-curated {
