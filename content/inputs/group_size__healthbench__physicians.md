@@ -10,10 +10,10 @@ units: people
 source_url: 'https://openai.com/index/healthbench/'
 summary: "Number of physicians who partnered with OpenAI to build HealthBench."
 sourceName: "OpenAI HealthBench post"
-sourceNote: "OpenAI says HealthBench was built in partnership with 262 physicians who practiced in 60 countries."
-sourceLocator: "Opening summary and dataset description"
+sourceNote: "HealthBench gives the exact count of 262 physicians, and OpenAI's January 8, 2026 healthcare announcement separately describes a global network of more than 260 licensed physicians across 60 countries."
+sourceLocator: "HealthBench opening summary and the OpenAI for Healthcare section on AI models optimized for healthcare"
 sourceLocatorUrl: 'https://openai.com/index/healthbench/'
-sourceExcerpt: "OpenAI says HealthBench was built in partnership with 262 physicians."
+sourceExcerpt: "HealthBench says the benchmark was built with 262 physicians; the later healthcare announcement describes a network of more than 260 licensed physicians."
 sourceQuality: "first-party-report"
 lastReviewed: "2026-04-03"
 mainExampleForCategory: false
@@ -44,3 +44,5 @@ This is a breadth-of-expert-participation benchmark, not a direct measure of tot
 
 - [https://openai.com/index/healthbench/](https://openai.com/index/healthbench/)
 - OpenAI says HealthBench was built in partnership with 262 physicians who practiced in 60 countries.
+- [https://openai.com/index/openai-for-healthcare//](https://openai.com/index/openai-for-healthcare//)
+- OpenAI's January 8, 2026 healthcare announcement describes a global network of more than 260 licensed physicians across 60 countries whose feedback informed model evaluation and product work.
