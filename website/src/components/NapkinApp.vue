@@ -18,6 +18,13 @@ import { buildInputCatalogFamilies, type InputCatalogFamily as CatalogFamily } f
 import { INPUT_FOCUS_GROUPS, getInputFocusGroup, getInputFocusGroupKey } from '../lib/input-groups';
 import { buildVariantOptionGroups, isReasonableVariant } from '../lib/input-variants';
 import {
+  CUSTOM_SCENARIO_PRESET_ID,
+  DEFAULT_SCENARIO_PRESET_ID,
+  findScenarioPreset,
+  getActiveScenarioPresetId,
+  getScenarioPresetRelevantInputKeys,
+} from '../lib/scenario-presets';
+import {
   getInputTitle,
 } from '../lib/input-ui';
 import { parseEntries, serializeEntries } from '../lib/url-state';
@@ -61,6 +68,15 @@ type FillPickerGroup = {
   key: string;
   label: string;
   options: FillPickerOption[];
+};
+type ScenarioPresetOption = {
+  id: string;
+  label: string;
+};
+type ScenarioCategoryOption = {
+  value: string;
+  label: string;
+  count: number;
 };
 
 const QUALITY_ORDER = ['first-party-report', 'third-party-report', 'news', 'other'];
@@ -220,11 +236,37 @@ const uniqueCategories = computed(() => {
 
   return ['All', ...new Set(categories)];
 });
+const scenarioCategoryOptions = computed<ScenarioCategoryOption[]>(() => {
+  const categoryCounts = new Map<string, number>();
+
+  scenariosData.value.forEach((scenario) => {
+    if (!scenario.category) {
+      return;
+    }
+
+    categoryCounts.set(scenario.category, (categoryCounts.get(scenario.category) ?? 0) + 1);
+  });
+
+  return uniqueCategories.value.map((category) => ({
+    value: category,
+    label: category,
+    count: category === 'All' ? scenariosData.value.length : (categoryCounts.get(category) ?? 0),
+  }));
+});
 
 const filteredScenarios = computed(() => {
   return selectedScenario.value === 'All'
     ? scenariosData.value
     : scenariosData.value.filter((scenario) => scenario.category === selectedScenario.value);
+});
+const scenarioToolbarSummary = computed(() => {
+  const filteredCount = filteredScenarios.value.length;
+  const totalCount = scenariosData.value.length;
+  const categorySummary = selectedScenario.value === 'All'
+    ? 'across all categories'
+    : `in ${selectedScenario.value}`;
+
+  return `Showing ${filteredCount} of ${totalCount} ${pluralize(totalCount, 'scenario')} ${categorySummary}.`;
 });
 
 const sortedInputs = computed(() => {
@@ -489,6 +531,10 @@ function getScenarioExploreId(scenarioId: string): string {
 
 function getScenarioCalcDetailsId(scenarioId: string): string {
   return `scenario-${scenarioId}-calc-details`;
+}
+
+function getScenarioPresetFieldId(scenarioId: string): string {
+  return `scenario-${scenarioId}-preset`;
 }
 
 function normalizeFieldNumber(value: number): string {
@@ -1079,12 +1125,80 @@ function onVariableChange(variable: string, value: string) {
   applyCardVariantChange();
 }
 
-function applyCardVariantChange() {
+function syncScenarioInputSelections() {
   scenariosData.value.forEach((scenario) => {
     scenario.inputs = scenario.input_variables.map((key) => {
       const replacement = fillSelections.value[key];
       return replacement && isCompatibleFill(key, replacement) ? replacement : key;
     });
+  });
+}
+
+function applyCardVariantChange() {
+  syncScenarioInputSelections();
+  recalculate();
+}
+
+function getScenarioPresetValue(scenario: Scenario): string {
+  return getActiveScenarioPresetId(scenario, fillSelections.value, inputs.value);
+}
+
+function getScenarioPresetOptions(scenario: Scenario): ScenarioPresetOption[] {
+  const options: ScenarioPresetOption[] = [
+    {
+      id: DEFAULT_SCENARIO_PRESET_ID,
+      label: 'Scenario default',
+    },
+    ...((scenario.presets ?? []).map((preset) => ({
+      id: preset.id,
+      label: preset.label,
+    }))),
+  ];
+
+  if (getScenarioPresetValue(scenario) === CUSTOM_SCENARIO_PRESET_ID) {
+    options.push({
+      id: CUSTOM_SCENARIO_PRESET_ID,
+      label: 'Custom mix',
+    });
+  }
+
+  return options;
+}
+
+function onScenarioPresetChange(scenario: Scenario, presetId: string) {
+  if (presetId === CUSTOM_SCENARIO_PRESET_ID) {
+    return;
+  }
+
+  const preset = presetId === DEFAULT_SCENARIO_PRESET_ID
+    ? null
+    : findScenarioPreset(scenario, presetId);
+
+  if (presetId !== DEFAULT_SCENARIO_PRESET_ID && !preset) {
+    return;
+  }
+
+  getScenarioPresetRelevantInputKeys(scenario).forEach((key) => {
+    const input = inputs.value[key];
+    if (!input) return;
+
+    clearDraftValue(key);
+    input.value = input.default_value;
+  });
+
+  scenario.input_variables.forEach((key) => {
+    const replacement = preset?.fills?.find((fill) => fill.input === key)?.variant ?? key;
+    fillSelections.value[key] = isCompatibleFill(key, replacement) ? replacement : key;
+  });
+
+  syncScenarioInputSelections();
+
+  preset?.values?.forEach(({ input, value }) => {
+    if (!inputs.value[input]) {
+      return;
+    }
+
+    inputs.value[input].value = value;
   });
 
   recalculate();
@@ -1605,92 +1719,108 @@ onBeforeUnmount(() => {
           <div class="page-toolbar-top" :class="{ 'single-view': !hasViewTabs }">
             <div
               v-if="hasViewTabs"
-              class="view-tabs"
-              role="tablist"
-              aria-label="Main views"
+              class="page-toolbar-group page-toolbar-group-view"
             >
-              <button
-                class="view-tab"
-                :id="getViewTabId('scenarios')"
-                :class="{ active: activeView === 'scenarios' }"
-                :aria-controls="getViewPanelId('scenarios')"
-                :aria-selected="activeView === 'scenarios'"
-                role="tab"
-                :tabindex="activeView === 'scenarios' ? 0 : -1"
-                type="button"
-                @keydown="handleViewTabKeydown"
-                @click="setActiveView('scenarios')"
+              <p class="page-toolbar-label">View</p>
+              <div
+                class="view-tabs"
+                role="tablist"
+                aria-label="Main views"
               >
-                Scenarios
-              </button>
-              <button
-                class="view-tab"
-                :id="getViewTabId('inputs')"
-                :class="{ active: activeView === 'inputs' }"
-                :aria-controls="getViewPanelId('inputs')"
-                :aria-selected="activeView === 'inputs'"
-                role="tab"
-                :tabindex="activeView === 'inputs' ? 0 : -1"
-                type="button"
-                @keydown="handleViewTabKeydown"
-                @click="setActiveView('inputs')"
-              >
-                Inputs Library
-              </button>
+                <button
+                  class="view-tab"
+                  :id="getViewTabId('scenarios')"
+                  :class="{ active: activeView === 'scenarios' }"
+                  :aria-controls="getViewPanelId('scenarios')"
+                  :aria-selected="activeView === 'scenarios'"
+                  role="tab"
+                  :tabindex="activeView === 'scenarios' ? 0 : -1"
+                  type="button"
+                  @keydown="handleViewTabKeydown"
+                  @click="setActiveView('scenarios')"
+                >
+                  Scenarios
+                </button>
+                <button
+                  class="view-tab"
+                  :id="getViewTabId('inputs')"
+                  :class="{ active: activeView === 'inputs' }"
+                  :aria-controls="getViewPanelId('inputs')"
+                  :aria-selected="activeView === 'inputs'"
+                  role="tab"
+                  :tabindex="activeView === 'inputs' ? 0 : -1"
+                  type="button"
+                  @keydown="handleViewTabKeydown"
+                  @click="setActiveView('inputs')"
+                >
+                  Inputs Library
+                </button>
+              </div>
             </div>
 
-            <div class="toolbar-actions">
-              <button
-                class="btn btn-outline-primary btn-sm"
-                type="button"
-                :disabled="isExportingWorkbook"
-                @click="exportWorkbook"
-              >
-                {{ exportWorkbookLabel }}
-              </button>
-              <button
-                class="btn btn-outline-secondary btn-sm"
-                type="button"
-                :disabled="!hasCustomizedState"
-                @click="resetAllInputs"
-              >
-                Reset all changes
-              </button>
-              <button
-                v-if="canToggleInspector"
-                class="btn btn-outline-primary btn-sm"
-                :aria-controls="INSPECTOR_DIALOG_ID"
-                :aria-expanded="rightPanelOpen"
-                aria-haspopup="dialog"
-                type="button"
-                @click="toggleInspector($event.currentTarget as HTMLElement)"
-              >
-                {{ inspectorToggleLabel }}
-              </button>
-              <button
-                v-if="hasCustomizedState"
-                class="btn btn-outline-primary btn-sm"
-                type="button"
-                @click="copyShareLink"
-              >
-                {{ shareButtonLabel }}
-              </button>
+            <div class="page-toolbar-group page-toolbar-group-actions">
+              <p class="page-toolbar-label">Actions</p>
+              <div class="toolbar-actions">
+                <button
+                  class="btn btn-outline-primary btn-sm"
+                  type="button"
+                  :disabled="isExportingWorkbook"
+                  @click="exportWorkbook"
+                >
+                  {{ exportWorkbookLabel }}
+                </button>
+                <button
+                  class="btn btn-outline-primary btn-sm"
+                  type="button"
+                  @click="copyShareLink"
+                >
+                  {{ shareButtonLabel }}
+                </button>
+                <button
+                  class="btn btn-outline-primary btn-sm"
+                  :aria-controls="INSPECTOR_DIALOG_ID"
+                  :aria-expanded="rightPanelOpen"
+                  aria-haspopup="dialog"
+                  :disabled="!canToggleInspector"
+                  type="button"
+                  @click="toggleInspector($event.currentTarget as HTMLElement)"
+                >
+                  {{ inspectorToggleLabel }}
+                </button>
+                <button
+                  class="btn btn-outline-secondary btn-sm"
+                  type="button"
+                  :disabled="!hasCustomizedState"
+                  @click="resetAllInputs"
+                >
+                  Reset all changes
+                </button>
+              </div>
             </div>
           </div>
 
           <div v-if="isScenarioViewVisible" class="page-toolbar-bottom">
-            <div class="chip-row" role="group" aria-label="Filter scenarios by category">
-              <button
-                v-for="category in uniqueCategories"
-                :key="category"
-                class="category-chip"
-                :class="{ active: selectedScenario === category }"
-                :aria-pressed="selectedScenario === category"
-                type="button"
-                @click="toggleCategory(category)"
-              >
-                {{ category }}
-              </button>
+            <div class="page-toolbar-group page-toolbar-group-fill">
+              <div class="page-toolbar-heading">
+                <p class="page-toolbar-label">Scenario categories</p>
+                <p class="toolbar-note">{{ scenarioToolbarSummary }}</p>
+              </div>
+
+              <div class="chip-row" role="group" aria-label="Filter scenarios by category">
+                <button
+                  v-for="category in scenarioCategoryOptions"
+                  :key="category.value"
+                  class="category-chip"
+                  :class="{ active: selectedScenario === category.value }"
+                  :aria-label="`${category.label}: ${category.count} ${pluralize(category.count, 'scenario')}`"
+                  :aria-pressed="selectedScenario === category.value"
+                  type="button"
+                  @click="toggleCategory(category.value)"
+                >
+                  <span>{{ category.label }}</span>
+                  <span class="page-chip-count" aria-hidden="true">{{ category.count }}</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -2121,6 +2251,30 @@ onBeforeUnmount(() => {
               </div>
 
               <div class="scenario-card-footer scenario-card-footer-summary">
+                <div v-if="scenario.presets?.length" class="scenario-preset-toolbar">
+                  <label
+                    class="scenario-preset-label"
+                    :for="getScenarioPresetFieldId(scenario.id)"
+                  >
+                    Load combo
+                  </label>
+                  <select
+                    :id="getScenarioPresetFieldId(scenario.id)"
+                    class="form-select form-select-sm scenario-preset-select"
+                    :aria-label="`Load a preset input combination for ${scenario.title}`"
+                    :value="getScenarioPresetValue(scenario)"
+                    @change="onScenarioPresetChange(scenario, ($event.target as HTMLSelectElement).value)"
+                  >
+                    <option
+                      v-for="option in getScenarioPresetOptions(scenario)"
+                      :key="`${scenario.id}-${option.id}`"
+                      :value="option.id"
+                    >
+                      {{ option.label }}
+                    </option>
+                  </select>
+                </div>
+
                 <button
                   class="btn btn-outline-primary btn-sm"
                   :aria-controls="getScenarioExploreId(scenario.id)"
@@ -2602,27 +2756,32 @@ onBeforeUnmount(() => {
 
             <div v-else class="inspector-details">
               <div class="inspector-detail-header">
-                <div>
+                <div class="inspector-detail-title">
                   <h3>{{ selectedInputDetails.title }}</h3>
                 </div>
-                <a
-                  v-if="selectedInputDetails.source_url"
-                  class="source-link-chip"
-                  :href="selectedInputDetails.source_url"
-                  target="_blank"
-                  rel="noreferrer"
+                <div
+                  v-if="selectedInputDetails.source_url || selectedInputDetails.sourceLocatorUrl"
+                  class="detail-chip-group inspector-detail-actions"
                 >
-                  {{ getSourceLinkLabel(selectedInputDetails) }}
-                </a>
-                <a
-                  v-if="selectedInputDetails.sourceLocatorUrl"
-                  class="source-link-chip"
-                  :href="selectedInputDetails.sourceLocatorUrl"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Open exact citation
-                </a>
+                  <a
+                    v-if="selectedInputDetails.source_url"
+                    class="source-link-chip"
+                    :href="selectedInputDetails.source_url"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {{ getSourceLinkLabel(selectedInputDetails) }}
+                  </a>
+                  <a
+                    v-if="selectedInputDetails.sourceLocatorUrl"
+                    class="source-link-chip"
+                    :href="selectedInputDetails.sourceLocatorUrl"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Open exact citation
+                  </a>
+                </div>
               </div>
 
               <p v-if="selectedInputDetails.summary" class="inspector-summary">

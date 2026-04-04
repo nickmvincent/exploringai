@@ -6,6 +6,29 @@ description: >-
   {wage_data__phd__dollars_per_question})?
 formula: >-
   {dataset_size__hle__questions} * {wage_data__phd__dollars_per_question}
+presets:
+  - id: pilot-set
+    label: 300-question pilot at current expert rate
+    values:
+      - input: dataset_size__hle__questions
+        value: 300
+  - id: expanded-public-set
+    label: 10,000-question set at current expert rate
+    values:
+      - input: dataset_size__hle__questions
+        value: 10000
+  - id: premium-public-set
+    label: 3,000-question set at premium expert rate
+    values:
+      - input: wage_data__phd__dollars_per_question
+        value: 500
+  - id: expanded-premium-set
+    label: 10,000-question set at premium expert rate
+    values:
+      - input: dataset_size__hle__questions
+        value: 10000
+      - input: wage_data__phd__dollars_per_question
+        value: 500
 result_label: Dataset Cost
 result_units: dollars
 category: Paying for new labour

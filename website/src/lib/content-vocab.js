@@ -55,6 +55,7 @@ export const INPUT_UNITS = [
 
 export const SCENARIO_CATEGORIES = [
   'Distributing money',
+  'Making data scale vivid',
   'Paying for new labour',
 ];
 

@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import yaml from 'js-yaml';
 import {
   INPUT_TYPE_VALUE,
@@ -97,6 +97,59 @@ function ensureHttpUrl(errors, filePath, label, value) {
 
 function sortStrings(values) {
   return [...values].sort((a, b) => a.localeCompare(b));
+}
+
+function getInputCatalogFamilyKey(input) {
+  if (input.entity) {
+    return `${input.variable_type}::${input.entity}`;
+  }
+
+  return `${input.variable_type}::${input.id}`;
+}
+
+export function collectInputLibraryConsistencyIssues(inputs) {
+  const errors = [];
+  const seenTitles = new Map();
+  const mainExamplesByFamily = new Map();
+
+  inputs.forEach((input) => {
+    const title = typeof input.title === 'string' ? input.title.trim() : '';
+
+    if (title) {
+      if (seenTitles.has(title)) {
+        errors.push(
+          `${input.filePath}: duplicate input title "${title}" also used by ${seenTitles.get(title)}.`
+        );
+      } else {
+        seenTitles.set(title, input.filePath);
+      }
+    }
+
+    if (!input.mainExampleForCategory) {
+      return;
+    }
+
+    const familyKey = getInputCatalogFamilyKey(input);
+    const existing = mainExamplesByFamily.get(familyKey) ?? [];
+    existing.push(input);
+    mainExamplesByFamily.set(familyKey, existing);
+  });
+
+  mainExamplesByFamily.forEach((familyInputs, familyKey) => {
+    if (familyInputs.length <= 1) {
+      return;
+    }
+
+    const locations = familyInputs
+      .map((input) => `${input.id} (${input.filePath})`)
+      .join(', ');
+
+    errors.push(
+      `Catalog family "${familyKey}" has multiple inputs marked mainExampleForCategory: ${locations}.`
+    );
+  });
+
+  return errors;
 }
 
 async function loadInputs(errors) {
@@ -196,9 +249,15 @@ async function loadInputs(errors) {
     inputs.push({
       id: inputId,
       filePath,
+      title: data.title,
       value: data.value,
+      variable_type: data.variable_type,
+      entity: data.entity ?? undefined,
+      mainExampleForCategory: Boolean(data.mainExampleForCategory),
     });
   }
+
+  errors.push(...collectInputLibraryConsistencyIssues(inputs));
 
   return inputs;
 }
@@ -290,4 +349,6 @@ async function main() {
   console.log(`Content check passed for ${inputs.length} inputs and ${scenarioCount} scenarios.`);
 }
 
-await main();
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  await main();
+}

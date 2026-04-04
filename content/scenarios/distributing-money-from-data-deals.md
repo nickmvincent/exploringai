@@ -6,6 +6,28 @@ description: >-
   {deal_group_size__reddit__daily_active_users}), how much will each person get?
 formula: >-
   {deal_value__reddit_google__dollars} / {deal_group_size__reddit__daily_active_users}
+presets:
+  - id: newscorp-to-employees
+    label: News Corp deal -> all employees
+    fills:
+      - input: deal_value__reddit_google__dollars
+        variant: deal_value__newscorp__dollars
+      - input: deal_group_size__reddit__daily_active_users
+        variant: deal_group_size__newscorp__employees
+  - id: newscorp-to-wsj-journalists
+    label: News Corp deal -> WSJ journalists
+    fills:
+      - input: deal_value__reddit_google__dollars
+        variant: deal_value__newscorp__dollars
+      - input: deal_group_size__reddit__daily_active_users
+        variant: deal_group_size__wsj__journalists
+  - id: taylor-francis-to-articles
+    label: Taylor & Francis deal -> journal articles
+    fills:
+      - input: deal_value__reddit_google__dollars
+        variant: deal_value__taylorandfrancis_microsoft__dollars
+      - input: deal_group_size__reddit__daily_active_users
+        variant: deal_group_size__taylorandfrancis__articles
 result_label: Per Person Revenue
 result_units: dollars
 category: Distributing money

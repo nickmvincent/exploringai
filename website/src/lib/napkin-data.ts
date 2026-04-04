@@ -112,6 +112,19 @@ export async function loadNapkinData() {
       input_variables: inputVariables,
       inputs: inputVariables,
       formula: data.formula,
+      presets: data.presets?.map((preset) => ({
+        id: preset.id,
+        label: preset.label,
+        description: preset.description ?? undefined,
+        fills: preset.fills?.map((fill) => ({
+          input: fill.input,
+          variant: fill.variant,
+        })) ?? [],
+        values: preset.values?.map((value) => ({
+          input: value.input,
+          value: value.value,
+        })) ?? [],
+      })) ?? [],
       result_label: data.result_label,
       result_units: data.result_units,
       category: data.category,

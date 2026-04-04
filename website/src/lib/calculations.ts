@@ -59,6 +59,24 @@ export interface InputReferenceChartBar {
   highlight?: boolean;
 }
 
+export interface ScenarioPresetFill {
+  input: string;
+  variant: string;
+}
+
+export interface ScenarioPresetValue {
+  input: string;
+  value: number;
+}
+
+export interface ScenarioPreset {
+  id: string;
+  label: string;
+  description?: string;
+  fills?: ScenarioPresetFill[];
+  values?: ScenarioPresetValue[];
+}
+
 export interface Scenario {
   id: string;
   title: string;
@@ -74,6 +92,7 @@ export interface Scenario {
     rawValue: number | null;
     units: string;
   };
+  presets?: ScenarioPreset[];
   showExplore?: boolean;
   showCalcDetails?: boolean;
   calculate?: (...args: number[]) => number;

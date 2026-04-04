@@ -27,6 +27,21 @@ const linkSchema = z.object({
   label: z.string(),
   href: z.string().url(),
 });
+const scenarioPresetFillSchema = z.object({
+  input: z.string(),
+  variant: z.string(),
+});
+const scenarioPresetValueSchema = z.object({
+  input: z.string(),
+  value: z.number(),
+});
+const scenarioPresetSchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  description: z.string().optional().nullable(),
+  fills: z.array(scenarioPresetFillSchema).optional().nullable(),
+  values: z.array(scenarioPresetValueSchema).optional().nullable(),
+});
 
 const inputs = defineCollection({
   loader: glob({ pattern: "**/*.md", base: "../content/inputs" }),
@@ -88,6 +103,7 @@ const scenarios = defineCollection({
     description: z.string(),
     formula: z.string(),
     input_variables: z.array(z.string()).optional(),
+    presets: z.array(scenarioPresetSchema).optional().nullable(),
     result_label: z.string(),
     result_units: z.enum(inputUnits),
     category: z.enum(scenarioCategories),

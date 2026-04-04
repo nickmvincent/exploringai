@@ -6,6 +6,36 @@ description: >-
   get?
 formula: >-
   {yearly_revenue__openai__dollars} / {group_size__world__people}
+presets:
+  - id: openai-to-usa
+    label: OpenAI revenue -> all Americans
+    fills:
+      - input: group_size__world__people
+        variant: group_size__usa__people
+  - id: anthropic-to-world
+    label: Anthropic revenue -> everyone on Earth
+    fills:
+      - input: yearly_revenue__openai__dollars
+        variant: yearly_revenue__anthropic__dollars
+  - id: anthropic-to-usa
+    label: Anthropic revenue -> all Americans
+    fills:
+      - input: yearly_revenue__openai__dollars
+        variant: yearly_revenue__anthropic__dollars
+      - input: group_size__world__people
+        variant: group_size__usa__people
+  - id: microsoft-to-world
+    label: Microsoft AI revenue -> everyone on Earth
+    fills:
+      - input: yearly_revenue__openai__dollars
+        variant: yearly_revenue__microsoft__dollars
+  - id: coreweave-to-usa
+    label: CoreWeave revenue -> all Americans
+    fills:
+      - input: yearly_revenue__openai__dollars
+        variant: yearly_revenue__coreweave__dollars
+      - input: group_size__world__people
+        variant: group_size__usa__people
 result_label: Per Person Revenue
 result_units: dollars
 category: Distributing money

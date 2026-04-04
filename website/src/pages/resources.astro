@@ -73,44 +73,51 @@ const statusLabels: Record<string, string> = {
 >
   <main id="site-main" class="resources-page">
     <header class="resources-hero">
+      <p class="section-kicker">Reading list</p>
       <h1>Project notes, asks, and source material.</h1>
       <p>
         This page keeps the project writing together with the papers, trackers, and filings behind the calculator.
       </p>
+      <nav class="resources-jump-nav" aria-label="Jump to resource sections">
+        <a href="#essays-heading">Essays <span>{essays.length}</span></a>
+        <a href="#asks-heading">Asks <span>{asks.length}</span></a>
+        <a href="#external-heading">Sources <span>{keyPaperEntries.length}</span></a>
+      </nav>
     </header>
 
     <section class="resource-section" aria-labelledby="essays-heading">
       <div class="resource-section-header">
         <div>
+          <p class="section-kicker">Project writing</p>
           <h2 id="essays-heading">Essays and working notes</h2>
         </div>
         <p>Notes, open questions, and longer walkthroughs connected to the calculator.</p>
       </div>
 
       {essays.length ? (
-        <div class="essay-list">
+        <ul class="resource-stream">
           {essays.map(({ entry, Content }) => (
-            <article class="essay-card">
-              <div class="essay-card-header">
-                <div>
-                  <div class="essay-meta-row">
+            <li>
+              <article class="resource-row">
+                <div class="resource-row-main">
+                  <div class="resource-row-topline">
                     <span class="resource-status">{statusLabels[entry.data.status] || entry.data.status}</span>
                     {entry.data.related_scenario_ids?.[0] && (
-                      <a class="resource-link-chip" href={`/?scenario=${entry.data.related_scenario_ids[0]}`}>
+                      <a class="resource-text-link" href={`/?scenario=${entry.data.related_scenario_ids[0]}`}>
                         Open related scenario
                       </a>
                     )}
                   </div>
                   <h3>{entry.data.title}</h3>
+                  <p class="resource-row-summary">{entry.data.excerpt}</p>
+                  <div class="essay-body resource-row-body">
+                    <Content />
+                  </div>
                 </div>
-                <p class="essay-excerpt">{entry.data.excerpt}</p>
-              </div>
-              <div class="essay-body">
-                <Content />
-              </div>
-            </article>
+              </article>
+            </li>
           ))}
-        </div>
+        </ul>
       ) : (
         <div class="resource-empty">No public essays are published yet.</div>
       )}
@@ -119,26 +126,33 @@ const statusLabels: Record<string, string> = {
     <section class="resource-section" aria-labelledby="asks-heading">
       <div class="resource-section-header">
         <div>
+          <p class="section-kicker">Public asks</p>
           <h2 id="asks-heading">What we want made legible</h2>
         </div>
         <p>Concrete asks that would make these estimates easier to ground in public evidence.</p>
       </div>
 
-      <div class="ask-grid">
+      <ul class="resource-stream">
         {asks.map(({ entry, Content }) => (
-          <article class="ask-card">
-            <h3>{entry.data.title}</h3>
-            <div class="ask-body">
-              <Content />
-            </div>
-          </article>
+          <li>
+            <article class="resource-row">
+              <div class="resource-row-main">
+                <h3>{entry.data.title}</h3>
+                {entry.data.summary && <p class="resource-row-summary">{entry.data.summary}</p>}
+                <div class="ask-body resource-row-body">
+                  <Content />
+                </div>
+              </div>
+            </article>
+          </li>
         ))}
-      </div>
+      </ul>
     </section>
 
     <section class="resource-section resource-section-external" aria-labelledby="external-heading">
       <div class="resource-section-header">
         <div>
+          <p class="section-kicker">External sources</p>
           <h2 id="external-heading">Papers, trackers, and filings</h2>
         </div>
         <p>Public sources tied to the shared inputs, scenarios, and surrounding policy argument.</p>
@@ -149,44 +163,52 @@ const statusLabels: Record<string, string> = {
           <section class="external-group">
             <div class="external-group-header">
               <h3>{keyPaperKindLabels[kind] || kind}</h3>
-              <span>{entries.length} references</span>
+              <span class="section-count">{entries.length} references</span>
             </div>
 
-            <div class="external-grid">
+            <ul class="resource-stream resource-stream-tight">
               {entries.map((entry) => (
-                <article class="external-card">
-                  <div class="external-card-header">
-                    <div>
-                      <h4>{entry.data.title}</h4>
+                <li>
+                  <article class="resource-row resource-row-external">
+                    <div class="resource-row-main">
+                      <h4>
+                        {entry.data.source_url ? (
+                          <a
+                            class="resource-primary-link"
+                            href={entry.data.source_url}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            {entry.data.title}
+                          </a>
+                        ) : (
+                          entry.data.title
+                        )}
+                      </h4>
                       <p class="external-meta">{entry.data.anchor}</p>
+                      <p class="resource-row-summary">{entry.data.relevance}</p>
+
+                      {entry.data.key_inputs?.length ? (
+                        <p class="external-input-summary">
+                          <strong>Useful for:</strong> {entry.data.key_inputs.join('; ')}
+                        </p>
+                      ) : null}
+
+                      {entry.data.links?.length ? (
+                        <div class="resource-inline-links" aria-label="Additional links">
+                          <span class="resource-inline-label">Also:</span>
+                          {entry.data.links.map((link) => (
+                            <a class="resource-text-link" href={link.href} target="_blank" rel="noreferrer">
+                              {link.label}
+                            </a>
+                          ))}
+                        </div>
+                      ) : null}
                     </div>
-                    {entry.data.source_url && (
-                      <a class="resource-link-chip" href={entry.data.source_url} target="_blank" rel="noreferrer">
-                        Open source
-                      </a>
-                    )}
-                  </div>
-
-                  <p class="external-relevance">{entry.data.relevance}</p>
-
-                  {entry.data.key_inputs?.length ? (
-                    <ul class="external-input-list">
-                      {entry.data.key_inputs.map((input) => <li>{input}</li>)}
-                    </ul>
-                  ) : null}
-
-                  {entry.data.links?.length ? (
-                    <div class="external-link-row">
-                      {entry.data.links.map((link) => (
-                        <a class="resource-link-chip" href={link.href} target="_blank" rel="noreferrer">
-                          {link.label}
-                        </a>
-                      ))}
-                    </div>
-                  ) : null}
-                </article>
+                  </article>
+                </li>
               ))}
-            </div>
+            </ul>
           </section>
         ))}
       </div>
@@ -197,7 +219,7 @@ const statusLabels: Record<string, string> = {
 <style>
   .resources-page {
     width: 100%;
-    max-width: 1180px;
+    max-width: 1080px;
     margin: 0 auto;
     padding: 2rem 1.5rem 4rem;
   }
@@ -206,113 +228,164 @@ const statusLabels: Record<string, string> = {
   .resource-section,
   .resource-empty {
     border: 1px solid rgba(216, 222, 230, 0.92);
-    border-radius: 24px;
-    background: rgba(255, 255, 255, 0.84);
-    box-shadow: 0 16px 32px rgba(31, 39, 51, 0.08);
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.88);
+    box-shadow: 0 10px 24px rgba(31, 39, 51, 0.05);
   }
 
   .resources-hero {
     padding: 2rem;
     background:
-      radial-gradient(circle at 12% 14%, rgba(255, 255, 255, 0.88), transparent 36%),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(247, 249, 252, 0.94)),
-      rgba(255, 255, 255, 0.88);
+      linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(249, 250, 252, 0.94)),
+      rgba(255, 255, 255, 0.92);
   }
 
   .resources-hero h1 {
     margin-bottom: 0.8rem;
     color: var(--primary-color);
-    font-size: clamp(2.4rem, 5vw, 3.8rem);
-    line-height: 1.04;
+    font-size: clamp(2.4rem, 5vw, 3.5rem);
+    line-height: 1.05;
   }
 
-  .resources-hero p:last-child,
-  .resource-section-header p,
-  .essay-excerpt,
-  .external-relevance,
+  .resources-hero > p:not(.section-kicker),
+  .resource-section-header > p,
   .resource-empty {
     color: var(--ink-soft);
   }
 
+  .section-kicker {
+    margin: 0 0 0.55rem;
+    color: var(--dark-gray);
+    font-family: var(--font-ui);
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .resources-jump-nav {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-top: 1.4rem;
+  }
+
+  .resources-jump-nav a,
+  .section-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.2rem;
+    padding: 0.45rem 0.8rem;
+    border: 1px solid rgba(216, 222, 230, 0.92);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--ink-soft);
+    font-family: var(--font-ui);
+    font-size: 0.92rem;
+    text-decoration: none;
+  }
+
+  .resources-jump-nav a span {
+    color: var(--primary-color);
+    font-weight: 600;
+  }
+
   .resource-section {
     margin-top: 1.4rem;
-    padding: 1.4rem;
+    padding: 1.45rem 1.5rem;
   }
 
   .resource-section-header {
     display: grid;
-    grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
     gap: 1rem;
-    margin-bottom: 1.15rem;
+    margin-bottom: 1rem;
     align-items: end;
   }
 
   .resource-section-header h2,
-  .essay-card h3,
-  .ask-card h3,
-  .external-card h4 {
+  .resource-row h3,
+  .resource-row h4,
+  .external-group-header h3 {
     margin-bottom: 0;
   }
 
   .external-meta {
-    margin: 0.35rem 0 0;
+    margin: 0.3rem 0 0;
     color: var(--dark-gray);
-    font-size: 0.9rem;
+    font-family: var(--font-ui);
+    font-size: 0.92rem;
   }
 
-  .essay-list,
+  .resource-stream,
+  .external-group-stack {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
   .external-group-stack {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .essay-card,
-  .ask-card,
-  .external-card {
-    border: 1px solid rgba(216, 222, 230, 0.92);
-    border-radius: 20px;
-    background: rgba(255, 255, 255, 0.86);
-    box-shadow: 0 12px 24px rgba(31, 39, 51, 0.06);
+  .resource-stream > li + li {
+    border-top: 1px solid rgba(216, 222, 230, 0.92);
   }
 
-  .essay-card,
-  .ask-card,
-  .external-card,
-  .external-group {
-    overflow: hidden;
+  .resource-stream-tight > li + li {
+    border-top-color: rgba(216, 222, 230, 0.8);
   }
 
-  .essay-card {
-    padding: 1.25rem;
+  .resource-row {
+    padding: 1.15rem 0;
   }
 
-  .essay-card-header {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
-    gap: 1rem;
-    align-items: start;
-    margin-bottom: 1rem;
+  .resource-row-main {
+    max-width: 76ch;
   }
 
-  .essay-meta-row,
-  .external-link-row {
+  .resource-row-topline,
+  .resource-inline-links {
     display: flex;
-    gap: 0.55rem;
+    gap: 0.65rem;
     flex-wrap: wrap;
-    margin-bottom: 0.55rem;
+    align-items: center;
   }
 
-  .resource-status,
-  .resource-link-chip {
+  .resource-row-topline {
+    margin-bottom: 0.65rem;
+  }
+
+  .resource-row-summary,
+  .resource-row-body,
+  .external-input-summary,
+  .resource-inline-links {
+    margin-top: 0.75rem;
+  }
+
+  .resource-row-summary,
+  .resource-row-body,
+  .external-input-summary {
+    color: var(--ink-soft);
+  }
+
+  .resource-row-body,
+  .essay-body,
+  .ask-body {
+    color: var(--black);
+  }
+
+  .resource-status {
     display: inline-flex;
     align-items: center;
-    min-height: 2rem;
-    padding: 0.35rem 0.72rem;
+    min-height: 1.8rem;
+    padding: 0.22rem 0.62rem;
     border-radius: 999px;
     font-family: var(--font-ui);
-    font-size: 0.9rem;
-    text-decoration: none;
+    font-size: 0.84rem;
   }
 
   .resource-status {
@@ -320,20 +393,22 @@ const statusLabels: Record<string, string> = {
     background: rgba(43, 76, 111, 0.08);
   }
 
-  .resource-link-chip {
+  .resource-text-link,
+  .resource-primary-link {
     color: var(--ink-soft);
-    border: 1px solid rgba(216, 222, 230, 0.92);
-    background: rgba(255, 255, 255, 0.92);
+    font-family: var(--font-ui);
+    text-decoration-thickness: 0.08em;
+    text-underline-offset: 0.18em;
   }
 
-  .resource-link-chip:hover {
+  .resource-text-link:hover,
+  .resource-primary-link:hover,
+  .resources-jump-nav a:hover {
     color: var(--primary-color);
-    border-color: rgba(43, 76, 111, 0.24);
   }
 
-  .essay-body,
-  .ask-body {
-    color: var(--black);
+  .resource-primary-link {
+    color: var(--primary-color);
   }
 
   .essay-body :global(p:last-child),
@@ -341,51 +416,44 @@ const statusLabels: Record<string, string> = {
     margin-bottom: 0;
   }
 
-  .ask-grid,
-  .external-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1rem;
+  .resource-row-body :global(p:last-child) {
+    margin-bottom: 0;
   }
 
-  .ask-card,
-  .external-card {
-    padding: 1.1rem;
+  .resource-inline-label {
+    color: var(--dark-gray);
+    font-family: var(--font-ui);
+    font-size: 0.9rem;
   }
 
   .external-group {
     border: 1px solid rgba(216, 222, 230, 0.92);
-    border-radius: 22px;
-    background: rgba(247, 249, 252, 0.62);
-    padding: 1rem;
-  }
-
-  .external-group-header,
-  .external-card-header {
-    display: flex;
-    gap: 0.9rem;
-    justify-content: space-between;
-    align-items: flex-start;
+    border-radius: 18px;
+    background: rgba(249, 250, 252, 0.78);
+    padding: 1rem 1.2rem;
   }
 
   .external-group-header {
-    margin-bottom: 0.9rem;
+    display: flex;
+    gap: 0.75rem;
+    justify-content: space-between;
+    align-items: center;
   }
 
-  .external-group-header span {
-    color: var(--dark-gray);
-    font-family: var(--font-ui);
-    font-size: 0.92rem;
+  .external-group-header {
+    margin-bottom: 0.25rem;
   }
 
-  .external-input-list {
-    margin: 0.9rem 0 0;
-    padding-left: 1.15rem;
-    color: var(--ink-soft);
+  .resource-row-external h4 {
+    font-size: 1.2rem;
   }
 
-  .external-input-list li + li {
-    margin-top: 0.35rem;
+  .external-input-summary {
+    font-size: 0.98rem;
+  }
+
+  .external-input-summary strong {
+    color: var(--black);
   }
 
   .resource-empty {
@@ -398,8 +466,12 @@ const statusLabels: Record<string, string> = {
       padding: 1.5rem 1rem 3rem;
     }
 
-    .resource-section-header,
-    .essay-card-header {
+    .resource-section,
+    .resources-hero {
+      padding: 1.25rem;
+    }
+
+    .resource-section-header {
       grid-template-columns: 1fr;
     }
   }
@@ -407,11 +479,17 @@ const statusLabels: Record<string, string> = {
   @media (max-width: 640px) {
     .resources-hero,
     .resource-section,
-    .essay-card,
-    .ask-card,
-    .external-card,
     .resource-empty {
       border-radius: 20px;
+    }
+
+    .external-group {
+      padding: 0.95rem 1rem;
+    }
+
+    .external-group-header {
+      align-items: flex-start;
+      flex-direction: column;
     }
   }
 </style>

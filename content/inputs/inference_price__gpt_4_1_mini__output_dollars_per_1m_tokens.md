@@ -16,7 +16,6 @@ sourceLocatorUrl: 'https://platform.openai.com/docs/pricing'
 sourceExcerpt: "The pricing page lists GPT-4.1 mini output tokens at $1.60 per 1M tokens."
 sourceQuality: "first-party-report"
 lastReviewed: "2026-03-10"
-mainExampleForCategory: true
 min: 0
 step: 0.01
 date_added: '2026-03-10T00:00:00.000Z'

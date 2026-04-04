@@ -7,6 +7,31 @@ description: >-
 formula: >-
   {dataset_size__llama3__tokens} * {training_detail__openai__words_per_token} *
   {wage_data__generic_freelance_higher__dollars_per_word}
+presets:
+  - id: olmo3-at-lower-rate
+    label: OLMo 3 scale -> lower freelance rate
+    fills:
+      - input: dataset_size__llama3__tokens
+        variant: dataset_size__olmo3__tokens
+      - input: wage_data__generic_freelance_higher__dollars_per_word
+        variant: wage_data__generic_freelance_lower__dollars_per_word
+  - id: qwen3-at-higher-rate
+    label: Qwen 3 scale -> higher freelance rate
+    fills:
+      - input: dataset_size__llama3__tokens
+        variant: dataset_size__qwen3__tokens
+  - id: deepseek-at-lower-rate
+    label: DeepSeek V3 scale -> lower freelance rate
+    fills:
+      - input: dataset_size__llama3__tokens
+        variant: dataset_size__deepseek_v3__tokens
+      - input: wage_data__generic_freelance_higher__dollars_per_word
+        variant: wage_data__generic_freelance_lower__dollars_per_word
+  - id: llama4-maverick-at-higher-rate
+    label: Llama 4 Maverick scale -> higher freelance rate
+    fills:
+      - input: dataset_size__llama3__tokens
+        variant: dataset_size__llama4_maverick__tokens
 result_label: Dataset Cost
 result_units: dollars
 category: Paying for new labour
