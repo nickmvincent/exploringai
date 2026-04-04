@@ -11,7 +11,7 @@ key_inputs:
   - Royalty basis for AI-generated outputs that substitute for books
   - Revenue share allocated to author-remuneration pools
   - Administrative cost of output-based versus input-based compensation
-sourceQuality: primary
+sourceQuality: "third-party-report"
 sort_order: 40
 visibility: public
 type: KeyPaper

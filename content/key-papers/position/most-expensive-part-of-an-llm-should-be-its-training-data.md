@@ -12,7 +12,7 @@ key_inputs:
   - Share of total model-development cost attributable to training data
   - Cost of replacing high-quality corpora with commissioned data
   - Public count of high-value data suppliers versus model builders
-sourceQuality: primary
+sourceQuality: "third-party-report"
 sort_order: 20
 visibility: public
 type: KeyPaper

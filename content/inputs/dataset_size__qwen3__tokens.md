@@ -14,9 +14,9 @@ sourceNote: "Alibaba says Qwen3 models were pretrained on about 36 trillion toke
 sourceLocator: "Qwen3 blog pre-training section"
 sourceLocatorUrl: 'https://qwenlm.github.io/blog/qwen3/'
 sourceExcerpt: "The Qwen3 blog says the models were pretrained on about 36T tokens across 119 languages and dialects."
-sourceQuality: "official"
-confidence: 0.95
+sourceQuality: "first-party-report"
 lastReviewed: "2026-03-11"
+mainExampleForCategory: false
 min: 0
 step: 100
 date_added: '2026-03-11T19:19:59.000Z'

@@ -9,17 +9,14 @@ entity: anthropic
 units: dollars
 source_url: 'https://finance.yahoo.com/news/exclusive-anthropic-aims-nearly-triple-170234463.html'
 summary: "Reported annualized revenue run rate for Anthropic."
-importanceRank: 9
-importanceReason: "Shows that frontier-model revenue is no longer confined to one company."
 sourceName: "Reuters / Anthropic"
 sourceNote: "Anthropic told Reuters in October 2025 that its annual revenue run rate was approaching $7B."
 sourceLocator: "Reported revenue-run-rate summary in Reuters coverage"
 sourceLocatorUrl: 'https://finance.yahoo.com/news/exclusive-anthropic-aims-nearly-triple-170234463.html'
 sourceExcerpt: "Reuters reported that Anthropic's annual revenue run rate was approaching $7B."
-sourceQuality: "reported"
-confidence: 0.72
+sourceQuality: "news"
 lastReviewed: "2026-03-10"
-featured: false
+mainExampleForCategory: false
 min: 0
 step: 0.01
 date_added: '2025-03-19T00:00:00.000Z'

@@ -10,18 +10,15 @@ units: dollars_per_question
 source_url: >-
   https://static.scale.com/uploads/654197dc94d34f66c0f5184e/Publication%20Ready%20Humanity%27s%20Last%20Exam.pdf
 summary: "A conservative benchmark for paying expert contributors to produce evaluation questions."
-importanceRank: 16
-importanceReason: "Provides a concrete benchmark for compensating domain experts for evaluation work."
 sourceName: "Humanity's Last Exam paper and site"
 sourceNote: "A $500k prize pool spread across 2,500 final public questions implies about $200 per retained question, excluding organizer and reviewer labor."
 sourceLocator: "Paper and site description of the $500k prize pool and 2,500 final questions"
 sourceLocatorUrl: 'https://static.scale.com/uploads/654197dc94d34f66c0f5184e/Publication%20Ready%20Humanity%27s%20Last%20Exam.pdf'
 sourceExcerpt: "The benchmark combined a $500k prize pool with 2,500 final public questions."
 derivationNote: "This input divides the $500,000 prize pool by 2,500 retained questions to estimate dollars per question."
-sourceQuality: "primary"
-confidence: 0.85
+sourceQuality: "third-party-report"
 lastReviewed: "2026-03-10"
-featured: false
+mainExampleForCategory: false
 min: 0
 step: 1
 date_added: '2025-03-19T00:00:00.000Z'

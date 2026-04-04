@@ -14,9 +14,9 @@ sourceNote: "An unsealed appendix filed in February 2025 says 35.7TB of the down
 sourceLocator: "Appendix A table summarizing alleged download sizes from shadow libraries"
 sourceLocatorUrl: 'https://cdn.arstechnica.net/wp-content/uploads/2025/02/Kadrey-v-Meta-Motion-for-Relief-Appendix-A-2-5-25.pdf'
 sourceExcerpt: "The appendix attributes 35.7TB of the alleged downloads to Z-Library and LibGen."
-sourceQuality: "primary"
-confidence: 0.82
+sourceQuality: "third-party-report"
 lastReviewed: "2026-03-11"
+mainExampleForCategory: false
 min: 0
 step: 0.1
 date_added: '2026-03-11T19:19:59.000Z'

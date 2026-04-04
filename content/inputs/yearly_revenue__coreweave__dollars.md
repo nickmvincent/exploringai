@@ -10,17 +10,14 @@ units: dollars
 source_url: >-
   https://investors.coreweave.com/news/news-details/2026/CoreWeave-Reports-Strong-Fourth-Quarter-and-Fiscal-Year-2025-Results
 summary: "Full-year revenue for an AI-cloud infrastructure company."
-importanceRank: 11
-importanceReason: "Adds an AI-infrastructure revenue benchmark from a company with unusually direct exposure to model demand."
 sourceName: "CoreWeave earnings release"
 sourceNote: "CoreWeave reported $5.131B of fiscal-year 2025 revenue."
 sourceLocator: "Fiscal year 2025 results highlights"
 sourceLocatorUrl: 'https://investors.coreweave.com/news/news-details/2026/CoreWeave-Reports-Strong-Fourth-Quarter-and-Fiscal-Year-2025-Results'
 sourceExcerpt: "CoreWeave reports $5.131B in fiscal-year 2025 revenue."
-sourceQuality: "official"
-confidence: 0.95
+sourceQuality: "first-party-report"
 lastReviewed: "2026-03-10"
-featured: false
+mainExampleForCategory: false
 min: 0
 step: 0.01
 date_added: '2026-03-10T00:00:00.000Z'

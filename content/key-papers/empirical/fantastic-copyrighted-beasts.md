@@ -9,7 +9,7 @@ key_inputs:
   - Rate of recognizable copyrighted-character generation
   - Prompt sensitivity for protected-character outputs
   - Effect of mitigation methods on copyrighted-content generation
-sourceQuality: primary
+sourceQuality: "third-party-report"
 sort_order: 80
 visibility: public
 type: KeyPaper

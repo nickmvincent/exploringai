@@ -14,9 +14,9 @@ sourceNote: "Alibaba says Qwen3-Coder was pretrained on 7.5 trillion tokens."
 sourceLocator: "Qwen3-Coder blog pre-training section"
 sourceLocatorUrl: 'https://qwenlm.github.io/blog/qwen3-coder/'
 sourceExcerpt: "The Qwen3-Coder blog says the model was pretrained on 7.5T tokens."
-sourceQuality: "official"
-confidence: 0.95
+sourceQuality: "first-party-report"
 lastReviewed: "2026-03-11"
+mainExampleForCategory: false
 min: 0
 step: 10
 date_added: '2026-03-11T19:19:59.000Z'

@@ -8,7 +8,6 @@ export type VariantOptionGroup = {
   options: Input[];
 };
 
-const SUGGESTED_IMPORTANCE_RANK_MAX = 20;
 const DEAL_GROUP_SIZE_PEOPLEISH_UNITS = new Set([
   'people',
   'employees',
@@ -28,10 +27,8 @@ function getCompatibilityUnitsBucket(input: Pick<Input, 'variable_type' | 'units
 }
 
 function sortVariantOptions(a: Input, b: Input): number {
-  const rankA = a.importanceRank ?? Number.MAX_SAFE_INTEGER;
-  const rankB = b.importanceRank ?? Number.MAX_SAFE_INTEGER;
-  if (rankA !== rankB) {
-    return rankA - rankB;
+  if (Boolean(a.mainExampleForCategory) !== Boolean(b.mainExampleForCategory)) {
+    return a.mainExampleForCategory ? -1 : 1;
   }
 
   return (a.title || a.variable_name).localeCompare(b.title || b.variable_name);
@@ -76,9 +73,7 @@ export function buildVariantOptionGroups(
       groupKey = 'current';
     } else if (candidate.variable_name === sourceKey) {
       groupKey = 'default';
-    } else if (
-      (candidate.importanceRank ?? Number.MAX_SAFE_INTEGER) <= SUGGESTED_IMPORTANCE_RANK_MAX
-    ) {
+    } else if (candidate.mainExampleForCategory) {
       groupKey = 'suggested';
     }
 

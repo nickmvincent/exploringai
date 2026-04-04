@@ -59,12 +59,10 @@ export const SCENARIO_CATEGORIES = [
 ];
 
 export const SOURCE_QUALITY_VALUES = [
-  'official',
-  'primary',
-  'reported',
-  'industry',
-  'heuristic',
-  'assumption',
+  'first-party-report',
+  'third-party-report',
+  'news',
+  'other',
 ];
 
 export const BLOG_STATUS_VALUES = ['draft', 'in_progress', 'published'];

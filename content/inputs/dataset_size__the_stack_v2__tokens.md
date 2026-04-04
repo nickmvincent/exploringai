@@ -9,17 +9,14 @@ entity: the_stack_v2
 units: tokens
 source_url: 'https://huggingface.co/datasets/bigcode/the-stack-v2'
 summary: "Approximate code-token count for The Stack v2."
-importanceRank: 12
-importanceReason: "Provides a public benchmark for the scale of a modern code-training corpus."
 sourceName: "The Stack v2 dataset card"
 sourceNote: "The dataset card describes The Stack v2 as a roughly 900B-token code corpus."
 sourceLocator: "Dataset card summary and source-data collection sections"
 sourceLocatorUrl: 'https://huggingface.co/datasets/bigcode/the-stack-v2'
 sourceExcerpt: "The dataset card describes The Stack v2 as a roughly 900B-token corpus with 67.53TB total size and 3.28B unique files."
-sourceQuality: "official"
-confidence: 0.9
+sourceQuality: "first-party-report"
 lastReviewed: "2026-03-11"
-featured: true
+mainExampleForCategory: true
 min: 0
 step: 10
 date_added: '2026-03-11T00:00:00.000Z'

@@ -8,7 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const inputsDir = path.resolve(__dirname, '../content/inputs');
 const strict = process.argv.includes('--strict');
-const sourceFreeQualities = new Set(['assumption', 'heuristic']);
+const sourceFreeQualities = new Set(['other']);
 
 const files = readdirSync(inputsDir)
   .filter((name) => name.endsWith('.md'))
@@ -41,7 +41,7 @@ function hasStructuredField(frontmatter, key) {
   return normalizeFieldValue(readField(frontmatter, key)) !== null;
 }
 
-const sharedRequiredFields = ['sourceName', 'sourceNote', 'sourceLocator', 'sourceExcerpt', 'sourceQuality', 'confidence'];
+const sharedRequiredFields = ['sourceName', 'sourceNote', 'sourceLocator', 'sourceExcerpt', 'sourceQuality'];
 
 const results = files.map((name) => {
   const absPath = path.join(inputsDir, name);
@@ -65,12 +65,12 @@ const results = files.map((name) => {
 
 const missingCount = results.filter((entry) => entry.missing.length > 0).length;
 const externallyVerifiableCount = results.filter((entry) => entry.requiresExternalSource && entry.missing.length === 0).length;
-const documentedAssumptionCount = results.filter((entry) => !entry.requiresExternalSource && entry.missing.length === 0).length;
+const documentedOtherCount = results.filter((entry) => !entry.requiresExternalSource && entry.missing.length === 0).length;
 const sourceFreeCount = results.filter((entry) => !entry.hasExternalSource).length;
 
 console.log(`Inputs scanned: ${results.length}`);
 console.log(`Externally sourced and verification-ready: ${externallyVerifiableCount}`);
-console.log(`Documented assumptions or heuristics: ${documentedAssumptionCount}`);
+console.log(`Documented "other" inputs: ${documentedOtherCount}`);
 console.log(`Without external source URL: ${sourceFreeCount}`);
 console.log(`Missing required citation fields: ${missingCount}`);
 

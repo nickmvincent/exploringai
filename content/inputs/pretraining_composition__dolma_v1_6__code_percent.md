@@ -9,18 +9,15 @@ entity: dolma_v1_6
 units: percent
 source_url: 'https://huggingface.co/datasets/allenai/dolma'
 summary: "Approximate share of Dolma v1.6 tokens that come from code."
-importanceRank: 20
-importanceReason: "Code is a major category in modern pretraining mixtures and worth separating from prose."
 sourceName: "AllenAI Dolma dataset card"
 sourceNote: "Derived from the published The Stack token count in Dolma v1.6."
 sourceLocator: "Dataset card table of source-token counts for Dolma v1.6"
 sourceLocatorUrl: 'https://huggingface.co/datasets/allenai/dolma'
 sourceExcerpt: "The Dolma card lists 411B The Stack tokens out of 3,059B total tokens."
 derivationNote: "This input divides the The Stack token count by the 3,059B-token total."
-sourceQuality: "official"
-confidence: 0.95
+sourceQuality: "first-party-report"
 lastReviewed: "2026-03-10"
-featured: false
+mainExampleForCategory: false
 min: 0
 step: 0.1
 date_added: '2026-03-10T00:00:00.000Z'

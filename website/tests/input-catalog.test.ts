@@ -52,7 +52,7 @@ test('buildInputCatalogFamilies turns near-duplicate benchmark rows into one fam
         variable_type: 'dataset_size',
         entity: 'fineweb2',
         display_units: 'terabytes',
-        importanceRank: 7,
+        mainExampleForCategory: false,
       }),
     },
     {
@@ -62,7 +62,7 @@ test('buildInputCatalogFamilies turns near-duplicate benchmark rows into one fam
         variable_type: 'dataset_size',
         entity: 'fineweb2',
         display_units: 'trillions of words',
-        importanceRank: 6,
+        mainExampleForCategory: true,
       }),
     },
     {
@@ -72,7 +72,7 @@ test('buildInputCatalogFamilies turns near-duplicate benchmark rows into one fam
         variable_type: 'yearly_revenue',
         entity: 'openai',
         display_units: 'billions of dollars',
-        importanceRank: 4,
+        mainExampleForCategory: true,
       }),
     },
   ];
@@ -87,11 +87,6 @@ test('buildInputCatalogFamilies turns near-duplicate benchmark rows into one fam
     })),
     [
       {
-        key: 'yearly_revenue::openai',
-        title: 'Openai revenue benchmarks',
-        entries: ['yearly_revenue__openai__dollars'],
-      },
-      {
         key: 'dataset_size::fineweb2',
         title: 'Fineweb2 dataset size benchmarks',
         entries: [
@@ -99,8 +94,13 @@ test('buildInputCatalogFamilies turns near-duplicate benchmark rows into one fam
           'dataset_size__fineweb2__terabytes',
         ],
       },
+      {
+        key: 'yearly_revenue::openai',
+        title: 'Openai revenue benchmarks',
+        entries: ['yearly_revenue__openai__dollars'],
+      },
     ],
   );
 
-  assert.match(families[1].description, /representative entry uses trillions of words/i);
+  assert.match(families[0].description, /2 related measurements\. Including terabytes\./i);
 });

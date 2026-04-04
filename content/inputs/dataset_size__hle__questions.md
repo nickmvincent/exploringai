@@ -9,17 +9,14 @@ entity: hle
 units: questions
 source_url: 'https://lastexam.ai/'
 summary: "The number of public benchmark questions in Humanity's Last Exam."
-importanceRank: 15
-importanceReason: "Grounds the size of an expert-made evaluation benchmark in a public number."
 sourceName: "Humanity's Last Exam"
 sourceNote: "HLE's finalized public benchmark contains 2,500 questions."
 sourceLocator: "Benchmark overview on the Humanity's Last Exam site"
 sourceLocatorUrl: 'https://lastexam.ai/'
 sourceExcerpt: "Humanity's Last Exam describes the public benchmark as containing 2,500 questions."
-sourceQuality: "official"
-confidence: 0.95
+sourceQuality: "first-party-report"
 lastReviewed: "2026-03-10"
-featured: false
+mainExampleForCategory: false
 min: 0
 step: 10
 referenceCharts:

@@ -9,17 +9,14 @@ entity: books3
 units: books
 source_url: 'https://docs.justia.com/cases/federal/district-courts/california/candce/3%3A2024cv05417/434709/231'
 summary: "Number of books in Books3"
-importanceRank: 31
-importanceReason: "Makes copyrighted-book training debates legible in a concrete unit people understand."
 sourceName: "Bartz v. Anthropic summary-judgment order"
 sourceNote: "The June 2025 order identifies the Books3 dataset as containing 196,640 books."
 sourceLocator: "Summary-judgment order discussion of Anthropic's central library"
 sourceLocatorUrl: 'https://docs.justia.com/cases/federal/district-courts/california/candce/3%3A2024cv05417/434709/231'
 sourceExcerpt: "The order identifies Books3 as a dataset of 196,640 books."
-sourceQuality: "primary"
-confidence: 0.9
+sourceQuality: "third-party-report"
 lastReviewed: "2026-03-11"
-featured: false
+mainExampleForCategory: false
 min: 0
 step: 100
 referenceCharts:

@@ -9,17 +9,14 @@ entity: tulu_3
 units: examples
 source_url: 'https://huggingface.co/datasets/allenai/tulu-3-sft-mixture'
 summary: "Number of FLAN v2 examples in the public Tulu 3 SFT mixture."
-importanceRank: 29
-importanceReason: "FLAN-style task mixtures remain a useful benchmark for instruction tuning sources."
 sourceName: "Tulu 3 SFT mixture card"
 sourceNote: "FLAN v2 contributes 89,982 examples in the released mixture."
 sourceLocator: "Dataset card mixture summary table"
 sourceLocatorUrl: 'https://huggingface.co/datasets/allenai/tulu-3-sft-mixture'
 sourceExcerpt: "The Tulu 3 SFT card lists 89,982 FLAN v2 examples."
-sourceQuality: "official"
-confidence: 0.95
+sourceQuality: "first-party-report"
 lastReviewed: "2026-03-10"
-featured: false
+mainExampleForCategory: false
 min: 0
 step: 100
 date_added: '2026-03-10T00:00:00.000Z'

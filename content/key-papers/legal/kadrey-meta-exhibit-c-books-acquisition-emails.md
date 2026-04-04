@@ -12,7 +12,7 @@ key_inputs:
   - Approximate token count for Books3 plus Gutenberg
   - Internal estimates of book and journal counts in a sample licensing dataset
   - Internal comparisons between licensing costs, speed, and legal risk
-sourceQuality: primary
+sourceQuality: "third-party-report"
 sort_order: 100
 visibility: public
 type: KeyPaper

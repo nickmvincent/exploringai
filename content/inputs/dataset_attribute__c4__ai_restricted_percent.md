@@ -9,18 +9,15 @@ entity: c4
 units: percent
 source_url: 'https://arxiv.org/abs/2407.14933'
 summary: "Estimated share of C4 URLs carrying AI-restrictive terms or robots exclusions."
-importanceRank: 12
-importanceReason: "Makes the shrinking practical size of the open web legible as a single input."
 sourceName: "Consent in Crisis"
 sourceNote: "Longpre et al. estimate that about 45% of C4 URLs are restricted for AI use by terms or robots exclusions."
 sourceLocator: "Paper abstract and C4 restriction-share analysis"
 sourceExcerpt: "The paper estimates that about 45% of C4 URLs are restricted for AI use by terms or robots exclusions."
 source_key_papers:
   - empirical/consent-in-crisis
-sourceQuality: "primary"
-confidence: 0.9
+sourceQuality: "third-party-report"
 lastReviewed: "2026-03-11"
-featured: false
+mainExampleForCategory: false
 min: 0
 max: 100
 step: 1

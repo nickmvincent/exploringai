@@ -14,9 +14,9 @@ sourceNote: "The paper describes Common Pile as an 8TB openly licensed corpus."
 sourceLocator: "Paper abstract and corpus overview"
 sourceLocatorUrl: 'https://arxiv.org/html/2506.05209'
 sourceExcerpt: "The paper presents Common Pile as an 8TB openly licensed corpus."
-sourceQuality: "primary"
-confidence: 0.9
+sourceQuality: "third-party-report"
 lastReviewed: "2026-03-11"
+mainExampleForCategory: false
 min: 0
 step: 0.1
 date_added: '2026-03-11T19:19:59.000Z'

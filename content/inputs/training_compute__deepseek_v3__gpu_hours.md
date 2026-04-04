@@ -14,9 +14,9 @@ sourceNote: "DeepSeek reports 2.788 million H800 GPU hours for the full DeepSeek
 sourceLocator: "README overview bullets"
 sourceLocatorUrl: 'https://github.com/deepseek-ai/DeepSeek-V3#readme'
 sourceExcerpt: "The repository lists 2.788M H800 GPU hours for the full DeepSeek-V3 training run."
-sourceQuality: "official"
-confidence: 0.95
+sourceQuality: "first-party-report"
 lastReviewed: "2026-03-11"
+mainExampleForCategory: false
 min: 0
 step: 0.01
 date_added: '2026-03-11T19:19:59.000Z'

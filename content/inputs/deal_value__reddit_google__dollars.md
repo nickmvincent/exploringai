@@ -9,17 +9,14 @@ entity: reddit_google
 units: dollars
 source_url: 'https://tech.yahoo.com/ai/articles/exclusive-reddit-ai-content-licensing-041012503.html'
 summary: "Reported yearly value of the Google-Reddit data licensing deal."
-importanceRank: 13
-importanceReason: "A concrete public example of how valuable user-generated training data can be."
 sourceName: "Reuters"
 sourceNote: "Reuters reported the Google-Reddit licensing contract was worth about $60M per year."
 sourceLocator: "Reported deal-value summary in Reuters coverage"
 sourceLocatorUrl: 'https://tech.yahoo.com/ai/articles/exclusive-reddit-ai-content-licensing-041012503.html'
 sourceExcerpt: "Reuters reported that Google agreed to pay Reddit about $60M per year."
-sourceQuality: "reported"
-confidence: 0.72
+sourceQuality: "news"
 lastReviewed: "2026-03-10"
-featured: false
+mainExampleForCategory: false
 min: 0
 step: 0.1
 date_added: '2025-03-19T00:00:00.000Z'

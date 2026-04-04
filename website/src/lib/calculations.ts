@@ -13,9 +13,7 @@ export interface Input {
   entity?: string;
   units: string;
   source_url?: string;
-  nice_name?: string;
-  importanceRank?: number;
-  importanceReason?: string;
+  mainExampleForCategory?: boolean;
   sourceName?: string;
   sourceNote?: string;
   sourceLocator?: string;
@@ -25,9 +23,7 @@ export interface Input {
   sourcePublished?: string;
   sourceQuality?: string;
   summary?: string;
-  confidence?: number;
   lastReviewed?: string;
-  featured?: boolean;
   min?: number;
   max?: number;
   step?: number;

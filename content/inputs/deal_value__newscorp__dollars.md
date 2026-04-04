@@ -10,17 +10,14 @@ units: dollars
 source_url: >-
   https://www.investing.com/news/stock-market-news/sam-altmans-openai-signs-content-agreement-with-news-corp-3453039
 summary: "Estimated total value of the OpenAI-News Corp content licensing agreement."
-importanceRank: 35
-importanceReason: "A large publisher-licensing example that helps contextualize the upper end of disclosed deals."
 sourceName: "Reuters citing WSJ reporting"
 sourceNote: "Reported as worth more than $250M over five years; stored here as a round-number benchmark."
 sourceLocator: "Reported deal-value summary in Reuters coverage"
 sourceLocatorUrl: 'https://www.investing.com/news/stock-market-news/sam-altmans-openai-signs-content-agreement-with-news-corp-3453039'
 sourceExcerpt: "Reuters reported the OpenAI-News Corp agreement as worth more than $250M over five years."
-sourceQuality: "reported"
-confidence: 0.72
+sourceQuality: "news"
 lastReviewed: "2026-03-10"
-featured: false
+mainExampleForCategory: false
 min: 0
 step: 1
 date_added: '2025-03-19T00:00:00.000Z'

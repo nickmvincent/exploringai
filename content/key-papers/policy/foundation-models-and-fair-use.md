@@ -11,7 +11,7 @@ key_inputs:
   - Rates of regurgitation or memorization from copyrighted sources
   - Degree of source substitution for downstream users
   - Availability of technical mitigations for copyrighted material
-sourceQuality: primary
+sourceQuality: "third-party-report"
 sort_order: 30
 visibility: public
 type: KeyPaper

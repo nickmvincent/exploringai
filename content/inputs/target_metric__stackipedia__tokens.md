@@ -9,16 +9,13 @@ entity: stackipedia
 units: tokens
 source_url: null
 summary: "Internal planning target for the size of a hypothetical Stackipedia corpus."
-importanceRank: 43
-importanceReason: "A project target is useful once readers understand the external scale benchmarks above."
 sourceName: "Project default"
 sourceNote: "Internal target for a hypothetical public-knowledge corpus, not an observed empirical statistic."
 sourceLocator: "Project-default planning target for Stackipedia"
 sourceExcerpt: "Stackipedia planning uses a target corpus size of 1B tokens."
-sourceQuality: "assumption"
-confidence: 0.25
+sourceQuality: "other"
 lastReviewed: "2026-03-10"
-featured: false
+mainExampleForCategory: false
 min: 0
 step: 0.01
 date_added: '2025-03-19T00:00:00.000Z'

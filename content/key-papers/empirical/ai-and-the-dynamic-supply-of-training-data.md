@@ -11,7 +11,7 @@ key_inputs:
   - Elasticity of creator participation under different compensation rules
   - Change in data supply under opt-out, licensing, or royalty regimes
   - Time lag between policy changes and observable corpus shrinkage
-sourceQuality: primary
+sourceQuality: "third-party-report"
 sort_order: 50
 visibility: public
 type: KeyPaper

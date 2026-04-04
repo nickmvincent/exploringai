@@ -10,17 +10,14 @@ units: words
 source_url: >-
   https://www.penguin.co.uk/articles/2020/09/book-length-debate-fiction-long-novels
 summary: "An average number of words per book"
-importanceRank: 32
-importanceReason: "Helps readers convert a book count into a rough text-volume estimate."
 sourceName: "Penguin Books explainer"
 sourceNote: "This is an industry rule-of-thumb for a typical full-length book, not a census of Books3 itself."
 sourceLocator: "Industry explainer discussing typical novel length"
 sourceLocatorUrl: 'https://www.penguin.co.uk/articles/2020/09/book-length-debate-fiction-long-novels'
 sourceExcerpt: "The explainer treats roughly 80,000 words as a typical full-length book benchmark."
-sourceQuality: "industry"
-confidence: 0.6
+sourceQuality: "other"
 lastReviewed: "2026-03-10"
-featured: false
+mainExampleForCategory: false
 min: 0
 step: 100
 referenceCharts:

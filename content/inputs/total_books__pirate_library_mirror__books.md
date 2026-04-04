@@ -14,9 +14,9 @@ sourceNote: "Judge Alsup wrote that Anthropic downloaded at least two million bo
 sourceLocator: "Summary-judgment order discussion of Anthropic's central library"
 sourceLocatorUrl: 'https://docs.justia.com/cases/federal/district-courts/california/candce/3%3A2024cv05417/434709/231'
 sourceExcerpt: "The order says Anthropic downloaded at least two million books from Pirate Library Mirror."
-sourceQuality: "primary"
-confidence: 0.9
+sourceQuality: "third-party-report"
 lastReviewed: "2026-03-11"
+mainExampleForCategory: false
 min: 0
 step: 0.1
 date_added: '2026-03-11T19:19:59.000Z'

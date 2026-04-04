@@ -13,7 +13,7 @@ key_inputs:
   - Share of C4 URLs carrying AI-restrictive terms or robots rules
   - Growth rate of AI-specific restrictions over time
   - Share of top websites that newly block AI crawlers
-sourceQuality: primary
+sourceQuality: "third-party-report"
 sort_order: 60
 visibility: public
 type: KeyPaper

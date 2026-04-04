@@ -137,11 +137,6 @@ async function loadInputs(errors) {
     ensureFiniteNumber(errors, filePath, 'min', data.min);
     ensureFiniteNumber(errors, filePath, 'max', data.max);
     ensureFiniteNumber(errors, filePath, 'step', data.step);
-    ensureFiniteNumber(errors, filePath, 'confidence', data.confidence);
-
-    if (typeof data.confidence === 'number' && (data.confidence < 0 || data.confidence > 1)) {
-      errors.push(`${filePath}: confidence must be between 0 and 1.`);
-    }
 
     if (typeof data.step === 'number' && data.step <= 0) {
       errors.push(`${filePath}: step must be greater than 0.`);

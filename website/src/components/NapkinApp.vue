@@ -21,6 +21,7 @@ import {
   getInputTitle,
 } from '../lib/input-ui';
 import { parseEntries, serializeEntries } from '../lib/url-state';
+import type { CustomScenarioExport } from '../lib/excel-export';
 
 type ViewMode = 'scenarios' | 'inputs';
 type InputCatalogView = 'spreadsheet' | 'cards';
@@ -40,14 +41,12 @@ type GroupedInputEntry = {
 type GroupedInputSection = {
   key: string;
   chipLabel: string;
-  shortDescription: string;
   prompt: string;
   label: string;
   description: string;
   entries: GroupedInputEntry[];
 };
 type GroupedInputCatalogSection = GroupedInputSection & {
-  collectionCount: number;
   familyCount: number;
   families: CatalogFamily[];
 };
@@ -64,7 +63,7 @@ type FillPickerGroup = {
   options: FillPickerOption[];
 };
 
-const QUALITY_ORDER = ['official', 'primary', 'reported', 'industry', 'heuristic', 'assumption'];
+const QUALITY_ORDER = ['first-party-report', 'third-party-report', 'news', 'other'];
 const FREE_SCENARIO_DEFAULTS: FreeScenarioState = {
   title: 'Build Your Own Scenario',
   description: '',
@@ -99,10 +98,9 @@ const props = withDefaults(defineProps<{
   showInputLibrary: true,
   showHeader: true,
   showAbout: true,
-  pageEyebrow: 'Interactive calculator',
   pageTitle: 'Exploring AI: Data Napkin Math',
   pageDescription:
-    'Interactive napkin math, back-of-the-envelope estimates, and ballpark figures for training-data value, compensation, and distribution questions. How will the proceeds and benefits of AI be distributed?',
+    'Editable napkin math for training-data value, compensation, and distribution questions.',
 });
 const VIEW_TAB_IDS: Record<ViewMode, string> = {
   scenarios: 'view-tab-scenarios',
@@ -112,9 +110,16 @@ const VIEW_PANEL_IDS: Record<ViewMode, string> = {
   scenarios: 'napkinMath',
   inputs: 'inputLibrary',
 };
+const INPUT_LIBRARY_PANEL_IDS: Record<InputCatalogView, string> = {
+  spreadsheet: 'input-library-spreadsheet-panel',
+  cards: 'input-library-cards-panel',
+};
 const INSPECTOR_DIALOG_ID = 'input-inspector-dialog';
 const INSPECTOR_TITLE_ID = 'input-inspector-title';
 const INSPECTOR_DESCRIPTION_ID = 'input-inspector-description';
+const FREE_SCENARIO_HEADING_ID = 'free-scenario-heading';
+const FREE_SCENARIO_EXPANDED_ID = 'free-scenario-expanded';
+const FREE_SCENARIO_CALC_DETAILS_ID = 'free-scenario-calc-details';
 
 function getDefaultView(): ViewMode {
   if (!props.showScenarioLibrary && props.showInputLibrary) {
@@ -172,11 +177,14 @@ const inspectorDrawerRef = ref<HTMLElement | null>(null);
 const inspectorCloseButtonRef = ref<HTMLButtonElement | null>(null);
 
 const shareButtonLabel = ref('Copy current view');
+const exportWorkbookLabel = ref('Export Excel workbook');
 const freeScenarioCopyLabel = ref('Copy Scenario Markdown');
 const hasMounted = ref(false);
 const isApplyingUrlState = ref(false);
+const isExportingWorkbook = ref(false);
 
 let shareResetTimeout: ReturnType<typeof setTimeout> | null = null;
+let exportWorkbookResetTimeout: ReturnType<typeof setTimeout> | null = null;
 let freeScenarioCopyResetTimeout: ReturnType<typeof setTimeout> | null = null;
 let inspectorReturnFocusTarget: HTMLElement | null = null;
 
@@ -223,11 +231,8 @@ const sortedInputs = computed(() => {
   return Object.entries(inputs.value)
     .map(([key, input]) => ({ key, input }))
     .sort((a, b) => {
-      const rankA = a.input.importanceRank ?? Number.MAX_SAFE_INTEGER;
-      const rankB = b.input.importanceRank ?? Number.MAX_SAFE_INTEGER;
-
-      if (rankA !== rankB) {
-        return rankA - rankB;
+      if (Boolean(a.input.mainExampleForCategory) !== Boolean(b.input.mainExampleForCategory)) {
+        return a.input.mainExampleForCategory ? -1 : 1;
       }
 
       return (a.input.title || a.key).localeCompare(b.input.title || b.key);
@@ -278,7 +283,6 @@ const filteredInputs = computed(() => {
       input.title,
       input.variable_name,
       input.summary,
-      input.importanceReason,
       input.sourceName,
       input.sourceNote,
       input.sourceLocator,
@@ -319,7 +323,6 @@ const groupedFilteredInputCatalog = computed<GroupedInputCatalogSection[]>(() =>
       ...group,
       familyCount: families.length,
       families,
-      collectionCount: families.filter((family) => family.entries.length > 1).length,
     };
   });
 });
@@ -342,10 +345,6 @@ const filteredCatalogFamilyCount = computed(() => {
 
 const multiMeasureCatalogFamilyCount = computed(() => {
   return allCatalogFamilies.value.filter((family) => family.entries.length > 1).length;
-});
-
-const filteredCollectionCount = computed(() => {
-  return filteredCatalogFamilies.value.filter((family) => family.entries.length > 1).length;
 });
 
 const citedInputCount = computed(() => {
@@ -476,6 +475,22 @@ function getViewPanelId(view: ViewMode): string {
   return VIEW_PANEL_IDS[view];
 }
 
+function getInputLibraryPanelId(view: InputCatalogView): string {
+  return INPUT_LIBRARY_PANEL_IDS[view];
+}
+
+function getScenarioHeadingId(scenarioId: string): string {
+  return `scenario-${scenarioId}-heading`;
+}
+
+function getScenarioExploreId(scenarioId: string): string {
+  return `scenario-${scenarioId}-explainer`;
+}
+
+function getScenarioCalcDetailsId(scenarioId: string): string {
+  return `scenario-${scenarioId}-calc-details`;
+}
+
 function normalizeFieldNumber(value: number): string {
   if (!Number.isFinite(value)) return '';
 
@@ -551,27 +566,49 @@ function formatSourceQuality(sourceQuality?: string | null): string {
     return 'Not labeled';
   }
 
-  return formatLabel(sourceQuality);
+  switch (sourceQuality) {
+    case 'first-party-report':
+      return 'First-party report';
+    case 'third-party-report':
+      return 'Third-party report';
+    case 'news':
+      return 'News';
+    case 'other':
+      return 'Other';
+    default:
+      return sourceQuality.replace(/-/g, ' ');
+  }
 }
 
-function formatConfidence(confidence?: number | null): string | null {
-  if (confidence === undefined || confidence === null || !Number.isFinite(confidence)) {
-    return null;
+function buildResultAnnouncement(label: string, value: string, units?: string | null): string {
+  const valueWithUnits = [value, units].filter(Boolean).join(' ').trim();
+  return [label, valueWithUnits].filter(Boolean).join(': ');
+}
+
+function getFreeScenarioResultAnnouncement(): string {
+  const resultLabel = freeScenario.value.resultLabel || FREE_SCENARIO_DEFAULTS.resultLabel;
+
+  if (freeScenarioEvaluation.value.error) {
+    return buildResultAnnouncement(resultLabel, freeScenarioEvaluation.value.error);
   }
 
-  return `${Math.round(confidence * 100)}%`;
+  return buildResultAnnouncement(
+    resultLabel,
+    humanReadable(freeScenarioEvaluation.value.rawValue),
+    freeScenario.value.resultUnits || FREE_SCENARIO_DEFAULTS.resultUnits
+  );
+}
+
+function getScenarioResultAnnouncement(scenario: Scenario): string {
+  return buildResultAnnouncement(scenario.result_label, scenario.result.value, scenario.result.units);
 }
 
 function getSourceQualityTone(sourceQuality?: string | null): string {
-  if (sourceQuality === 'assumption' || sourceQuality === 'heuristic') {
-    return 'caution';
-  }
-
-  if (sourceQuality === 'official' || sourceQuality === 'primary') {
+  if (sourceQuality === 'first-party-report') {
     return 'strong';
   }
 
-  if (sourceQuality === 'reported' || sourceQuality === 'industry') {
+  if (sourceQuality === 'third-party-report' || sourceQuality === 'news') {
     return 'moderate';
   }
 
@@ -583,12 +620,8 @@ function getSourceAvailabilityNote(input?: Input | null): string | null {
     return null;
   }
 
-  if (input.sourceQuality === 'assumption') {
-    return 'No external source linked. This is an editable project assumption.';
-  }
-
-  if (input.sourceQuality === 'heuristic') {
-    return 'No external source linked. This is a heuristic benchmark rather than a directly cited public figure.';
+  if (input.sourceQuality === 'other') {
+    return 'No external source linked. This is a project-specific benchmark or uncited reference point.';
   }
 
   return 'No external source linked for this input.';
@@ -756,6 +789,12 @@ function commitDraftValue(key: string) {
     logChange(key, nextValue);
     recalculate();
   }
+}
+
+function commitAllDraftValues() {
+  Object.keys(inputDrafts.value).forEach((key) => {
+    commitDraftValue(key);
+  });
 }
 
 function handleValueKeydown(key: string, event: KeyboardEvent) {
@@ -1088,7 +1127,7 @@ function getFillOptionGroups(variable: string): FillPickerGroup[] {
       title: option.title || formatLabel(option.variable_name),
       valueText: `${formatInputFieldValue(option)} ${option.display_units}`.trim(),
       sourceQualityLabel: option.sourceQuality ? formatSourceQuality(option.sourceQuality) : null,
-      summary: option.summary || option.importanceReason || null,
+      summary: option.summary || null,
     })),
   }));
 }
@@ -1377,6 +1416,7 @@ function applyUrlStateFromLocation() {
 }
 
 async function copyShareLink() {
+  commitAllDraftValues();
   syncUrlState();
 
   try {
@@ -1392,6 +1432,60 @@ async function copyShareLink() {
 
   shareResetTimeout = window.setTimeout(() => {
     shareButtonLabel.value = 'Copy current view';
+  }, 1800);
+}
+
+function getCustomScenarioExport(): CustomScenarioExport | null {
+  if (!freeScenario.value.expression.trim()) {
+    return null;
+  }
+
+  return {
+    title: freeScenario.value.title || FREE_SCENARIO_DEFAULTS.title,
+    description: freeScenario.value.description,
+    category: freeScenario.value.category,
+    expression: freeScenario.value.expression,
+    resultLabel: freeScenario.value.resultLabel || FREE_SCENARIO_DEFAULTS.resultLabel,
+    resultUnits: freeScenario.value.resultUnits || FREE_SCENARIO_DEFAULTS.resultUnits,
+    rawValue: freeScenarioEvaluation.value.rawValue,
+    error: freeScenarioEvaluation.value.error,
+  };
+}
+
+async function exportWorkbook() {
+  if (isExportingWorkbook.value) {
+    return;
+  }
+
+  commitAllDraftValues();
+  syncUrlState();
+  isExportingWorkbook.value = true;
+  exportWorkbookLabel.value = 'Preparing Excel...';
+
+  try {
+    const { buildWorkbookExportModel, downloadWorkbookExport } = await import('../lib/excel-export');
+    const workbook = buildWorkbookExportModel({
+      inputs: inputs.value,
+      scenarios: scenariosData.value,
+      customScenario: getCustomScenarioExport(),
+      sourceUrl: window.location.href,
+    });
+
+    await downloadWorkbookExport(workbook);
+    exportWorkbookLabel.value = 'Excel Downloaded';
+  } catch (error) {
+    console.error('Unable to export Excel workbook:', error);
+    exportWorkbookLabel.value = 'Export Failed';
+  } finally {
+    isExportingWorkbook.value = false;
+  }
+
+  if (exportWorkbookResetTimeout) {
+    clearTimeout(exportWorkbookResetTimeout);
+  }
+
+  exportWorkbookResetTimeout = window.setTimeout(() => {
+    exportWorkbookLabel.value = 'Export Excel workbook';
   }, 1800);
 }
 
@@ -1485,6 +1579,10 @@ onBeforeUnmount(() => {
     clearTimeout(shareResetTimeout);
   }
 
+  if (exportWorkbookResetTimeout) {
+    clearTimeout(exportWorkbookResetTimeout);
+  }
+
   if (freeScenarioCopyResetTimeout) {
     clearTimeout(freeScenarioCopyResetTimeout);
   }
@@ -1543,6 +1641,14 @@ onBeforeUnmount(() => {
 
             <div class="toolbar-actions">
               <button
+                class="btn btn-outline-primary btn-sm"
+                type="button"
+                :disabled="isExportingWorkbook"
+                @click="exportWorkbook"
+              >
+                {{ exportWorkbookLabel }}
+              </button>
+              <button
                 class="btn btn-outline-secondary btn-sm"
                 type="button"
                 :disabled="!hasCustomizedState"
@@ -1573,17 +1679,13 @@ onBeforeUnmount(() => {
           </div>
 
           <div v-if="isScenarioViewVisible" class="page-toolbar-bottom">
-            <p class="toolbar-note">
-              {{ filteredScenarios.length }} {{ pluralize(filteredScenarios.length, 'scenario') }}.
-              Open any one for the notes and formula.
-            </p>
-
-            <div class="chip-row">
+            <div class="chip-row" role="group" aria-label="Filter scenarios by category">
               <button
                 v-for="category in uniqueCategories"
                 :key="category"
                 class="category-chip"
                 :class="{ active: selectedScenario === category }"
+                :aria-pressed="selectedScenario === category"
                 type="button"
                 @click="toggleCategory(category)"
               >
@@ -1603,10 +1705,11 @@ onBeforeUnmount(() => {
               />
             </label>
 
-            <div class="view-tabs input-library-view-switch" aria-label="Inputs library view">
+            <div class="view-tabs input-library-view-switch" role="group" aria-label="Inputs library view">
               <button
                 class="view-tab"
                 :class="{ active: inputLibraryView === 'spreadsheet' }"
+                :aria-pressed="inputLibraryView === 'spreadsheet'"
                 type="button"
                 @click="setInputLibraryView('spreadsheet')"
               >
@@ -1615,6 +1718,7 @@ onBeforeUnmount(() => {
               <button
                 class="view-tab"
                 :class="{ active: inputLibraryView === 'cards' }"
+                :aria-pressed="inputLibraryView === 'cards'"
                 type="button"
                 @click="setInputLibraryView('cards')"
               >
@@ -1658,8 +1762,7 @@ onBeforeUnmount(() => {
             <p class="toolbar-note">
               Showing {{ filteredInputs.length }} of {{ sortedInputs.length }}
               {{ pluralize(sortedInputs.length, 'input') }} across
-              {{ filteredCatalogFamilyCount }} {{ pluralize(filteredCatalogFamilyCount, 'benchmark family', 'benchmark families') }}
-              in {{ groupedFilteredInputCatalog.length }} {{ pluralize(groupedFilteredInputCatalog.length, 'aisle') }}.
+              {{ filteredCatalogFamilyCount }} {{ pluralize(filteredCatalogFamilyCount, 'benchmark family', 'benchmark families') }}.
             </p>
           </div>
         </section>
@@ -1683,7 +1786,7 @@ onBeforeUnmount(() => {
               <template v-if="freeScenarioOpen || freeScenarioHasDraft">
                 <div class="scenario-card-header free-scenario-header">
                   <div class="scenario-intro">
-                    <h3>{{ freeScenario.title || FREE_SCENARIO_DEFAULTS.title }}</h3>
+                    <h3 :id="FREE_SCENARIO_HEADING_ID">{{ freeScenario.title || FREE_SCENARIO_DEFAULTS.title }}</h3>
                     <p class="scenario-description-text">
                       Build a custom formula from the shared input library when the curated scenarios do not
                       quite match the question you want to ask.
@@ -1692,9 +1795,15 @@ onBeforeUnmount(() => {
 
                   <div class="scenario-result-panel" :class="{ 'scenario-result-panel-error': freeScenarioEvaluation.error }">
                     <span class="result-label">{{ freeScenario.resultLabel || FREE_SCENARIO_DEFAULTS.resultLabel }}</span>
-                    <div class="result-output" :class="{ 'result-output-error': freeScenarioEvaluation.error }">
+                    <output
+                      class="result-output"
+                      :class="{ 'result-output-error': freeScenarioEvaluation.error }"
+                      aria-atomic="true"
+                      aria-live="polite"
+                      :aria-label="getFreeScenarioResultAnnouncement()"
+                    >
                       {{ freeScenarioEvaluation.error ? 'Check formula' : humanReadable(freeScenarioEvaluation.rawValue) }}
-                    </div>
+                    </output>
                     <div class="result-units">
                       {{ freeScenario.resultUnits || FREE_SCENARIO_DEFAULTS.resultUnits }}
                     </div>
@@ -1721,7 +1830,13 @@ onBeforeUnmount(() => {
                         : 'Keep this advanced builder tucked away until the curated scenarios stop being enough.'
                     }}
                   </p>
-                  <button class="btn btn-outline-primary btn-sm" type="button" @click="toggleFreeScenarioOpen">
+                  <button
+                    class="btn btn-outline-primary btn-sm"
+                    :aria-controls="FREE_SCENARIO_EXPANDED_ID"
+                    :aria-expanded="freeScenarioOpen"
+                    type="button"
+                    @click="toggleFreeScenarioOpen"
+                  >
                     {{ freeScenarioOpen ? 'Hide builder' : 'Open builder' }}
                   </button>
                 </div>
@@ -1729,15 +1844,27 @@ onBeforeUnmount(() => {
 
               <div v-else class="free-scenario-closed-summary">
                 <div>
-                  <h3>Custom scenario builder</h3>
+                  <h3 :id="FREE_SCENARIO_HEADING_ID">Custom scenario builder</h3>
                   <p>For questions the curated examples do not cover.</p>
                 </div>
-                <button class="btn btn-outline-primary btn-sm" type="button" @click="toggleFreeScenarioOpen">
+                <button
+                  class="btn btn-outline-primary btn-sm"
+                  :aria-controls="FREE_SCENARIO_EXPANDED_ID"
+                  :aria-expanded="freeScenarioOpen"
+                  type="button"
+                  @click="toggleFreeScenarioOpen"
+                >
                   Open builder
                 </button>
               </div>
 
-              <template v-if="freeScenarioOpen">
+              <div
+                v-if="freeScenarioOpen"
+                :id="FREE_SCENARIO_EXPANDED_ID"
+                aria-labelledby="free-scenario-heading"
+                class="free-scenario-expanded"
+                role="region"
+              >
                 <div class="free-scenario-metadata">
                   <label class="free-scenario-field">
                     <span>Card title</span>
@@ -1843,8 +1970,8 @@ onBeforeUnmount(() => {
                   <p class="free-scenario-helper">
                     Supported syntax: numbers, parentheses, and <code>+</code>, <code>-</code>, <code>*</code>,
                     <code>/</code>, <code>^</code>. Input tokens use curly braces, like
-                    <code>{{ '{yearly_revenue__openai__dollars}' }}</code>. When you like the draft, copy
-                    markdown for <code>content/scenarios/{{ freeScenarioSuggestedFilename }}</code>.
+                    <code>{{ '{yearly_revenue__openai__dollars}' }}</code>. Copy the markdown when you want to turn
+                    the draft into <code>content/scenarios/{{ freeScenarioSuggestedFilename }}</code>.
                   </p>
                 </div>
 
@@ -1866,7 +1993,6 @@ onBeforeUnmount(() => {
                         v-for="entry in group.entries"
                         :key="entry.key"
                         :changed="isInputChanged(entry.key)"
-                        :confidence-label="formatConfidence(entry.input.confidence)"
                         :entry="entry"
                         :field-value="getFieldValue(entry.key)"
                         :readable-note="getInputReadableNote(entry.key)"
@@ -1900,6 +2026,8 @@ onBeforeUnmount(() => {
                   </button>
                   <button
                     class="btn btn-outline-info btn-sm"
+                    :aria-controls="FREE_SCENARIO_CALC_DETAILS_ID"
+                    :aria-expanded="freeScenario.showCalcDetails"
                     type="button"
                     @click="freeScenario.showCalcDetails = !freeScenario.showCalcDetails"
                   >
@@ -1907,7 +2035,13 @@ onBeforeUnmount(() => {
                   </button>
                 </div>
 
-                <div v-if="freeScenario.showCalcDetails" class="calc-details">
+                <div
+                  v-if="freeScenario.showCalcDetails"
+                  :id="FREE_SCENARIO_CALC_DETAILS_ID"
+                  aria-label="Calculation details for the custom scenario"
+                  class="calc-details"
+                  role="region"
+                >
                   <h4>Calculation Details</h4>
                   <div class="operation-description">
                     <strong>Formula</strong>
@@ -1939,7 +2073,7 @@ onBeforeUnmount(() => {
                     </span>
                   </div>
                 </div>
-              </template>
+              </div>
 
             </article>
 
@@ -1953,7 +2087,7 @@ onBeforeUnmount(() => {
               <div class="scenario-card-header scenario-card-header-curated">
                 <div class="scenario-intro">
                   <div class="scenario-category-label">{{ scenario.category }}</div>
-                  <h3>{{ scenario.title }}</h3>
+                  <h3 :id="getScenarioHeadingId(scenario.id)">{{ scenario.title }}</h3>
                   <p class="scenario-description-text">
                     <template v-for="(segment, idx) in parseDescription(scenario.description)" :key="idx">
                       <template v-if="segment.type === 'text'">{{ segment.text }}</template>
@@ -1973,7 +2107,14 @@ onBeforeUnmount(() => {
                 <div class="scenario-claim-panel">
                   <div class="scenario-result-panel">
                     <span class="result-label">{{ scenario.result_label }}</span>
-                    <div class="result-output">{{ scenario.result.value }}</div>
+                    <output
+                      aria-atomic="true"
+                      aria-live="polite"
+                      class="result-output"
+                      :aria-label="getScenarioResultAnnouncement(scenario)"
+                    >
+                      {{ scenario.result.value }}
+                    </output>
                     <div class="result-units">{{ scenario.result.units }}</div>
                   </div>
                 </div>
@@ -1982,27 +2123,26 @@ onBeforeUnmount(() => {
               <div class="scenario-card-footer scenario-card-footer-summary">
                 <button
                   class="btn btn-outline-primary btn-sm"
+                  :aria-controls="getScenarioExploreId(scenario.id)"
+                  :aria-expanded="scenario.showExplore"
                   type="button"
                   @click="toggleScenarioExplore(scenario)"
                 >
                   {{ scenario.showExplore ? 'Close notes' : 'Open notes' }}
                 </button>
-                <button
-                  v-if="scenario.showExplore"
-                  class="btn btn-outline-info btn-sm"
-                  type="button"
-                  @click="scenario.showCalcDetails = !scenario.showCalcDetails"
-                >
-                  {{ scenario.showCalcDetails ? 'Hide' : 'Show' }} formula
-                </button>
               </div>
 
-              <div v-if="scenario.showExplore" class="scenario-explainer">
+              <div
+                v-if="scenario.showExplore"
+                :id="getScenarioExploreId(scenario.id)"
+                :aria-labelledby="getScenarioHeadingId(scenario.id)"
+                class="scenario-explainer"
+                role="region"
+              >
                 <div class="scenario-explainer-header">
-                  <div>
+                  <div class="scenario-explainer-header-copy">
                     <h4>Notes and assumptions</h4>
                   </div>
-                  <p>Shared inputs stay linked across scenarios, so edits carry through everywhere they are reused.</p>
                 </div>
 
                 <div class="scenario-input-group-list">
@@ -2026,7 +2166,6 @@ onBeforeUnmount(() => {
                         v-for="entry in group.entries"
                         :key="entry.key"
                         :changed="isInputChanged(entry.key)"
-                        :confidence-label="formatConfidence(entry.input.confidence)"
                         :entry="entry"
                         :field-value="getFieldValue(entry.key)"
                         :readable-note="getInputReadableNote(entry.key)"
@@ -2045,7 +2184,13 @@ onBeforeUnmount(() => {
                   </div>
                 </div>
 
-                <div v-if="scenario.showCalcDetails" class="calc-details">
+                <div
+                  v-if="scenario.showCalcDetails"
+                  :id="getScenarioCalcDetailsId(scenario.id)"
+                  :aria-label="`Calculation details for ${scenario.title}`"
+                  class="calc-details"
+                  role="region"
+                >
                   <h4>Calculation Details</h4>
                   <div class="operation-description">
                     <strong>Formula</strong>
@@ -2067,6 +2212,18 @@ onBeforeUnmount(() => {
                     <span class="text-primary">{{ humanReadable(scenario.result.rawValue) }} {{ scenario.result.units }}</span>
                   </div>
                 </div>
+
+                <div class="scenario-explainer-actions">
+                  <button
+                    class="btn btn-outline-info btn-sm"
+                    :aria-controls="getScenarioCalcDetailsId(scenario.id)"
+                    :aria-expanded="scenario.showCalcDetails"
+                    type="button"
+                    @click="scenario.showCalcDetails = !scenario.showCalcDetails"
+                  >
+                    {{ scenario.showCalcDetails ? 'Hide formula' : 'Show formula' }}
+                  </button>
+                </div>
               </div>
             </article>
           </div>
@@ -2087,15 +2244,8 @@ onBeforeUnmount(() => {
         >
           <div class="input-catalog-intro">
             <p id="inputLibrary-description" class="input-catalog-intro-copy">
-              Browse the shared assumptions as either a spreadsheet or a tighter catalog of benchmark families.
-              Related measurements now stay bundled together, so most duplicate-looking rows read as one source
-              with nearby variants instead of accidental repeats.
-              <template v-if="filteredCollectionCount">
-                {{ filteredCollectionCount }}
-                {{ pluralize(filteredCollectionCount, 'family', 'families') }} in the current view
-                {{ filteredCollectionCount === 1 ? 'contains' : 'contain' }} multiple
-                related measurements.
-              </template>
+              Browse the shared inputs as a spreadsheet or grouped catalog. Related measurements stay together
+              instead of reading like duplicate rows.
             </p>
 
             <div class="input-catalog-mini-stats" aria-label="Inputs library overview">
@@ -2114,10 +2264,6 @@ onBeforeUnmount(() => {
             <aside class="input-catalog-sidebar">
               <div class="input-catalog-sidebar-inner">
                 <p class="input-catalog-sidebar-title">Jump by question type</p>
-                <p class="input-catalog-sidebar-copy">
-                  Each section keeps related benchmarks together in both views.
-                </p>
-
                 <nav class="input-catalog-nav" aria-label="Input categories">
                   <a
                     v-for="group in groupedFilteredInputCatalog"
@@ -2131,14 +2277,17 @@ onBeforeUnmount(() => {
                         {{ group.familyCount }} {{ pluralize(group.familyCount, 'family', 'families') }}
                       </span>
                     </span>
-                    <span class="input-catalog-link-copy">{{ group.shortDescription }}</span>
                   </a>
                 </nav>
               </div>
             </aside>
 
             <div class="input-catalog-main">
-              <div v-if="inputLibraryView === 'spreadsheet'" class="input-catalog-group-stack">
+              <div
+                v-if="inputLibraryView === 'spreadsheet'"
+                :id="getInputLibraryPanelId('spreadsheet')"
+                class="input-catalog-group-stack"
+              >
                 <section
                   v-for="group in groupedFilteredInputCatalog"
                   :id="getInputCatalogGroupId('spreadsheet', group.key)"
@@ -2154,12 +2303,15 @@ onBeforeUnmount(() => {
 
                   <div class="input-spreadsheet-wrap">
                     <table class="input-spreadsheet-table">
+                      <caption class="visually-hidden">
+                        {{ group.label }} benchmarks with editable current values, metadata, and source details.
+                      </caption>
                       <thead>
                         <tr>
-                          <th>Input</th>
-                          <th>Current value</th>
-                          <th>Metadata</th>
-                          <th>Source and usage</th>
+                          <th scope="col">Input</th>
+                          <th scope="col">Current value</th>
+                          <th scope="col">Metadata</th>
+                          <th scope="col">Source and usage</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -2168,7 +2320,7 @@ onBeforeUnmount(() => {
                           :key="entry.key"
                           class="input-spreadsheet-row"
                         >
-                          <td class="input-spreadsheet-main" data-label="Input">
+                          <th scope="row" class="input-spreadsheet-main" data-label="Input">
                             <div class="input-spreadsheet-titleline">
                               <button
                                 class="input-spreadsheet-title"
@@ -2177,12 +2329,12 @@ onBeforeUnmount(() => {
                               >
                                 {{ getInputTitle(entry.key, entry.input) }}
                               </button>
-                              <span class="input-rank-text">Rank {{ entry.input.importanceRank || '-' }}</span>
+                              <span v-if="entry.input.mainExampleForCategory" class="input-rank-text">Main example</span>
                             </div>
-                            <p class="input-spreadsheet-summary">
-                              {{ entry.input.summary || entry.input.importanceReason }}
+                            <p v-if="entry.input.summary" class="input-spreadsheet-summary">
+                              {{ entry.input.summary }}
                             </p>
-                          </td>
+                          </th>
 
                           <td class="input-spreadsheet-value" data-label="Current value">
                             <div class="input-spreadsheet-value-row">
@@ -2234,9 +2386,6 @@ onBeforeUnmount(() => {
                             <div class="input-spreadsheet-copy-list">
                               <span>{{ formatLabel(entry.input.variable_type) }}</span>
                               <span v-if="entry.input.entity">{{ formatLabel(entry.input.entity) }}</span>
-                              <span v-if="formatConfidence(entry.input.confidence)">
-                                Confidence {{ formatConfidence(entry.input.confidence) }}
-                              </span>
                             </div>
                           </td>
 
@@ -2267,7 +2416,10 @@ onBeforeUnmount(() => {
                               </a>
                             </div>
                             <div v-if="entry.input.usedIn?.length" class="input-spreadsheet-usage">
-                              <span class="usage-label">Used in</span>
+                              <span class="input-spreadsheet-usage-count">
+                                {{ entry.input.usedIn.length }}
+                                {{ entry.input.usedIn.length === 1 ? 'scenario uses this' : 'scenarios use this' }}
+                              </span>
                               <button
                                 v-for="scenario in entry.input.usedIn"
                                 :key="scenario.id"
@@ -2286,7 +2438,11 @@ onBeforeUnmount(() => {
                 </section>
               </div>
 
-              <div v-else class="input-catalog-group-stack">
+              <div
+                v-else
+                :id="getInputLibraryPanelId('cards')"
+                class="input-catalog-group-stack"
+              >
                 <section
                   v-for="group in groupedFilteredInputCatalog"
                   :id="getInputCatalogGroupId('cards', group.key)"
@@ -2299,13 +2455,6 @@ onBeforeUnmount(() => {
                     </div>
                     <p>{{ group.description }}</p>
                   </div>
-
-                  <p v-if="group.collectionCount" class="input-family-group-note">
-                    {{ group.collectionCount }}
-                    {{ pluralize(group.collectionCount, 'benchmark family') }} in this aisle
-                    {{ group.collectionCount === 1 ? 'contains' : 'contain' }} multiple related measurements, so the
-                    catalog view keeps them bundled together.
-                  </p>
 
                   <div class="input-family-grid">
                     <template v-for="family in group.families" :key="family.key">
@@ -2323,16 +2472,8 @@ onBeforeUnmount(() => {
                         <p class="input-family-card-copy">{{ family.description }}</p>
 
                         <div class="input-family-lead">
-                          <div class="input-family-subhead">
-                            <span class="input-family-subhead-label">Representative entry</span>
-                            <span class="input-family-subhead-copy">
-                              {{ family.entries[0].input.display_units }}
-                            </span>
-                          </div>
-
                           <InputLibraryCard
                             :changed="isInputChanged(family.entries[0].key)"
-                            :confidence-label="formatConfidence(family.entries[0].input.confidence)"
                             :entry="family.entries[0]"
                             :field-value="getFieldValue(family.entries[0].key)"
                             :readable-note="getInputReadableNote(family.entries[0].key)"
@@ -2350,12 +2491,7 @@ onBeforeUnmount(() => {
                         </div>
 
                         <div class="input-family-variants">
-                          <div class="input-family-subhead">
-                            <span class="input-family-subhead-label">Variants</span>
-                            <span class="input-family-subhead-copy">
-                              Same family, different units or nearby cuts.
-                            </span>
-                          </div>
+                          <p class="input-family-subhead">Other variants</p>
 
                           <div class="inputs-library input-family-variant-grid">
                             <InputLibraryCard
@@ -2363,7 +2499,6 @@ onBeforeUnmount(() => {
                               :key="entry.key"
                               compact
                               :changed="isInputChanged(entry.key)"
-                              :confidence-label="formatConfidence(entry.input.confidence)"
                               :entry="entry"
                               :field-value="getFieldValue(entry.key)"
                               :readable-note="getInputReadableNote(entry.key)"
@@ -2386,7 +2521,6 @@ onBeforeUnmount(() => {
                         v-else
                         :key="family.entries[0].key"
                         :changed="isInputChanged(family.entries[0].key)"
-                        :confidence-label="formatConfidence(family.entries[0].input.confidence)"
                         :entry="family.entries[0]"
                         :field-value="getFieldValue(family.entries[0].key)"
                         :readable-note="getInputReadableNote(family.entries[0].key)"
@@ -2418,13 +2552,8 @@ onBeforeUnmount(() => {
             <summary>About this page</summary>
             <div class="about-content">
               <p>
-                <strong>This website is still evolving.</strong> The goal is to make public debates about
-                training data legible through transparent assumptions and easy-to-share napkin math.
-              </p>
-              <p>
-                The calculations are intentionally simple. What matters most is helping readers inspect the
-                assumptions, compare alternate reference points, and see how much each estimate depends on a
-                small set of shared inputs.
+                <strong>This site is still evolving.</strong> It is built to make AI training-data and distribution
+                debates easier to inspect with shared inputs and simple, editable math.
               </p>
               <p>
                 The
@@ -2439,12 +2568,11 @@ onBeforeUnmount(() => {
       </main>
 
       <aside
+        v-if="rightPanelOpen"
         :id="INSPECTOR_DIALOG_ID"
         ref="inspectorDrawerRef"
-        class="inspector-drawer"
-        :class="{ open: rightPanelOpen }"
+        class="inspector-drawer open"
         :aria-describedby="INSPECTOR_DESCRIPTION_ID"
-        :aria-hidden="!rightPanelOpen"
         :aria-labelledby="INSPECTOR_TITLE_ID"
         aria-modal="true"
         role="dialog"
@@ -2469,13 +2597,12 @@ onBeforeUnmount(() => {
             </p>
 
             <div v-if="!selectedInputDetails" class="inspector-empty">
-              Select any "Inspect" button to see the source note, external link, and scenario usage for that input.
+              Choose an input to see its source, notes, and linked scenarios.
             </div>
 
             <div v-else class="inspector-details">
               <div class="inspector-detail-header">
                 <div>
-                  <p class="eyebrow">{{ formatLabel(selectedInputDetails.variable_type) }}</p>
                   <h3>{{ selectedInputDetails.title }}</h3>
                 </div>
                 <a
@@ -2498,8 +2625,8 @@ onBeforeUnmount(() => {
                 </a>
               </div>
 
-              <p class="inspector-summary">
-                {{ selectedInputDetails.summary || selectedInputDetails.importanceReason }}
+              <p v-if="selectedInputDetails.summary" class="inspector-summary">
+                {{ selectedInputDetails.summary }}
               </p>
 
               <InputReferenceCharts
@@ -2509,37 +2636,27 @@ onBeforeUnmount(() => {
               />
 
               <div class="detail-item">
-                <span class="detail-label">Current value</span>
+                <span class="detail-label">Current</span>
                 <span class="detail-value">
                   {{ formatInputFieldValue(selectedInputDetails) }} {{ selectedInputDetails.display_units }}
                 </span>
               </div>
 
               <div class="detail-item">
-                <span class="detail-label">Default value</span>
+                <span class="detail-label">Default</span>
                 <span class="detail-value">
                   {{ formatInputFieldValue({ ...selectedInputDetails, value: selectedInputDetails.default_value }) }}
                   {{ selectedInputDetails.display_units }}
                 </span>
               </div>
 
-              <div v-if="selectedInputDetails.importanceRank" class="detail-item">
-                <span class="detail-label">Importance rank</span>
-                <span class="detail-value">#{{ selectedInputDetails.importanceRank }}</span>
-              </div>
-
-              <div v-if="selectedInputDetails.importanceReason" class="detail-item">
-                <span class="detail-label">Why it matters</span>
-                <span class="detail-value">{{ selectedInputDetails.importanceReason }}</span>
-              </div>
-
-              <div class="detail-item">
-                <span class="detail-label">Variable name</span>
-                <span class="detail-value">{{ selectedInputDetails.variable_name }}</span>
+              <div v-if="selectedInputDetails.mainExampleForCategory" class="detail-item">
+                <span class="detail-label">Main example</span>
+                <span class="detail-value">Yes</span>
               </div>
 
               <div v-if="selectedInputDetails.sourceQuality" class="detail-item">
-                <span class="detail-label">Source quality</span>
+                <span class="detail-label">Quality</span>
                 <div class="detail-meta-row">
                   <span
                     class="quality-pill"
@@ -2547,14 +2664,11 @@ onBeforeUnmount(() => {
                   >
                     {{ formatSourceQuality(selectedInputDetails.sourceQuality) }}
                   </span>
-                  <span v-if="formatConfidence(selectedInputDetails.confidence)" class="detail-meta-copy">
-                    Confidence {{ formatConfidence(selectedInputDetails.confidence) }}
-                  </span>
                 </div>
               </div>
 
               <div v-if="selectedInputDetails.source_url || getSourceAvailabilityNote(selectedInputDetails)" class="detail-item">
-                <span class="detail-label">External source</span>
+                <span class="detail-label">Source</span>
                 <span v-if="selectedInputDetails.source_url" class="detail-value">
                   <a :href="selectedInputDetails.source_url" target="_blank" rel="noreferrer">
                     {{ selectedInputDetails.sourceName || selectedInputDetails.source_url }}
@@ -2571,32 +2685,32 @@ onBeforeUnmount(() => {
               </div>
 
               <div v-if="selectedInputDetails.sourceLocator" class="detail-item">
-                <span class="detail-label">Exact locator</span>
+                <span class="detail-label">Locator</span>
                 <span class="detail-value">{{ selectedInputDetails.sourceLocator }}</span>
               </div>
 
               <div v-if="selectedInputDetails.sourceExcerpt" class="detail-item">
-                <span class="detail-label">Verification excerpt</span>
+                <span class="detail-label">Excerpt</span>
                 <span class="detail-value detail-value-quote">{{ selectedInputDetails.sourceExcerpt }}</span>
               </div>
 
               <div v-if="selectedInputDetails.derivationNote" class="detail-item">
-                <span class="detail-label">Derivation note</span>
+                <span class="detail-label">Derivation</span>
                 <span class="detail-value">{{ selectedInputDetails.derivationNote }}</span>
               </div>
 
               <div v-if="selectedInputDetails.sourcePublished" class="detail-item">
-                <span class="detail-label">Source date</span>
+                <span class="detail-label">Published</span>
                 <span class="detail-value">{{ selectedInputDetails.sourcePublished }}</span>
               </div>
 
               <div v-if="selectedInputDetails.lastReviewed" class="detail-item">
-                <span class="detail-label">Last reviewed</span>
+                <span class="detail-label">Reviewed</span>
                 <span class="detail-value">{{ selectedInputDetails.lastReviewed }}</span>
               </div>
 
               <div v-if="selectedInputDetails.usedIn?.length" class="detail-item">
-                <span class="detail-label">Used in</span>
+                <span class="detail-label">Scenarios</span>
                 <div class="detail-chip-group">
                   <button
                     v-for="scenario in selectedInputDetails.usedIn"

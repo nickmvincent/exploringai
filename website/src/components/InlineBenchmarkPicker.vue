@@ -113,20 +113,19 @@ onBeforeUnmount(() => {
       class="benchmark-picker-trigger"
       :aria-expanded="open"
       :aria-label="ariaLabel"
+      :title="selectedOption.valueText"
       aria-haspopup="dialog"
       @click="toggle"
     >
       <span class="benchmark-picker-copy">
         <span class="benchmark-picker-title">{{ selectedOption.title }}</span>
-        <span class="benchmark-picker-meta">{{ selectedOption.valueText }}</span>
       </span>
       <span class="benchmark-picker-caret" aria-hidden="true"></span>
     </button>
 
-    <span v-else-if="selectedOption" class="benchmark-picker-static-copy">
+    <span v-else-if="selectedOption" class="benchmark-picker-static-copy" :title="selectedOption.valueText">
       <span class="benchmark-picker-copy">
         <span class="benchmark-picker-title">{{ selectedOption.title }}</span>
-        <span class="benchmark-picker-meta">{{ selectedOption.valueText }}</span>
       </span>
     </span>
 
@@ -177,9 +176,9 @@ onBeforeUnmount(() => {
 .benchmark-picker {
   position: relative;
   display: inline-flex;
-  vertical-align: middle;
-  max-width: min(100%, 30rem);
-  margin: 0 0.22rem;
+  vertical-align: baseline;
+  max-width: min(100%, 24rem);
+  margin: 0 0.16rem;
   z-index: 2;
 }
 
@@ -190,14 +189,14 @@ onBeforeUnmount(() => {
 .benchmark-picker-trigger,
 .benchmark-picker-static-copy {
   display: inline-flex;
-  align-items: center;
-  gap: 0.8rem;
+  align-items: baseline;
+  gap: 0.35rem;
   min-width: 0;
   max-width: 100%;
-  padding: 0.28rem 0.56rem 0.3rem;
+  padding: 0.08rem 0.42rem 0.12rem;
   border-radius: 2px;
   border: 1px solid rgba(31, 39, 51, 0.14);
-  background: rgba(251, 249, 243, 0.92);
+  background: rgba(255, 255, 255, 0.72);
   transition:
     border-color 0.18s ease,
     transform 0.18s ease,
@@ -211,7 +210,7 @@ onBeforeUnmount(() => {
 .benchmark-picker.changed .benchmark-picker-trigger,
 .benchmark-picker.changed .benchmark-picker-static-copy {
   border-color: rgba(31, 39, 51, 0.28);
-  background: rgba(243, 239, 228, 0.96);
+  background: rgba(243, 239, 228, 0.9);
 }
 
 .benchmark-picker-trigger:hover {
@@ -226,39 +225,26 @@ onBeforeUnmount(() => {
 }
 
 .benchmark-picker-copy {
-  display: grid;
+  display: inline;
   min-width: 0;
-}
-
-.benchmark-picker-title,
-.benchmark-picker-meta {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .benchmark-picker-title {
   color: var(--black);
   font-family: var(--font-body);
-  font-size: 0.96rem;
+  font-size: 0.98rem;
   font-weight: 600;
-  line-height: 1.15;
-}
-
-.benchmark-picker-meta {
-  color: var(--ink-soft);
-  font-family: var(--font-ui);
-  font-size: 0.72rem;
-  line-height: 1.15;
+  line-height: 1.3;
 }
 
 .benchmark-picker-caret {
   flex: 0 0 auto;
-  width: 0.9rem;
-  height: 0.9rem;
-  border-right: 2px solid rgba(31, 39, 51, 0.66);
-  border-bottom: 2px solid rgba(31, 39, 51, 0.66);
-  transform: rotate(45deg) translateY(-2px);
+  width: 0.52rem;
+  height: 0.52rem;
+  margin-left: 0.06rem;
+  border-right: 1.5px solid rgba(31, 39, 51, 0.66);
+  border-bottom: 1.5px solid rgba(31, 39, 51, 0.66);
+  transform: rotate(45deg) translateY(-1px);
   transition: transform 0.18s ease;
 }
 
@@ -385,7 +371,7 @@ onBeforeUnmount(() => {
 @media (max-width: 640px) {
   .benchmark-picker {
     max-width: 100%;
-    margin: 0.12rem 0.15rem;
+    margin: 0.08rem 0.12rem;
   }
 
   .benchmark-picker-trigger,

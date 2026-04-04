@@ -8,7 +8,6 @@ export type InputCatalogEntry<T extends Input = Input> = {
 export type InputCatalogFamily<T extends Input = Input> = {
   key: string;
   title: string;
-  eyebrow: string;
   description: string;
   entries: InputCatalogEntry<T>[];
 };
@@ -34,10 +33,8 @@ const FAMILY_TITLE_BY_TYPE: Record<string, string> = {
 };
 
 function sortCatalogEntries(a: InputCatalogEntry, b: InputCatalogEntry): number {
-  const rankA = a.input.importanceRank ?? Number.MAX_SAFE_INTEGER;
-  const rankB = b.input.importanceRank ?? Number.MAX_SAFE_INTEGER;
-  if (rankA !== rankB) {
-    return rankA - rankB;
+  if (Boolean(a.input.mainExampleForCategory) !== Boolean(b.input.mainExampleForCategory)) {
+    return a.input.mainExampleForCategory ? -1 : 1;
   }
 
   return (a.input.title || a.key).localeCompare(b.input.title || b.key);
@@ -59,7 +56,7 @@ function getFamilyDescription(entries: InputCatalogEntry[]): string {
   }
 
   if (entries.length === 1) {
-    return lead.summary || lead.importanceReason || 'Standalone benchmark.';
+    return lead.summary || 'Standalone benchmark.';
   }
 
   const variantLabels = entries
@@ -69,8 +66,11 @@ function getFamilyDescription(entries: InputCatalogEntry[]): string {
     .join(', ');
   const remainingCount = Math.max(entries.length - 4, 0);
   const suffix = remainingCount ? `, and ${remainingCount} more` : '';
+  const variantCopy = variantLabels
+    ? `Including ${variantLabels}${suffix}.`
+    : 'Grouped nearby units and cuts.';
 
-  return `${formatLabel(lead.entity || lead.variable_name)} is tracked in ${entries.length} related measurements. The representative entry uses ${lead.display_units}; variants include ${variantLabels}${suffix}.`;
+  return `${entries.length} related measurements. ${variantCopy}`;
 }
 
 export function getInputCatalogFamilyKey(
@@ -104,7 +104,6 @@ export function buildInputCatalogFamilies<T extends Input>(
       return {
         key,
         title: getFamilyTitle(lead),
-        eyebrow: formatLabel(lead.variable_type),
         description: getFamilyDescription(familyEntries),
         entries: familyEntries,
       };

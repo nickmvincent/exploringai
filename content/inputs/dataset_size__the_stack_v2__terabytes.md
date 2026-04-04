@@ -14,9 +14,9 @@ sourceNote: "The dataset card describes The Stack v2 as 67.53TB in total before 
 sourceLocator: "Dataset card summary and source-data collection sections"
 sourceLocatorUrl: 'https://huggingface.co/datasets/bigcode/the-stack-v2'
 sourceExcerpt: "The dataset card describes The Stack v2 as a roughly 900B-token corpus with 67.53TB total size and 3.28B unique files."
-sourceQuality: "official"
-confidence: 0.9
+sourceQuality: "first-party-report"
 lastReviewed: "2026-03-11"
+mainExampleForCategory: false
 min: 0
 step: 0.1
 date_added: '2026-03-11T19:19:59.000Z'

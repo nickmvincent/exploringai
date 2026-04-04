@@ -14,7 +14,7 @@ key_inputs:
   - Count of public AI data deals with disclosed counterparties
   - Share of deals with public pricing or royalty terms
   - Renewal and exclusivity terms across publisher-platform agreements
-sourceQuality: primary
+sourceQuality: "third-party-report"
 sort_order: 10
 visibility: public
 type: KeyPaper

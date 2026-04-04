@@ -9,18 +9,15 @@ entity: books3_plus_gutenberg
 units: tokens
 source_url: 'https://storage.courtlistener.com/recap/gov.uscourts.cand.415175/gov.uscourts.cand.415175.449.4.pdf'
 summary: "Internal Meta comparison point for the size of a book-heavy corpus."
-importanceRank: 19
-importanceReason: "Puts one prominent books corpus on the same token scale as other pretraining inputs."
 sourceName: "Kadrey v. Meta Exhibit C"
 sourceNote: "An unsealed February 28, 2023 Meta email says Books3 plus Gutenberg is about 30B tokens."
 sourceLocator: "Exhibit C email comparing Books3 plus Gutenberg with licensed books"
 sourceExcerpt: "The exhibit includes a Meta employee estimate that Books3 plus Gutenberg is about 30B tokens."
 source_key_papers:
   - legal/kadrey-meta-exhibit-c-books-acquisition-emails
-sourceQuality: "primary"
-confidence: 0.88
+sourceQuality: "third-party-report"
 lastReviewed: "2026-03-11"
-featured: false
+mainExampleForCategory: false
 min: 0
 step: 1
 date_added: '2026-03-11T00:00:00.000Z'

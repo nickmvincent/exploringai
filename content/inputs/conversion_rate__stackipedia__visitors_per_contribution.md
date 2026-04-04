@@ -9,16 +9,13 @@ entity: stackipedia
 units: visitors_per_contribution
 source_url: null
 summary: "Internal planning assumption for how much demand is needed to generate one Stackipedia contribution."
-importanceRank: 42
-importanceReason: "A product-growth assumption rather than a broadly reusable public AI benchmark."
 sourceName: "Project default"
 sourceNote: "Hypothetical engagement assumption for Stackipedia."
 sourceLocator: "Project-default assumption for Stackipedia scenario design"
 sourceExcerpt: "Stackipedia scenarios assume about 50 visitors are needed to generate one contribution."
-sourceQuality: "assumption"
-confidence: 0.25
+sourceQuality: "other"
 lastReviewed: "2026-03-10"
-featured: false
+mainExampleForCategory: false
 min: 0
 step: 0.1
 date_added: '2025-03-19T00:00:00.000Z'

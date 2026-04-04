@@ -14,9 +14,9 @@ sourceNote: "The October 2025 order says the parties identified 482,460 works fo
 sourceLocator: "Settlement papers discussion of identified works and average recovery"
 sourceLocatorUrl: 'https://docs.justia.com/cases/federal/district-courts/california/candce/3%3A2024cv05417/434709/437'
 sourceExcerpt: "The filing states that the parties identified 482,460 works for settlement administration."
-sourceQuality: "primary"
-confidence: 0.9
+sourceQuality: "third-party-report"
 lastReviewed: "2026-03-11"
+mainExampleForCategory: false
 min: 0
 step: 100
 date_added: '2026-03-11T19:19:59.000Z'

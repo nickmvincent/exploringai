@@ -9,17 +9,14 @@ entity: olmo2
 units: tokens
 source_url: 'https://huggingface.co/allenai/OLMo-2-1124-7B'
 summary: "Total tokens used to pre-training a model"
-importanceRank: 34
-importanceReason: "Adds an additional open-model comparison point so one recipe is not carrying all the weight."
 sourceName: "AllenAI OLMo 2 model card"
 sourceNote: "AllenAI reports 5 trillion training tokens for OLMo 2."
 sourceLocator: "Model card training-data summary"
 sourceLocatorUrl: 'https://huggingface.co/allenai/OLMo-2-1124-7B'
 sourceExcerpt: "The OLMo 2 model card reports 5T training tokens."
-sourceQuality: "official"
-confidence: 0.95
+sourceQuality: "first-party-report"
 lastReviewed: "2026-03-10"
-featured: false
+mainExampleForCategory: false
 min: 0
 step: 10
 date_added: '2025-03-19T00:00:00.000Z'

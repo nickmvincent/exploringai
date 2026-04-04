@@ -9,17 +9,14 @@ entity: tulu_3
 units: examples
 source_url: 'https://huggingface.co/datasets/allenai/tulu-3-sft-mixture'
 summary: "Number of WildChat GPT-4 examples in the public Tulu 3 SFT mixture."
-importanceRank: 27
-importanceReason: "Conversation datasets are one of the main ingredients of assistant post-training."
 sourceName: "Tulu 3 SFT mixture card"
 sourceNote: "WildChat GPT-4 contributes 100,000 examples in the released mixture."
 sourceLocator: "Dataset card mixture summary table"
 sourceLocatorUrl: 'https://huggingface.co/datasets/allenai/tulu-3-sft-mixture'
 sourceExcerpt: "The Tulu 3 SFT card lists 100,000 WildChat GPT-4 examples."
-sourceQuality: "official"
-confidence: 0.95
+sourceQuality: "first-party-report"
 lastReviewed: "2026-03-10"
-featured: false
+mainExampleForCategory: false
 min: 0
 step: 100
 date_added: '2026-03-10T00:00:00.000Z'

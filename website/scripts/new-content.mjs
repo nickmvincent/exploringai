@@ -167,6 +167,7 @@ async function createInput() {
     ...(followUp.summary.trim() ? { summary: followUp.summary.trim() } : {}),
     ...(followUp.sourceUrl.trim() ? { source_url: followUp.sourceUrl.trim() } : {}),
     ...(followUp.sourceQuality ? { sourceQuality: followUp.sourceQuality } : {}),
+    mainExampleForCategory: false,
     type: INPUT_TYPE_VALUE,
   });
 

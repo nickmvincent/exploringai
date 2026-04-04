@@ -11,7 +11,7 @@ key_inputs:
   - Whether LibGen and related book datasets were used in training
   - Which preprocessing steps removed copyright markers or deduped rows
   - What internal evidence exists about torrenting, seeding, or data provenance
-sourceQuality: primary
+sourceQuality: "third-party-report"
 sort_order: 90
 visibility: public
 type: KeyPaper

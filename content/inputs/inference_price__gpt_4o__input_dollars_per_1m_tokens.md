@@ -9,17 +9,14 @@ entity: gpt_4o
 units: dollars_per_1m_input_tokens
 source_url: 'https://platform.openai.com/docs/pricing'
 summary: "Public API price benchmark for GPT-4o input tokens."
-importanceRank: 4
-importanceReason: "Public API prices are one of the few transparent benchmarks for inference economics."
 sourceName: "OpenAI pricing page"
 sourceNote: "GPT-4o input pricing is listed at $2.50 per 1M tokens."
 sourceLocator: "Pricing table entry for GPT-4o input tokens"
 sourceLocatorUrl: 'https://platform.openai.com/docs/pricing'
 sourceExcerpt: "The pricing page lists GPT-4o input tokens at $2.50 per 1M tokens."
-sourceQuality: "official"
-confidence: 0.95
+sourceQuality: "first-party-report"
 lastReviewed: "2026-03-10"
-featured: true
+mainExampleForCategory: true
 min: 0
 step: 0.01
 date_added: '2026-03-10T00:00:00.000Z'

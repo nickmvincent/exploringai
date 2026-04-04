@@ -25,7 +25,6 @@ const props = defineProps<{
   step?: number;
   readableNote?: string | null;
   sourceQualityLabel: string;
-  confidenceLabel?: string | null;
 }>();
 
 const emit = defineEmits<{
@@ -60,8 +59,8 @@ function getInspectValueLabel(): string {
     <div class="scenario-input-header">
       <div>
         <h4 :id="getInputHeadingId(scope, entry.key)">{{ getTitle() }}</h4>
-        <p :id="getInputSummaryId(scope, entry.key)" class="scenario-input-summary">
-          {{ entry.input.summary || entry.input.importanceReason }}
+        <p v-if="entry.input.summary" :id="getInputSummaryId(scope, entry.key)" class="scenario-input-summary">
+          {{ entry.input.summary }}
         </p>
       </div>
 
@@ -69,6 +68,7 @@ function getInspectValueLabel(): string {
         <span class="input-quality-badge">
           {{ sourceQualityLabel }}
         </span>
+        <span v-if="entry.input.mainExampleForCategory" class="input-quality-badge">Main example</span>
         <span v-if="changed" class="changed-badge">Modified</span>
       </div>
     </div>
@@ -96,7 +96,7 @@ function getInspectValueLabel(): string {
         :id="getInputFieldId(scope, entry.key)"
         type="number"
         class="form-control"
-        :aria-describedby="getInputSummaryId(scope, entry.key)"
+        :aria-describedby="entry.input.summary ? getInputSummaryId(scope, entry.key) : undefined"
         :aria-labelledby="`${getInputHeadingId(scope, entry.key)} ${getInputLabelId(scope, entry.key)}`"
         :value="fieldValue"
         :step="step"
@@ -147,22 +147,12 @@ function getInspectValueLabel(): string {
     <p v-if="readableNote" class="input-readable-note">
       {{ readableNote }}
     </p>
-
-    <div class="scenario-input-footer">
-      <span v-if="entry.input.usedIn?.length" class="input-usage">
-        Used in {{ entry.input.usedIn?.length }}
-        {{ entry.input.usedIn?.length === 1 ? 'scenario' : 'scenarios' }}
-      </span>
-      <span v-if="confidenceLabel" class="confidence-text">
-        {{ confidenceLabel }}
-      </span>
-    </div>
   </div>
 </template>
 
 <style scoped>
 .scenario-input-card {
-  padding: 1rem;
+  padding: 0.9rem 0.95rem 0.85rem;
   border: 1px solid rgba(31, 39, 51, 0.12);
   border-radius: 2px;
   background: rgba(255, 255, 255, 0.84);
@@ -184,11 +174,18 @@ function getInspectValueLabel(): string {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 0.9rem;
+  gap: 0.75rem;
 }
 
 .scenario-input-header h4 {
-  margin-bottom: 0.32rem;
+  margin-bottom: 0.22rem;
+}
+
+.scenario-input-summary {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.94rem;
+  line-height: 1.5;
 }
 
 .scenario-input-badges {
@@ -225,6 +222,7 @@ function getInspectValueLabel(): string {
 .scenario-input-label {
   display: inline-flex;
   align-items: center;
+  margin-top: 0.45rem;
   color: var(--dark-gray);
   font-family: var(--font-ui);
   font-size: 0.9rem;
@@ -234,24 +232,7 @@ function getInspectValueLabel(): string {
 .scenario-input-controls {
   display: grid;
   grid-template-columns: minmax(0, 1fr) repeat(4, auto);
-  gap: 0.5rem;
-  margin-top: 0.55rem;
-}
-
-.scenario-input-footer {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.8rem;
-  margin-top: 0.7rem;
-  color: var(--dark-gray);
-  font-size: 0.88rem;
-  flex-wrap: wrap;
-}
-
-.input-usage,
-.confidence-text {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
+  gap: 0.45rem;
+  margin-top: 0.45rem;
 }
 </style>

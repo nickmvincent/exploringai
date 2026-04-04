@@ -11,7 +11,7 @@ key_inputs:
   - Plaintiffs' theory of copying across Books3, LibGen, Z-Library, and Internet Archive
   - Claimed overlaps between internal model-development milestones and copied corpora
   - Exhibits that may contain benchmark or ablation evidence about books
-sourceQuality: primary
+sourceQuality: "third-party-report"
 sort_order: 110
 visibility: public
 type: KeyPaper

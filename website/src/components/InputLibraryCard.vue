@@ -24,7 +24,6 @@ const props = defineProps<{
   step?: number;
   readableNote?: string | null;
   sourceQualityLabel: string;
-  confidenceLabel?: string | null;
 }>();
 
 const emit = defineEmits<{
@@ -58,20 +57,17 @@ function getInspectValueLabel(): string {
 <template>
   <article class="input-library-card" :class="{ compact: props.compact }">
     <div class="input-library-header">
-      <div class="input-rank">
-        <span class="input-rank-number">#{{ entry.input.importanceRank || '-' }}</span>
-        <span class="input-rank-label">Importance</span>
-      </div>
-
       <div class="input-library-badges">
         <span class="input-quality-badge">{{ sourceQualityLabel }}</span>
-        <span v-if="entry.input.featured" class="input-quality-badge input-quality-badge-muted">Featured</span>
+        <span v-if="entry.input.mainExampleForCategory" class="input-quality-badge input-quality-badge-muted">
+          Main example
+        </span>
       </div>
     </div>
 
     <h3 :id="getInputHeadingId('library', entry.key)">{{ getTitle() }}</h3>
-    <p :id="getInputSummaryId('library', entry.key)" class="input-library-summary">
-      {{ entry.input.summary || entry.input.importanceReason }}
+    <p v-if="entry.input.summary" :id="getInputSummaryId('library', entry.key)" class="input-library-summary">
+      {{ entry.input.summary }}
     </p>
 
     <InputComparisonFigure
@@ -89,7 +85,7 @@ function getInspectValueLabel(): string {
         :id="getInputFieldId('library', entry.key)"
         type="number"
         class="form-control"
-        :aria-describedby="getInputSummaryId('library', entry.key)"
+        :aria-describedby="entry.input.summary ? getInputSummaryId('library', entry.key) : undefined"
         :aria-labelledby="`${getInputHeadingId('library', entry.key)} ${getInputLabelId('library', entry.key)}`"
         :value="fieldValue"
         :step="step"
@@ -165,15 +161,10 @@ function getInspectValueLabel(): string {
     <div class="input-library-meta">
       <span>{{ formatLabel(entry.input.variable_type) }}</span>
       <span v-if="entry.input.entity">{{ formatLabel(entry.input.entity) }}</span>
-      <span v-if="confidenceLabel">{{ confidenceLabel }}</span>
     </div>
 
-    <p v-if="!props.compact && entry.input.importanceReason" class="input-library-reason">
-      <strong>Why it matters:</strong> {{ entry.input.importanceReason }}
-    </p>
-
     <div v-if="!props.compact" class="input-library-source">
-      <strong>{{ entry.input.sourceName || 'Source status' }}</strong>
+      <strong>{{ entry.input.sourceName || 'Source' }}</strong>
       <span v-if="entry.input.lastReviewed">Reviewed {{ entry.input.lastReviewed }}</span>
     </div>
 
@@ -182,7 +173,10 @@ function getInspectValueLabel(): string {
     </p>
 
     <div v-if="!props.compact && entry.input.usedIn?.length" class="input-library-usage">
-      <span class="usage-label">Used in</span>
+      <span class="input-library-usage-count">
+        {{ entry.input.usedIn.length }}
+        {{ entry.input.usedIn.length === 1 ? 'scenario uses this' : 'scenarios use this' }}
+      </span>
       <button
         v-for="scenario in entry.input.usedIn"
         :key="scenario.id"
@@ -223,20 +217,14 @@ function getInspectValueLabel(): string {
 .input-library-header {
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 0.9rem;
 }
 
 .input-library-card h3,
 .input-library-summary,
-.input-library-note {
+  .input-library-note {
   margin: 0;
-}
-
-.input-rank {
-  display: inline-flex;
-  flex-direction: column;
-  gap: 0.1rem;
 }
 
 .input-rank-number {
@@ -286,7 +274,7 @@ function getInspectValueLabel(): string {
 }
 
 .input-library-units,
-.usage-label {
+.input-library-usage-count {
   display: inline-flex;
   align-items: center;
   color: var(--dark-gray);
@@ -315,10 +303,6 @@ function getInspectValueLabel(): string {
 .input-library-badges span + span::before {
   content: ' / ';
   color: rgba(31, 39, 51, 0.32);
-}
-
-.input-library-reason {
-  margin-bottom: 0;
 }
 
 .input-library-source {

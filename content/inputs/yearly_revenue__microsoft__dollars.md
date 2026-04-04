@@ -10,17 +10,14 @@ units: dollars
 source_url: >-
   https://news.microsoft.com/source/2025/01/29/microsoft-cloud-and-ai-strength-drives-second-quarter-results-2/
 summary: "Reported annualized revenue run rate for Microsoft's AI business."
-importanceRank: 10
-importanceReason: "Adds a major incumbent-company benchmark without confusing total corporate revenue with AI revenue."
 sourceName: "Microsoft earnings release"
 sourceNote: "Microsoft said in January 2025 that its AI business had surpassed a $13B annual revenue run rate."
 sourceLocator: "Second-quarter earnings release opening summary"
 sourceLocatorUrl: 'https://news.microsoft.com/source/2025/01/29/microsoft-cloud-and-ai-strength-drives-second-quarter-results-2/'
 sourceExcerpt: "Microsoft says its AI business has surpassed a $13B annual revenue run rate."
-sourceQuality: "official"
-confidence: 0.95
+sourceQuality: "first-party-report"
 lastReviewed: "2026-03-10"
-featured: false
+mainExampleForCategory: false
 min: 0
 step: 0.1
 date_added: '2025-03-19T00:00:00.000Z'

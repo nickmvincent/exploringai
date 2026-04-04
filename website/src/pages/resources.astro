@@ -73,21 +73,18 @@ const statusLabels: Record<string, string> = {
 >
   <main id="site-main" class="resources-page">
     <header class="resources-hero">
-      <p class="eyebrow">Resources</p>
-      <h1>Project notes first, source material underneath.</h1>
+      <h1>Project notes, asks, and source material.</h1>
       <p>
-        This page keeps our own essays and asks near the top, then collects the external papers,
-        trackers, and filings that anchor the calculator’s inputs and arguments.
+        This page keeps the project writing together with the papers, trackers, and filings behind the calculator.
       </p>
     </header>
 
     <section class="resource-section" aria-labelledby="essays-heading">
       <div class="resource-section-header">
         <div>
-          <p class="resource-kicker">Our writing</p>
           <h2 id="essays-heading">Essays and working notes</h2>
         </div>
-        <p>Interpretive notes, open questions, and longer-form walkthroughs connected to the calculator.</p>
+        <p>Notes, open questions, and longer walkthroughs connected to the calculator.</p>
       </div>
 
       {essays.length ? (
@@ -122,10 +119,9 @@ const statusLabels: Record<string, string> = {
     <section class="resource-section" aria-labelledby="asks-heading">
       <div class="resource-section-header">
         <div>
-          <p class="resource-kicker">Project asks</p>
           <h2 id="asks-heading">What we want made legible</h2>
         </div>
-        <p>Short, concrete asks that would make these estimates easier to ground in public evidence.</p>
+        <p>Concrete asks that would make these estimates easier to ground in public evidence.</p>
       </div>
 
       <div class="ask-grid">
@@ -143,10 +139,9 @@ const statusLabels: Record<string, string> = {
     <section class="resource-section resource-section-external" aria-labelledby="external-heading">
       <div class="resource-section-header">
         <div>
-          <p class="resource-kicker">External sources</p>
           <h2 id="external-heading">Papers, trackers, and filings</h2>
         </div>
-        <p>Public sources that matter for the shared inputs, the calculator scenarios, or the surrounding policy argument.</p>
+        <p>Public sources tied to the shared inputs, scenarios, and surrounding policy argument.</p>
       </div>
 
       <div class="external-group-stack">
@@ -162,8 +157,8 @@ const statusLabels: Record<string, string> = {
                 <article class="external-card">
                   <div class="external-card-header">
                     <div>
-                      <p class="external-anchor">{entry.data.anchor}</p>
                       <h4>{entry.data.title}</h4>
+                      <p class="external-meta">{entry.data.anchor}</p>
                     </div>
                     {entry.data.source_url && (
                       <a class="resource-link-chip" href={entry.data.source_url} target="_blank" rel="noreferrer">
@@ -259,15 +254,10 @@ const statusLabels: Record<string, string> = {
     margin-bottom: 0;
   }
 
-  .resource-kicker,
-  .external-anchor {
-    margin-bottom: 0.35rem;
+  .external-meta {
+    margin: 0.35rem 0 0;
     color: var(--dark-gray);
-    font-family: var(--font-ui);
-    font-size: 0.78rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    font-size: 0.9rem;
   }
 
   .essay-list,

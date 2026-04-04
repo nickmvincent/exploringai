@@ -9,17 +9,14 @@ entity: anthropic_books
 units: dollars_per_work
 source_url: 'https://docs.justia.com/cases/federal/district-courts/california/candce/3%3A2024cv05417/434709/437'
 summary: "Proposed average payout per identified work in the Anthropic books settlement."
-importanceRank: 18
-importanceReason: "Adds a concrete litigation-era compensation benchmark for copyrighted books used in AI training."
 sourceName: "Bartz v. Anthropic preliminary-approval memorandum"
 sourceNote: "The October 17, 2025 filing describes an expected per-work award of about $3,000 across 482,460 identified works."
 sourceLocator: "Settlement papers discussion of identified works and average recovery"
 sourceLocatorUrl: 'https://docs.justia.com/cases/federal/district-courts/california/candce/3%3A2024cv05417/434709/437'
 sourceExcerpt: "The filing describes an average award of about $3,000 per work across 482,460 identified works."
-sourceQuality: "primary"
-confidence: 0.9
+sourceQuality: "third-party-report"
 lastReviewed: "2026-03-11"
-featured: false
+mainExampleForCategory: false
 min: 0
 step: 100
 date_added: '2026-03-11T00:00:00.000Z'

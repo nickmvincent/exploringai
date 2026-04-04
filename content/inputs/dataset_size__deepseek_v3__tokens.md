@@ -9,17 +9,14 @@ entity: deepseek_v3
 units: tokens
 source_url: 'https://github.com/deepseek-ai/DeepSeek-V3'
 summary: "Total tokens DeepSeek reports for DeepSeek-V3 training."
-importanceRank: 5
-importanceReason: "Adds a second recent frontier-model disclosure to compare against Llama-family training scale."
 sourceName: "DeepSeek-V3 repository"
 sourceNote: "DeepSeek reports that DeepSeek-V3 was pretrained on 14.8 trillion high-quality and diverse tokens."
 sourceLocator: "README overview bullets and pre-training section"
 sourceLocatorUrl: 'https://github.com/deepseek-ai/DeepSeek-V3#readme'
 sourceExcerpt: "The repository says DeepSeek-V3 was pretrained on 14.8T high-quality and diverse tokens."
-sourceQuality: "official"
-confidence: 0.95
+sourceQuality: "first-party-report"
 lastReviewed: "2026-03-11"
-featured: true
+mainExampleForCategory: true
 min: 0
 step: 100
 date_added: '2026-03-11T00:00:00.000Z'

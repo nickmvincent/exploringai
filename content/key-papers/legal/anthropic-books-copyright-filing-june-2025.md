@@ -9,7 +9,7 @@ key_inputs:
   - Internal valuation of books as training data
   - Comparison between licensing costs and alternative acquisition paths
   - Evidence about how companies rank books relative to other training sources
-sourceQuality: primary
+sourceQuality: "third-party-report"
 sort_order: 120
 visibility: public
 type: KeyPaper

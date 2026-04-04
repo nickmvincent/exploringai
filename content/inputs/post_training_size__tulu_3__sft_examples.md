@@ -9,17 +9,14 @@ entity: tulu_3
 units: examples
 source_url: 'https://huggingface.co/datasets/allenai/tulu-3-sft-mixture'
 summary: "Number of supervised fine-tuning examples in the public Tulu 3 SFT mixture."
-importanceRank: 24
-importanceReason: "A public supervised fine-tuning benchmark helps make post-training scale less mysterious."
 sourceName: "Tulu 3 SFT mixture card"
 sourceNote: "The released Tulu 3 SFT mixture contains 939,344 examples."
 sourceLocator: "Dataset card mixture summary table"
 sourceLocatorUrl: 'https://huggingface.co/datasets/allenai/tulu-3-sft-mixture'
 sourceExcerpt: "The Tulu 3 SFT mixture card reports 939,344 supervised fine-tuning samples."
-sourceQuality: "official"
-confidence: 0.95
+sourceQuality: "first-party-report"
 lastReviewed: "2026-03-10"
-featured: false
+mainExampleForCategory: false
 min: 0
 step: 100
 referenceCharts:

@@ -9,16 +9,13 @@ entity: stackipedia
 units: tokens_per_document
 source_url: null
 summary: "Internal planning assumption for the typical size of a Stackipedia document."
-importanceRank: 40
-importanceReason: "Project-specific corpus assumptions matter, but only after the public reference points above."
 sourceName: "Project default"
 sourceNote: "Hypothetical default used for Stackipedia scenarios; no external public source is claimed."
 sourceLocator: "Project-default assumption for Stackipedia scenario design"
 sourceExcerpt: "Stackipedia scenarios assume a typical document length of 1,500 tokens."
-sourceQuality: "assumption"
-confidence: 0.25
+sourceQuality: "other"
 lastReviewed: "2026-03-10"
-featured: false
+mainExampleForCategory: false
 min: 0
 step: 10
 date_added: '2025-03-19T00:00:00.000Z'

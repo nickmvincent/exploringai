@@ -10,17 +10,14 @@ units: articles
 source_url: >-
   https://www.tandfonline.com/#:~:text=Advanced%20search.%205%2C291%2C000+%20articles.%20Find%20a%20journal.
 summary: "Number of Taylor and Francis Articles"
-importanceRank: 38
-importanceReason: "A rough denominator for how large an academic corpus is when licensed at publisher scale."
 sourceName: "Taylor & Francis Online"
 sourceNote: "Uses the article count publicly shown on the Taylor & Francis platform homepage."
 sourceLocator: "Homepage article-count banner"
 sourceLocatorUrl: 'https://www.tandfonline.com/#:~:text=Advanced%20search.%205%2C291%2C000+%20articles.%20Find%20a%20journal.'
 sourceExcerpt: "Taylor & Francis Online displays a corpus count of 5,291,000+ articles."
-sourceQuality: "official"
-confidence: 0.95
+sourceQuality: "first-party-report"
 lastReviewed: "2026-03-10"
-featured: false
+mainExampleForCategory: false
 min: 0
 step: 0.01
 date_added: '2025-03-19T00:00:00.000Z'

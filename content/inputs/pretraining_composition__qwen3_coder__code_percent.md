@@ -14,9 +14,9 @@ sourceNote: "Alibaba says 70 percent of Qwen3-Coder pretraining data was code."
 sourceLocator: "Qwen3-Coder blog pre-training section"
 sourceLocatorUrl: 'https://qwenlm.github.io/blog/qwen3-coder/'
 sourceExcerpt: "The Qwen3-Coder blog says about 70% of the pretraining corpus is code."
-sourceQuality: "official"
-confidence: 0.95
+sourceQuality: "first-party-report"
 lastReviewed: "2026-03-11"
+mainExampleForCategory: false
 min: 0
 max: 100
 step: 1

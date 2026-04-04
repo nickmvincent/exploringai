@@ -14,9 +14,9 @@ sourceNote: "Meta reports that Llama 4 Maverick was trained on 22 trillion token
 sourceLocator: "Training Data section in MODEL_CARD.md"
 sourceLocatorUrl: 'https://github.com/meta-llama/llama-models/blob/main/models/llama4/MODEL_CARD.md#L267-L275'
 sourceExcerpt: "The model card's training overview lists Maverick at roughly 22T pretraining tokens."
-sourceQuality: "official"
-confidence: 0.95
+sourceQuality: "first-party-report"
 lastReviewed: "2026-03-11"
+mainExampleForCategory: false
 min: 0
 step: 100
 date_added: '2026-03-11T19:19:59.000Z'

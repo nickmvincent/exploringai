@@ -12,15 +12,15 @@ markdown frontmatter because the collection loader does not infer semantics from
 
 For `inputs`, the main citation and evidence fields now include:
 
-- `source_url`: the main source page or document; this may be `null` only for `assumption` or `heuristic` inputs that do not claim an external source
+- `source_url`: the main source page or document; this may be `null` for `other` inputs that are documented project benchmarks rather than externally sourced reports
 - `sourceName`: short human-readable source label
 - `sourceNote`: quick summary of the claim
 - `sourceLocator`: where to look inside the source, such as a section name, table, figure, or page hint
 - `sourceLocatorUrl`: optional deep link to the exact citation location
 - `sourceExcerpt`: a short verification-ready excerpt or tight paraphrase of the cited claim
 - `derivationNote`: optional note for values that sum, divide, or otherwise derive from source figures
-- `sourceQuality`: evidence type, such as `official`, `primary`, `reported`, `industry`, `heuristic`, or `assumption`
-- `confidence`: a 0-1 confidence score for the chosen value
+- `sourceQuality`: evidence type, using `first-party-report`, `third-party-report`, `news`, or `other`
+- `mainExampleForCategory`: optional boolean that marks the benchmark the UI should treat as the primary example for that slice of the library
 
 Inputs can also optionally define a `comparisonImage` object in frontmatter when a card should render a small comparison graphic. Supported fields are `src`, `alt`, `caption`, `href`, and `label`.
 
@@ -107,6 +107,6 @@ items on the site.
 - `npm --prefix website run new:input` scaffolds a new input file.
 - `npm --prefix website run new:scenario` scaffolds a new scenario file.
 - `npm --prefix website run content:check` validates ids, formulas, units, categories, and cross-file references.
-- `npm --prefix website run verify:citations -- --strict` validates citation coverage and distinguishes externally sourced inputs from documented assumptions and heuristics.
+- `npm --prefix website run verify:citations -- --strict` validates citation coverage and distinguishes externally sourced inputs from documented `other` benchmarks.
 - `npm --prefix website run build` runs both the citation check and the content checks automatically before building the site.
 - The in-browser open-ended scenario builder can draft a saved scenario and copy markdown for a new file in `content/scenarios/`.

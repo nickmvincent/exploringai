@@ -9,17 +9,14 @@ entity: world
 units: people
 source_url: 'https://www.census.gov/newsroom/press-releases/2024/population-new-years-day.html'
 summary: "Projected world population."
-importanceRank: 12
-importanceReason: "Provides the broadest possible denominator for \"who benefits?\" comparisons."
 sourceName: "U.S. Census Bureau"
 sourceNote: "Uses the Census Bureau projection for world population on January 1, 2025."
 sourceLocator: "January 1, 2025 projection table in the Census press release"
 sourceLocatorUrl: 'https://www.census.gov/newsroom/press-releases/2024/population-new-years-day.html'
 sourceExcerpt: "The Census Bureau projects a world population of 8,092,034,511 on January 1, 2025."
-sourceQuality: "official"
-confidence: 0.95
+sourceQuality: "first-party-report"
 lastReviewed: "2026-03-10"
-featured: false
+mainExampleForCategory: false
 min: 0
 step: 0.01
 date_added: '2025-03-19T00:00:00.000Z'

@@ -11,7 +11,7 @@ key_inputs:
   - Success rate of post hoc unlearning or takedown methods
   - Retained capability loss after copyright-focused removal
   - Residual memorization after takedown attempts
-sourceQuality: primary
+sourceQuality: "third-party-report"
 sort_order: 70
 visibility: public
 type: KeyPaper

@@ -9,16 +9,13 @@ entity: stackipedia
 units: contributions_per_document
 source_url: null
 summary: "Internal planning assumption for how many contributions it takes to assemble one Stackipedia document."
-importanceRank: 41
-importanceReason: "Useful for scenario design, but this is an internal product assumption rather than a public literacy baseline."
 sourceName: "Project default"
 sourceNote: "Hypothetical productivity assumption for Stackipedia."
 sourceLocator: "Project-default assumption for Stackipedia scenario design"
 sourceExcerpt: "Stackipedia scenarios assume two contributions are needed to assemble one document."
-sourceQuality: "assumption"
-confidence: 0.25
+sourceQuality: "other"
 lastReviewed: "2026-03-10"
-featured: false
+mainExampleForCategory: false
 min: 0
 step: 0.01
 date_added: '2025-03-19T00:00:00.000Z'

@@ -5,7 +5,6 @@ export type InputFocusKey = 'money' | 'training-scale' | 'people' | 'data-mix' |
 export type InputFocusGroup = {
   key: InputFocusKey;
   chipLabel: string;
-  shortDescription: string;
   prompt: string;
   label: string;
   description: string;
@@ -15,7 +14,6 @@ export const INPUT_FOCUS_GROUPS: InputFocusGroup[] = [
   {
     key: 'money',
     chipLabel: 'Money',
-    shortDescription: 'Revenue anchors, deal values, labour rates, and inference pricing.',
     prompt: 'Money and prices',
     label: 'Money, payouts, and prices',
     description: 'Revenue anchors, deal values, labour rates, and inference pricing.',
@@ -23,7 +21,6 @@ export const INPUT_FOCUS_GROUPS: InputFocusGroup[] = [
   {
     key: 'training-scale',
     chipLabel: 'Training sizes',
-    shortDescription: 'Token counts, example counts, benchmark sizes, and other scale assumptions.',
     prompt: 'Training size',
     label: 'Training sizes and benchmark totals',
     description: 'Token counts, example counts, benchmark sizes, and other scale assumptions.',
@@ -31,7 +28,6 @@ export const INPUT_FOCUS_GROUPS: InputFocusGroup[] = [
   {
     key: 'people',
     chipLabel: 'People and groups',
-    shortDescription: 'Population, audience, workforce, and contributor counts used in per-person math.',
     prompt: 'People and groups',
     label: 'People, groups, and distribution targets',
     description: 'Population, audience, workforce, and contributor counts used in per-person math.',
@@ -39,7 +35,6 @@ export const INPUT_FOCUS_GROUPS: InputFocusGroup[] = [
   {
     key: 'data-mix',
     chipLabel: 'Data mix',
-    shortDescription: 'Composition shares, source slices, document size, and related dataset structure.',
     prompt: 'Data mix',
     label: 'Data mix and dataset structure',
     description: 'Composition shares, source slices, document size, and related dataset structure.',
@@ -47,7 +42,6 @@ export const INPUT_FOCUS_GROUPS: InputFocusGroup[] = [
   {
     key: 'other',
     chipLabel: 'Other',
-    shortDescription: 'Additional anchors that do not fit one of the main question buckets.',
     prompt: 'Other inputs',
     label: 'Other inputs',
     description: 'Additional anchors that do not fit one of the main question buckets.',
