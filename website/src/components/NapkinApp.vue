@@ -162,11 +162,7 @@ function resolveRequestedInputCatalogView(view?: string | null): InputCatalogVie
     return 'cards';
   }
 
-  if (view === 'spreadsheet') {
-    return 'spreadsheet';
-  }
-
-  return !props.showScenarioLibrary && props.showInputLibrary ? 'cards' : 'spreadsheet';
+  return 'spreadsheet';
 }
 
 const rightPanelOpen = ref(false);
@@ -251,12 +247,17 @@ const inspectorToggleLabel = computed(() => {
 });
 
 const uniqueCategories = computed(() => {
-  const categories = scenariosData.value
-    .map((scenario) => scenario.category)
-    .filter(Boolean)
+  const presentCategories = new Set(
+    scenariosData.value
+      .map((scenario) => scenario.category)
+      .filter(Boolean)
+  );
+  const categories = SCENARIO_CATEGORIES.filter((category) => presentCategories.has(category));
+  const uncategorized = [...presentCategories]
+    .filter((category) => !SCENARIO_CATEGORIES.includes(category))
     .sort((a, b) => a.localeCompare(b));
 
-  return ['All', ...new Set(categories)];
+  return ['All', ...categories, ...uncategorized];
 });
 const scenarioCategoryOptions = computed<ScenarioCategoryOption[]>(() => {
   const categoryCounts = new Map<string, number>();
@@ -1804,42 +1805,47 @@ onBeforeUnmount(() => {
 
             <div class="page-toolbar-group page-toolbar-group-actions">
               <p class="page-toolbar-label">Actions</p>
-              <div class="toolbar-actions">
-                <button
-                  class="btn btn-outline-primary btn-sm"
-                  type="button"
-                  :disabled="isExportingWorkbook"
-                  @click="exportWorkbook"
-                >
-                  {{ exportWorkbookLabel }}
-                </button>
-                <button
-                  class="btn btn-outline-primary btn-sm"
-                  type="button"
-                  @click="copyShareLink"
-                >
-                  {{ shareButtonLabel }}
-                </button>
-                <button
-                  class="btn btn-outline-primary btn-sm"
-                  :aria-controls="INSPECTOR_DIALOG_ID"
-                  :aria-expanded="rightPanelOpen"
-                  aria-haspopup="dialog"
-                  :disabled="!canToggleInspector"
-                  type="button"
-                  @click="toggleInspector($event.currentTarget as HTMLElement)"
-                >
-                  {{ inspectorToggleLabel }}
-                </button>
-                <button
-                  class="btn btn-outline-secondary btn-sm"
-                  type="button"
-                  :disabled="!hasCustomizedState"
-                  @click="resetAllInputs"
-                >
-                  Reset all changes
-                </button>
-              </div>
+              <details class="toolbar-tools-menu">
+                <summary class="btn btn-outline-primary btn-sm toolbar-tools-summary">
+                  Tools
+                </summary>
+                <div class="toolbar-actions toolbar-tools-panel">
+                  <button
+                    class="btn btn-outline-primary btn-sm"
+                    type="button"
+                    :disabled="isExportingWorkbook"
+                    @click="exportWorkbook"
+                  >
+                    {{ exportWorkbookLabel }}
+                  </button>
+                  <button
+                    class="btn btn-outline-primary btn-sm"
+                    type="button"
+                    @click="copyShareLink"
+                  >
+                    {{ shareButtonLabel }}
+                  </button>
+                  <button
+                    class="btn btn-outline-primary btn-sm"
+                    :aria-controls="INSPECTOR_DIALOG_ID"
+                    :aria-expanded="rightPanelOpen"
+                    aria-haspopup="dialog"
+                    :disabled="!canToggleInspector"
+                    type="button"
+                    @click="toggleInspector($event.currentTarget as HTMLElement)"
+                  >
+                    {{ inspectorToggleLabel }}
+                  </button>
+                  <button
+                    class="btn btn-outline-secondary btn-sm"
+                    type="button"
+                    :disabled="!hasCustomizedState"
+                    @click="resetAllInputs"
+                  >
+                    Reset all changes
+                  </button>
+                </div>
+              </details>
             </div>
           </div>
 
@@ -2529,22 +2535,27 @@ onBeforeUnmount(() => {
                             <p v-if="getInputReadableNote(entry.key)" class="input-readable-note">
                               {{ getInputReadableNote(entry.key) }}
                             </p>
-                            <div class="input-spreadsheet-quick-actions">
-                              <button class="btn btn-outline-secondary btn-sm" type="button" @click="adjustValue(entry.key, 0.1)">
-                                x0.1
-                              </button>
-                              <button class="btn btn-outline-secondary btn-sm" type="button" @click="adjustValue(entry.key, 10)">
-                                x10
-                              </button>
-                              <button
-                                class="btn btn-outline-secondary btn-sm"
-                                type="button"
-                                :disabled="!isInputChanged(entry.key)"
-                                @click="resetValue(entry.key)"
-                              >
-                                Reset
-                              </button>
-                            </div>
+                            <details class="input-spreadsheet-quick-actions input-adjust-menu">
+                              <summary class="btn btn-outline-secondary btn-sm input-adjust-summary">
+                                Scale
+                              </summary>
+                              <div class="input-adjust-panel">
+                                <button class="btn btn-outline-secondary btn-sm" type="button" @click="adjustValue(entry.key, 0.1)">
+                                  x0.1
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm" type="button" @click="adjustValue(entry.key, 10)">
+                                  x10
+                                </button>
+                                <button
+                                  class="btn btn-outline-secondary btn-sm"
+                                  type="button"
+                                  :disabled="!isInputChanged(entry.key)"
+                                  @click="resetValue(entry.key)"
+                                >
+                                  Reset
+                                </button>
+                              </div>
+                            </details>
                           </td>
 
                           <td class="input-spreadsheet-meta" data-label="Metadata">

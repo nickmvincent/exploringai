@@ -283,6 +283,7 @@ async function loadScenarios(inputValues, errors) {
     ensureOneOf(errors, filePath, 'category', data.category, SCENARIO_CATEGORIES);
     ensureOneOf(errors, filePath, 'result_units', data.result_units, INPUT_UNITS);
     ensureOneOf(errors, filePath, 'visibility', data.visibility, VISIBILITY_VALUES);
+    ensureFiniteNumber(errors, filePath, 'sort_order', data.sort_order);
 
     if (data.type && data.type !== SCENARIO_TYPE_VALUE) {
       errors.push(`${filePath}: type must be ${SCENARIO_TYPE_VALUE} when provided.`);

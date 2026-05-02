@@ -38,6 +38,7 @@ presets:
 result_label: Dataset Cost
 result_units: dollars
 category: Paying for new labour
+sort_order: 70
 date_added: "2025-03-19T00:00:00.000Z"
 tags:
   - type:calculation

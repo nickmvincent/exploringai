@@ -14,8 +14,19 @@ function getUniqueInputVariables(inputVariables: string[]) {
 export async function loadNapkinData() {
   const inputEntries = await getCollection('inputs');
   const scenarioEntries = await getCollection('scenarios');
+  const byScenarioOrder = (a: typeof scenarioEntries[number], b: typeof scenarioEntries[number]) => {
+    const orderA = a.data.sort_order ?? Number.MAX_SAFE_INTEGER;
+    const orderB = b.data.sort_order ?? Number.MAX_SAFE_INTEGER;
 
-  const scenarioReferences = scenarioEntries.map((entry) => ({
+    if (orderA !== orderB) {
+      return orderA - orderB;
+    }
+
+    return a.data.title.localeCompare(b.data.title);
+  };
+  const orderedScenarioEntries = [...scenarioEntries].sort(byScenarioOrder);
+
+  const scenarioReferences = orderedScenarioEntries.map((entry) => ({
     id: getEntryStem(entry.id),
     title: entry.data.title,
     category: entry.data.category,
@@ -99,7 +110,7 @@ export async function loadNapkinData() {
     };
   }
 
-  const scenarios: Scenario[] = scenarioEntries.map((entry) => {
+  const scenarios: Scenario[] = orderedScenarioEntries.map((entry) => {
     const { data } = entry;
     const inputVariables = getUniqueInputVariables(
       data.input_variables?.length ? data.input_variables : extractInputTokens(data.formula),
@@ -128,6 +139,7 @@ export async function loadNapkinData() {
       result_label: data.result_label,
       result_units: data.result_units,
       category: data.category,
+      sort_order: data.sort_order ?? undefined,
       result: {
         value: 'Loading...',
         rawValue: null,

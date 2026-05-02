@@ -31,6 +31,7 @@ presets:
 result_label: Total Compensation
 result_units: dollars
 category: Distributing money
+sort_order: 20
 date_added: '2026-04-03T20:52:00.000Z'
 tags:
   - type:calculation

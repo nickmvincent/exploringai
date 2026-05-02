@@ -28,6 +28,7 @@ presets:
 result_label: Token Slice
 result_units: tokens
 category: Making data scale vivid
+sort_order: 80
 date_added: '2026-04-03T20:52:00.000Z'
 tags:
   - type:calculation

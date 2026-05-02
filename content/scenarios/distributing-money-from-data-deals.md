@@ -31,6 +31,7 @@ presets:
 result_label: Per Person Revenue
 result_units: dollars
 category: Distributing money
+sort_order: 30
 date_added: "2025-03-19T00:00:00.000Z"
 tags:
   - type:calculation

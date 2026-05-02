@@ -37,6 +37,7 @@ presets:
 result_label: Annual Oversight Cost
 result_units: dollars
 category: Paying for new labour
+sort_order: 50
 date_added: '2026-04-06T21:05:00.000Z'
 tags:
   - type:calculation

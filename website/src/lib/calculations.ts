@@ -87,6 +87,7 @@ export interface Scenario {
   result_label: string;
   result_units: string;
   category: string;
+  sort_order?: number;
   result: {
     value: string;
     rawValue: number | null;

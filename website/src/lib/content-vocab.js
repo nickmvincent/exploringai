@@ -56,9 +56,9 @@ export const INPUT_UNITS = [
 ];
 
 export const SCENARIO_CATEGORIES = [
+  'Paying for new labour',
   'Distributing money',
   'Making data scale vivid',
-  'Paying for new labour',
 ];
 
 export const SOURCE_QUALITY_VALUES = [

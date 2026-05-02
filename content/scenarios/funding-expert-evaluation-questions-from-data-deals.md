@@ -26,6 +26,7 @@ presets:
 result_label: Questions Funded
 result_units: questions
 category: Paying for new labour
+sort_order: 40
 date_added: '2026-04-03T20:52:00.000Z'
 tags:
   - type:calculation

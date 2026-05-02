@@ -527,6 +527,42 @@ input[type="number"] {
   justify-content: flex-end;
 }
 
+.toolbar-tools-menu {
+  position: relative;
+}
+
+.toolbar-tools-summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.toolbar-tools-summary::-webkit-details-marker {
+  display: none;
+}
+
+.toolbar-tools-panel {
+  position: absolute;
+  top: calc(100% + 0.45rem);
+  right: 0;
+  z-index: 35;
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: stretch;
+  width: max-content;
+  min-width: 13.5rem;
+  max-width: min(80vw, 18rem);
+  padding: 0.5rem;
+  border: 1px solid rgba(31, 39, 51, 0.14);
+  border-radius: var(--border-radius-sm);
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 16px 34px rgba(31, 39, 51, 0.13);
+}
+
+.toolbar-tools-panel .btn {
+  width: 100%;
+  justify-content: center;
+}
+
 .toolbar-note {
   margin: 0;
   color: var(--dark-gray);
@@ -1659,6 +1695,36 @@ input[type="number"] {
   margin-top: 0.7rem;
 }
 
+.input-adjust-menu {
+  position: relative;
+  width: fit-content;
+}
+
+.input-adjust-summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.input-adjust-summary::-webkit-details-marker {
+  display: none;
+}
+
+.input-adjust-panel {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  left: 0;
+  z-index: 28;
+  display: grid;
+  gap: 0.35rem;
+  width: max-content;
+  min-width: 8.75rem;
+  padding: 0.45rem;
+  border: 1px solid rgba(31, 39, 51, 0.14);
+  border-radius: var(--border-radius-sm);
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 16px 34px rgba(31, 39, 51, 0.13);
+}
+
 .input-spreadsheet-copy-list {
   display: flex;
   flex-direction: column;
@@ -1947,6 +2013,11 @@ input[type="number"] {
     justify-content: flex-start;
   }
 
+  .toolbar-tools-panel {
+    left: 0;
+    right: auto;
+  }
+
   .library-toolbar {
     grid-template-columns: minmax(0, 1fr) minmax(220px, auto);
   }
@@ -2097,7 +2168,7 @@ input[type="number"] {
   .toolbar-actions {
     width: 100%;
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
     gap: 0.6rem;
   }
 
@@ -2191,6 +2262,29 @@ input[type="number"] {
 
   .toolbar-actions {
     grid-template-columns: 1fr;
+  }
+
+  .toolbar-tools-menu,
+  .toolbar-tools-summary,
+  .toolbar-tools-panel {
+    width: 100%;
+  }
+
+  .toolbar-tools-panel {
+    position: static;
+    max-width: none;
+    margin-top: 0.45rem;
+  }
+
+  .input-adjust-menu,
+  .input-adjust-summary,
+  .input-adjust-panel {
+    width: 100%;
+  }
+
+  .input-adjust-panel {
+    position: static;
+    margin-top: 0.35rem;
   }
 
   .chip-row {

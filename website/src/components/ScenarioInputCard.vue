@@ -107,31 +107,38 @@ function getInspectValueLabel(): string {
         @blur="emit('commit')"
         @keydown="emit('keydown', $event)"
       />
-      <button
-        class="btn btn-outline-secondary"
-        type="button"
-        :aria-label="getAdjustValueLabel(0.1)"
-        @click="emit('adjust', 0.1)"
-      >
-        x0.1
-      </button>
-      <button
-        class="btn btn-outline-secondary"
-        type="button"
-        :aria-label="getAdjustValueLabel(10)"
-        @click="emit('adjust', 10)"
-      >
-        x10
-      </button>
-      <button
-        class="btn btn-outline-secondary"
-        type="button"
-        :aria-label="getResetValueLabel()"
-        :disabled="!changed"
-        @click="emit('reset')"
-      >
-        Reset
-      </button>
+      <details class="scenario-input-adjust-menu">
+        <summary class="btn btn-outline-secondary scenario-input-adjust-summary">
+          Scale
+        </summary>
+        <div class="scenario-input-adjust-panel">
+          <button
+            class="btn btn-outline-secondary"
+            type="button"
+            :aria-label="getAdjustValueLabel(0.1)"
+            @click="emit('adjust', 0.1)"
+          >
+            x0.1
+          </button>
+          <button
+            class="btn btn-outline-secondary"
+            type="button"
+            :aria-label="getAdjustValueLabel(10)"
+            @click="emit('adjust', 10)"
+          >
+            x10
+          </button>
+          <button
+            class="btn btn-outline-secondary"
+            type="button"
+            :aria-label="getResetValueLabel()"
+            :disabled="!changed"
+            @click="emit('reset')"
+          >
+            Reset
+          </button>
+        </div>
+      </details>
       <button
         class="btn btn-secondary"
         type="button"
@@ -231,9 +238,40 @@ function getInspectValueLabel(): string {
 
 .scenario-input-controls {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) repeat(4, auto);
+  grid-template-columns: minmax(0, 1fr) repeat(2, auto);
+  align-items: start;
   gap: 0.45rem;
   margin-top: 0.45rem;
+}
+
+.scenario-input-adjust-menu {
+  position: relative;
+}
+
+.scenario-input-adjust-summary {
+  min-height: 2.55rem;
+  list-style: none;
+  cursor: pointer;
+}
+
+.scenario-input-adjust-summary::-webkit-details-marker {
+  display: none;
+}
+
+.scenario-input-adjust-panel {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  right: 0;
+  z-index: 24;
+  display: grid;
+  gap: 0.35rem;
+  width: max-content;
+  min-width: 9rem;
+  padding: 0.45rem;
+  border: 1px solid rgba(31, 39, 51, 0.14);
+  border-radius: var(--border-radius-sm);
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 16px 34px rgba(31, 39, 51, 0.13);
 }
 
 @media (max-width: 640px) {
@@ -247,6 +285,17 @@ function getInspectValueLabel(): string {
 
   .scenario-input-controls .btn {
     min-width: 0;
+  }
+
+  .scenario-input-adjust-panel {
+    position: static;
+    width: 100%;
+    margin-top: 0.35rem;
+  }
+
+  .scenario-input-adjust-menu,
+  .scenario-input-adjust-summary {
+    width: 100%;
   }
 }
 </style>

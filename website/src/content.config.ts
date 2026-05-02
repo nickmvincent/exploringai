@@ -107,6 +107,7 @@ const scenarios = defineCollection({
     result_label: z.string(),
     result_units: z.enum(inputUnits),
     category: z.enum(scenarioCategories),
+    sort_order: z.number().optional().nullable(),
     date_added: z.string().optional(),
     tags: z.array(z.string()).optional(),
     visibility: z.enum(visibilityValues).optional(),

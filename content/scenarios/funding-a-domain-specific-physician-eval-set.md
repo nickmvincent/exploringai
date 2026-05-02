@@ -37,6 +37,7 @@ presets:
 result_label: Evaluation Cost
 result_units: dollars
 category: Paying for new labour
+sort_order: 60
 date_added: '2026-04-03T21:15:00.000Z'
 tags:
   - type:calculation
