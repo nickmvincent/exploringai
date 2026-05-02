@@ -14,8 +14,8 @@ sourceNote: "Uses the high end of EFA's book-proposal per-word rate range as a c
 sourceLocator: "EFA rate chart range for book-proposal writing"
 sourceLocatorUrl: 'https://www.the-efa.org/rates/'
 sourceExcerpt: "This benchmark uses the high end of the EFA's professional per-word writing range."
-sourceQuality: "other"
-lastReviewed: "2026-03-10"
+sourceQuality: "third-party-report"
+lastReviewed: "2026-05-02"
 mainExampleForCategory: false
 min: 0
 step: 0.0001
