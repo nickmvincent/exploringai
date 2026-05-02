@@ -7,15 +7,15 @@ variable_name: dataset_size__hle__questions
 variable_type: dataset_size
 entity: hle
 units: questions
-source_url: 'https://lastexam.ai/'
+source_url: 'https://scale.com/leaderboard/humanitys_last_exam'
 summary: "The number of public benchmark questions in Humanity's Last Exam."
-sourceName: "Humanity's Last Exam"
-sourceNote: "HLE's finalized public benchmark contains 2,500 questions."
-sourceLocator: "Benchmark overview on the Humanity's Last Exam site"
-sourceLocatorUrl: 'https://lastexam.ai/'
-sourceExcerpt: "Humanity's Last Exam describes the public benchmark as containing 2,500 questions."
+sourceName: "Scale AI Humanity's Last Exam leaderboard"
+sourceNote: "Scale's April 3, 2025 update says HLE was finalized to 2,500 questions."
+sourceLocator: "April 3, 2025 update and Dataset Design section"
+sourceLocatorUrl: 'https://scale.com/leaderboard/humanitys_last_exam'
+sourceExcerpt: "Scale says HLE was finalized to 2,500 questions."
 sourceQuality: "first-party-report"
-lastReviewed: "2026-03-10"
+lastReviewed: "2026-05-02"
 mainExampleForCategory: false
 min: 0
 step: 10
@@ -37,6 +37,8 @@ referenceCharts:
         displayValue: "2,500 questions"
         note: "Roughly 100 experts at 25 questions each."
         highlight: true
+source_key_papers:
+  - humanitys-last-exam
 date_added: '2025-03-19T00:00:00.000Z'
 tags:
   - variable-type:dataset-size
@@ -60,5 +62,5 @@ This uses the finalized public benchmark size rather than including private hold
 
 ## Source
 
-- [https://lastexam.ai/](https://lastexam.ai/)
-- The official project page describes Humanity's Last Exam as a 2,500-question public benchmark.
+- [https://scale.com/leaderboard/humanitys_last_exam](https://scale.com/leaderboard/humanitys_last_exam)
+- Scale's April 3, 2025 update says HLE was finalized to 2,500 questions.

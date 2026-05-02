@@ -20,9 +20,9 @@ presets:
         variant: deal_value__taylorandfrancis_microsoft__dollars
   - id: reddit-at-premium-rate
     label: Reddit deal -> premium expert rate
-    values:
+    fills:
       - input: wage_data__phd__dollars_per_question
-        value: 500
+        variant: wage_data__hle_runner_up_prize__dollars_per_question
 result_label: Questions Funded
 result_units: questions
 category: Paying for new labour
@@ -38,16 +38,16 @@ type: ScenarioCalculation
 
 ## Description
 
-How many expert-eval questions could one data deal (say, 60 millions of dollars) fund at current expert rates (say, 300 dollars per question)?
+How many expert-eval questions could one data deal (say, 60 millions of dollars) fund at current expert rates (say, 200 dollars per question)?
 
 ## Inputs
 
 - **Payment made to Reddit by Google**: 60 millions of dollars
-- **Expert benchmark rate per question**: 300 dollars per question
+- **Expert benchmark rate per question**: 200 dollars per question
 
 ## Calculation
 
-- Divide: 60 millions of dollars ÷ 300 dollars per question = [result]
+- Divide: 60 millions of dollars / 200 dollars per question = [result]
 
 ## Result
 

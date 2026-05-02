@@ -154,7 +154,7 @@ function getInspectValueLabel(): string {
 .scenario-input-card {
   padding: 0.9rem 0.95rem 0.85rem;
   border: 1px solid rgba(31, 39, 51, 0.12);
-  border-radius: 2px;
+  border-radius: var(--border-radius-sm);
   background: rgba(255, 255, 255, 0.84);
   transition:
     border-color 0.18s ease,
@@ -201,7 +201,7 @@ function getInspectValueLabel(): string {
   align-items: center;
   min-height: 1.8rem;
   padding: 0.2rem 0.58rem;
-  border-radius: 2px;
+  border-radius: var(--border-radius-sm);
   font-size: 0.74rem;
   white-space: nowrap;
   letter-spacing: 0.05em;
@@ -234,5 +234,19 @@ function getInspectValueLabel(): string {
   grid-template-columns: minmax(0, 1fr) repeat(4, auto);
   gap: 0.45rem;
   margin-top: 0.45rem;
+}
+
+@media (max-width: 640px) {
+  .scenario-input-controls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .scenario-input-controls .form-control {
+    grid-column: 1 / -1;
+  }
+
+  .scenario-input-controls .btn {
+    min-width: 0;
+  }
 }
 </style>

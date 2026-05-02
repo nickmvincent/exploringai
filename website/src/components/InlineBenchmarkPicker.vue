@@ -177,7 +177,7 @@ onBeforeUnmount(() => {
   position: relative;
   display: inline-flex;
   vertical-align: baseline;
-  max-width: min(100%, 24rem);
+  max-width: min(100%, 28rem);
   margin: 0 0.16rem;
   z-index: 2;
 }
@@ -194,7 +194,7 @@ onBeforeUnmount(() => {
   min-width: 0;
   max-width: 100%;
   padding: 0.08rem 0.42rem 0.12rem;
-  border-radius: 2px;
+  border-radius: var(--border-radius-sm);
   border: 1px solid rgba(31, 39, 51, 0.14);
   background: rgba(255, 255, 255, 0.72);
   transition:
@@ -225,8 +225,9 @@ onBeforeUnmount(() => {
 }
 
 .benchmark-picker-copy {
-  display: inline;
+  display: inline-block;
   min-width: 0;
+  max-width: 100%;
 }
 
 .benchmark-picker-title {
@@ -235,6 +236,7 @@ onBeforeUnmount(() => {
   font-size: 0.98rem;
   font-weight: 600;
   line-height: 1.3;
+  overflow-wrap: break-word;
 }
 
 .benchmark-picker-caret {
@@ -260,8 +262,8 @@ onBeforeUnmount(() => {
   max-height: min(28rem, 65vh);
   padding: 0.8rem;
   border: 1px solid rgba(31, 39, 51, 0.16);
-  border-radius: 2px;
-  background: rgba(250, 248, 242, 0.98);
+  border-radius: var(--border-radius);
+  background: rgba(250, 252, 249, 0.98);
   box-shadow: 0 14px 30px rgba(31, 39, 51, 0.14);
   overflow-y: auto;
 }
@@ -294,7 +296,7 @@ onBeforeUnmount(() => {
   width: 100%;
   padding: 0.72rem 0.8rem;
   border: 1px solid rgba(31, 39, 51, 0.12);
-  border-radius: 0;
+  border-radius: var(--border-radius-sm);
   background: rgba(255, 255, 255, 0.94);
   text-align: left;
   transition:
@@ -305,7 +307,7 @@ onBeforeUnmount(() => {
 
 .benchmark-picker-option:hover {
   border-color: rgba(31, 39, 51, 0.2);
-  background: rgba(251, 249, 243, 0.98);
+  background: rgba(247, 250, 248, 0.98);
 }
 
 .benchmark-picker-option:focus-visible {
@@ -316,7 +318,7 @@ onBeforeUnmount(() => {
 
 .benchmark-picker-option.selected {
   border-color: rgba(31, 39, 51, 0.24);
-  background: rgba(244, 240, 229, 0.98);
+  background: rgba(237, 244, 240, 0.98);
 }
 
 .benchmark-picker-option-main {
@@ -360,7 +362,7 @@ onBeforeUnmount(() => {
   align-items: center;
   min-height: 1.6rem;
   padding: 0.16rem 0.5rem;
-  border-radius: 2px;
+  border-radius: var(--border-radius-sm);
   background: rgba(255, 255, 255, 0.94);
   border: 1px solid rgba(31, 39, 51, 0.14);
   color: var(--ink-soft);
@@ -377,6 +379,8 @@ onBeforeUnmount(() => {
   .benchmark-picker-trigger,
   .benchmark-picker-static-copy {
     max-width: 100%;
+    white-space: normal;
+    text-align: left;
   }
 
   .benchmark-picker-popover {

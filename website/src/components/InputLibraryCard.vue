@@ -210,7 +210,7 @@ function getInspectValueLabel(): string {
   gap: 0.8rem;
   padding: 0.95rem;
   background:
-    linear-gradient(180deg, rgba(43, 76, 111, 0.04), rgba(255, 255, 255, 0)),
+    linear-gradient(180deg, rgba(61, 112, 86, 0.05), rgba(255, 255, 255, 0)),
     rgba(255, 255, 255, 0.92);
 }
 
@@ -267,9 +267,9 @@ function getInspectValueLabel(): string {
   gap: 0.45rem;
   padding: 0.82rem 0.88rem;
   border: 1px solid rgba(216, 222, 230, 0.92);
-  border-radius: 18px;
+  border-radius: var(--border-radius);
   background:
-    linear-gradient(180deg, rgba(43, 76, 111, 0.05), rgba(255, 255, 255, 0.96)),
+    linear-gradient(180deg, rgba(61, 112, 86, 0.05), rgba(255, 255, 255, 0.96)),
     rgba(255, 255, 255, 0.96);
 }
 

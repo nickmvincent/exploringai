@@ -2,7 +2,7 @@
 title: Producing an expert evaluation set
 description: >-
   How much would it cost to pay for an eval dataset (say,
-  {dataset_size__hle__questions}) assuming moderate expert hourly wages (say,
+  {dataset_size__hle__questions}) assuming a per-question expert benchmark (say,
   {wage_data__phd__dollars_per_question})?
 formula: >-
   {dataset_size__hle__questions} * {wage_data__phd__dollars_per_question}
@@ -12,23 +12,29 @@ presets:
     values:
       - input: dataset_size__hle__questions
         value: 300
+  - id: gpqa-main-set
+    label: GPQA main scale at current expert rate
+    fills:
+      - input: dataset_size__hle__questions
+        variant: dataset_size__gpqa_main__questions
   - id: expanded-public-set
     label: 10,000-question set at current expert rate
     values:
       - input: dataset_size__hle__questions
         value: 10000
   - id: premium-public-set
-    label: 3,000-question set at premium expert rate
-    values:
+    label: HLE public set at premium expert prize tier
+    fills:
       - input: wage_data__phd__dollars_per_question
-        value: 500
+        variant: wage_data__hle_runner_up_prize__dollars_per_question
   - id: expanded-premium-set
     label: 10,000-question set at premium expert rate
+    fills:
+      - input: wage_data__phd__dollars_per_question
+        variant: wage_data__hle_runner_up_prize__dollars_per_question
     values:
       - input: dataset_size__hle__questions
         value: 10000
-      - input: wage_data__phd__dollars_per_question
-        value: 500
 result_label: Dataset Cost
 result_units: dollars
 category: Paying for new labour
@@ -44,16 +50,16 @@ type: ScenarioCalculation
 
 ## Description
 
-How much would it cost to pay for an eval dataset (say, 3,000 questions) assuming moderate expert hourly wages (say, 300 dollars per question)?
+How much would it cost to pay for an eval dataset (say, 2,500 questions) assuming a per-question expert benchmark (say, 200 dollars per question)?
 
 ## Inputs
 
-- **Total questions (HLE)**: 3,000 questions
-- **PhD rate per question**: 300 dollars per question
+- **Total public questions (Humanity's Last Exam)**: 2,500 questions
+- **Expert benchmark rate per question**: 200 dollars per question
 
 ## Calculation
 
-- Multiply: 3,000 questions × 300 dollars per question = [result]
+- Multiply: 2,500 questions x 200 dollars per question = [result]
 
 ## Result
 

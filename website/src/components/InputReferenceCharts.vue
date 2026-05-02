@@ -113,8 +113,8 @@ function formatBarValue(bar: InputReferenceChartBar) {
 .reference-charts {
   margin-top: 0.85rem;
   border: 1px solid rgba(90, 98, 112, 0.16);
-  border-radius: 16px;
-  background: rgba(248, 249, 251, 0.84);
+  border-radius: var(--border-radius);
+  background: rgba(245, 248, 246, 0.86);
   overflow: hidden;
 }
 
@@ -164,7 +164,7 @@ function formatBarValue(bar: InputReferenceChartBar) {
 
 .reference-chart {
   padding: 0.85rem;
-  border-radius: 14px;
+  border-radius: var(--border-radius-sm);
   background: rgba(255, 255, 255, 0.88);
   border: 1px solid rgba(216, 222, 230, 0.92);
 }

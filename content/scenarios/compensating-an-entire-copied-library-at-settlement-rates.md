@@ -23,6 +23,11 @@ presets:
     fills:
       - input: total_books__anthropic_pirated_library__books
         variant: total_books__pirate_library_mirror__books
+  - id: statutory-minimum
+    label: Anthropic copied library -> statutory minimum
+    fills:
+      - input: settlement_value__anthropic_books__dollars_per_work
+        variant: settlement_value__copyright_statutory_minimum__dollars_per_work
 result_label: Total Compensation
 result_units: dollars
 category: Distributing money

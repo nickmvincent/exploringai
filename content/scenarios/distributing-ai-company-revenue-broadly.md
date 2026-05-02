@@ -51,16 +51,16 @@ type: ScenarioCalculation
 
 ## Description
 
-If we distribute AI revenue (say, 3,490 millions of dollars) to some group of people (say, 8.10 billions of people), how much will each person get?
+If we distribute AI revenue (say, 10.00 billions of dollars) to some group of people (say, 8.09 billions of people), how much will each person get?
 
 ## Inputs
 
-- **Revenue from AI (OpenAI)**: 3,490 millions of dollars
-- **Number of people on Earth**: 8.10 billions of people
+- **Annualized revenue (OpenAI)**: 10.00 billions of dollars
+- **Number of people on Earth**: 8.09 billions of people
 
 ## Calculation
 
-- Divide: 3,490 millions of dollars ÷ 8.10 billions of people
+- Divide: 10.00 billions of dollars / 8.09 billions of people
 
 ## Result
 

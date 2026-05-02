@@ -47,18 +47,18 @@ type: ScenarioCalculation
 
 ## Description
 
-How much would it cost to pay for a brand new LLM-scale pre-training dataset (say, 15,000 billions of tokens) assuming moderate freelance writing wages (say, 1 dollars per word)?
+How much would it cost to pay for a brand new LLM-scale pre-training dataset (say, 15,000 billions of tokens) assuming moderate freelance writing wages (say, 0.09 dollars per word)?
 
 ## Inputs
 
 - **Total pre-training tokens (Llama 3)**: 15,000 billions of tokens
 - **Average words per token**: 0.75 words per token
-- **Freelance rate per word (high estimate)**: 1 dollars per word
+- **Paid writing rate per word (higher benchmark)**: 0.09 dollars per word
 
 ## Calculation
 
 - Multiply: 15,000 billions of tokens × 0.75 words per token = [total_words]
-- Multiply: [total_words] × 1 dollars per word = [result]
+- Multiply: [total_words] x 0.09 dollars per word = [result]
 
 ## Result
 

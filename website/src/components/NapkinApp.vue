@@ -180,8 +180,30 @@ const selectedSourceQuality = ref('All');
 const selectedInputType = ref('All');
 const freeScenarioOpen = ref(false);
 
-const inputs = ref<Record<string, Input>>({});
-const scenariosData = ref<Scenario[]>([]);
+function cloneInputs(source: Record<string, Input>) {
+  return JSON.parse(JSON.stringify(source)) as Record<string, Input>;
+}
+
+function cloneScenarios(source: Scenario[]) {
+  return JSON.parse(JSON.stringify(source)) as Scenario[];
+}
+
+function prepareScenariosForRender(source: Scenario[], sourceInputs: Record<string, Input>) {
+  const scenarios = cloneScenarios(source);
+
+  scenarios.forEach((scenario) => {
+    scenario.calculate = createCalculationFunction(scenario);
+  });
+
+  return updateCalculations(scenarios, sourceInputs);
+}
+
+const initialInputState = cloneInputs(props.initialInputs);
+
+const inputs = ref<Record<string, Input>>(initialInputState);
+const scenariosData = ref<Scenario[]>(
+  prepareScenariosForRender(props.initialScenarios, initialInputState)
+);
 const logs = ref<Record<string, { time: string; value: number }[]>>({});
 const fillSelections = ref<Record<string, string>>({});
 const inputDrafts = ref<Record<string, string>>({});
@@ -1670,8 +1692,8 @@ watch(
 );
 
 onMounted(() => {
-  inputs.value = JSON.parse(JSON.stringify(props.initialInputs));
-  scenariosData.value = JSON.parse(JSON.stringify(props.initialScenarios));
+  inputs.value = cloneInputs(props.initialInputs);
+  scenariosData.value = cloneScenarios(props.initialScenarios);
 
   ensureFreeScenarioInputPicker();
   initializeFillSelections();
@@ -1821,7 +1843,7 @@ onBeforeUnmount(() => {
             </div>
           </div>
 
-          <div v-else-if="isInputViewVisible" class="library-toolbar">
+          <div v-if="isInputViewVisible" class="library-toolbar">
             <label class="search-field">
               <span class="visually-hidden">Search inputs</span>
               <input

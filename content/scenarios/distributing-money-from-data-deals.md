@@ -43,16 +43,16 @@ type: ScenarioCalculation
 
 ## Description
 
-If we distribute the payments from recent data deal (say, 60 millions of dollars) to some group of people (say, 267.50 millions of daily active users), how much will each person get?
+If we distribute the payments from recent data deal (say, 60 millions of dollars) to some group of people (say, 121.40 millions of daily active users), how much will each person get?
 
 ## Inputs
 
 - **Payment made to Reddit by Google**: 60 millions of dollars
-- **Number of Reddit daily active users**: 267.50 millions of daily active users
+- **Reddit daily active uniques**: 121.40 millions of daily active users
 
 ## Calculation
 
-- Divide: 60 millions of dollars ÷ 267.50 millions of daily active users
+- Divide: 60 millions of dollars / 121.40 millions of daily active users
 
 ## Result
 
