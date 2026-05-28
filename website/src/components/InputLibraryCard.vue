@@ -196,22 +196,24 @@ function getInspectValueLabel(): string {
   flex-direction: column;
   gap: 0.95rem;
   padding: 1.15rem;
+  border-color: var(--notebook-rule);
+  background: rgba(255, 253, 248, 0.82);
+  box-shadow: none;
   transition:
-    transform 0.18s ease,
+    background-color 0.18s ease,
     border-color 0.18s ease;
 }
 
 .input-library-card:hover {
-  transform: translateY(-2px);
   border-color: rgba(43, 76, 111, 0.22);
+  background: rgba(255, 253, 248, 0.96);
 }
 
 .input-library-card.compact {
   gap: 0.8rem;
   padding: 0.95rem;
-  background:
-    linear-gradient(180deg, rgba(61, 112, 86, 0.05), rgba(255, 255, 255, 0)),
-    rgba(255, 255, 255, 0.92);
+  background: rgba(255, 253, 248, 0.82);
+  border-top: 2px solid rgba(61, 112, 86, 0.24);
 }
 
 .input-library-header {
@@ -266,11 +268,9 @@ function getInspectValueLabel(): string {
   grid-template-columns: minmax(0, 1fr);
   gap: 0.45rem;
   padding: 0.82rem 0.88rem;
-  border: 1px solid rgba(216, 222, 230, 0.92);
+  border: 1px solid var(--notebook-rule-soft);
   border-radius: var(--border-radius);
-  background:
-    linear-gradient(180deg, rgba(61, 112, 86, 0.05), rgba(255, 255, 255, 0.96)),
-    rgba(255, 255, 255, 0.96);
+  background: rgba(252, 251, 245, 0.82);
 }
 
 .input-library-units,

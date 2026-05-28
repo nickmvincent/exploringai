@@ -195,8 +195,8 @@ onBeforeUnmount(() => {
   max-width: 100%;
   padding: 0.08rem 0.42rem 0.12rem;
   border-radius: var(--border-radius-sm);
-  border: 1px solid rgba(31, 39, 51, 0.14);
-  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--notebook-rule-soft);
+  background: rgba(255, 253, 248, 0.72);
   transition:
     border-color 0.18s ease,
     transform 0.18s ease,
@@ -215,7 +215,7 @@ onBeforeUnmount(() => {
 
 .benchmark-picker-trigger:hover {
   border-color: rgba(31, 39, 51, 0.24);
-  background: rgba(255, 255, 255, 0.96);
+  background: rgba(255, 253, 248, 0.96);
 }
 
 .benchmark-picker-trigger:focus-visible {
@@ -261,17 +261,17 @@ onBeforeUnmount(() => {
   width: min(30rem, calc(100vw - 2rem));
   max-height: min(28rem, 65vh);
   padding: 0.8rem;
-  border: 1px solid rgba(31, 39, 51, 0.16);
+  border: 1px solid var(--notebook-rule);
   border-radius: var(--border-radius);
-  background: rgba(250, 252, 249, 0.98);
-  box-shadow: 0 14px 30px rgba(31, 39, 51, 0.14);
+  background: rgba(255, 253, 248, 0.98);
+  box-shadow: var(--shadow-strong);
   overflow-y: auto;
 }
 
 .benchmark-picker-group + .benchmark-picker-group {
   margin-top: 0.8rem;
   padding-top: 0.8rem;
-  border-top: 1px solid rgba(216, 222, 230, 0.72);
+  border-top: 1px solid var(--notebook-rule-soft);
 }
 
 .benchmark-picker-group-label {
@@ -295,9 +295,9 @@ onBeforeUnmount(() => {
   gap: 0.85rem;
   width: 100%;
   padding: 0.72rem 0.8rem;
-  border: 1px solid rgba(31, 39, 51, 0.12);
+  border: 1px solid var(--notebook-rule-soft);
   border-radius: var(--border-radius-sm);
-  background: rgba(255, 255, 255, 0.94);
+  background: rgba(255, 253, 248, 0.94);
   text-align: left;
   transition:
     border-color 0.18s ease,
@@ -363,8 +363,8 @@ onBeforeUnmount(() => {
   min-height: 1.6rem;
   padding: 0.16rem 0.5rem;
   border-radius: var(--border-radius-sm);
-  background: rgba(255, 255, 255, 0.94);
-  border: 1px solid rgba(31, 39, 51, 0.14);
+  background: rgba(255, 253, 248, 0.94);
+  border: 1px solid var(--notebook-rule-soft);
   color: var(--ink-soft);
   font-size: 0.72rem;
   font-weight: 700;

@@ -160,16 +160,18 @@ function getInspectValueLabel(): string {
 <style scoped>
 .scenario-input-card {
   padding: 0.9rem 0.95rem 0.85rem;
-  border: 1px solid rgba(31, 39, 51, 0.12);
+  border: 1px solid var(--notebook-rule-soft);
   border-radius: var(--border-radius-sm);
-  background: rgba(255, 255, 255, 0.84);
+  background: rgba(255, 253, 248, 0.68);
   transition:
+    background-color 0.18s ease,
     border-color 0.18s ease,
     box-shadow 0.18s ease;
 }
 
 .scenario-input-card:hover {
   border-color: rgba(31, 39, 51, 0.22);
+  background: rgba(255, 253, 248, 0.9);
 }
 
 .scenario-input-card.changed {
@@ -217,8 +219,8 @@ function getInspectValueLabel(): string {
 
 .input-quality-badge {
   color: var(--ink-soft);
-  background: rgba(251, 249, 243, 0.94);
-  border: 1px solid rgba(31, 39, 51, 0.14);
+  background: rgba(246, 245, 238, 0.86);
+  border: 1px solid var(--notebook-rule-soft);
 }
 
 .changed-badge {
@@ -268,10 +270,10 @@ function getInspectValueLabel(): string {
   width: max-content;
   min-width: 9rem;
   padding: 0.45rem;
-  border: 1px solid rgba(31, 39, 51, 0.14);
+  border: 1px solid var(--notebook-rule);
   border-radius: var(--border-radius-sm);
-  background: rgba(255, 255, 255, 0.98);
-  box-shadow: 0 16px 34px rgba(31, 39, 51, 0.13);
+  background: rgba(255, 253, 248, 0.98);
+  box-shadow: var(--shadow-strong);
 }
 
 @media (max-width: 640px) {
