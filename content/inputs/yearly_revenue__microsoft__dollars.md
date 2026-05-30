@@ -1,6 +1,6 @@
 ---
 title: Annualized AI revenue run rate (Microsoft)
-value: 13000000000
+value: 37000000000
 scale: 1000000000
 display_units: billions of dollars
 variable_name: yearly_revenue__microsoft__dollars
@@ -8,15 +8,15 @@ variable_type: yearly_revenue
 entity: microsoft
 units: dollars
 source_url: >-
-  https://news.microsoft.com/source/2025/01/29/microsoft-cloud-and-ai-strength-drives-second-quarter-results-2/
+  https://www.microsoft.com/en-us/investor/earnings/FY-2026-Q3/press-release-webcast
 summary: "Reported annualized revenue run rate for Microsoft's AI business."
 sourceName: "Microsoft earnings release"
-sourceNote: "Microsoft said in January 2025 that its AI business had surpassed a $13B annual revenue run rate."
-sourceLocator: "Second-quarter earnings release opening summary"
-sourceLocatorUrl: 'https://news.microsoft.com/source/2025/01/29/microsoft-cloud-and-ai-strength-drives-second-quarter-results-2/'
-sourceExcerpt: "Microsoft says its AI business has surpassed a $13B annual revenue run rate."
+sourceNote: "Microsoft said in April 2026 that its AI business had surpassed a $37B annual revenue run rate."
+sourceLocator: "FY26 Q3 earnings release opening summary"
+sourceLocatorUrl: 'https://www.microsoft.com/en-us/investor/earnings/FY-2026-Q3/press-release-webcast'
+sourceExcerpt: "Microsoft says its AI business surpassed a $37B annual revenue run rate."
 sourceQuality: "first-party-report"
-lastReviewed: "2026-03-10"
+lastReviewed: "2026-05-28"
 mainExampleForCategory: false
 min: 0
 step: 0.1
@@ -31,7 +31,7 @@ type: InputVariable
 
 # Annualized AI revenue run rate (Microsoft)
 
-**Value:** 13.00 billions of dollars
+**Value:** 37.00 billions of dollars
 
 ## Description
 
@@ -43,5 +43,5 @@ This uses Microsoft's disclosed AI-business run rate rather than total Microsoft
 
 ## Source
 
-- [https://news.microsoft.com/source/2025/01/29/microsoft-cloud-and-ai-strength-drives-second-quarter-results-2/](https://news.microsoft.com/source/2025/01/29/microsoft-cloud-and-ai-strength-drives-second-quarter-results-2/)
-- Microsoft said its AI business had surpassed a $13 billion annual revenue run rate.
+- [https://www.microsoft.com/en-us/investor/earnings/FY-2026-Q3/press-release-webcast](https://www.microsoft.com/en-us/investor/earnings/FY-2026-Q3/press-release-webcast)
+- Microsoft said its AI business had surpassed a $37 billion annual revenue run rate.

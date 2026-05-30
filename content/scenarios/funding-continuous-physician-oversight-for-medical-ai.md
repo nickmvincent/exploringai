@@ -50,21 +50,21 @@ type: ScenarioCalculation
 
 ## Description
 
-If feeling comfortable with medical AI meant asking some share of the world's physicians (say, 1 percent of physicians) out of a global pool of roughly 13.92 million physicians to each spend about 40 hours per physician per year on audits, review, and oversight, what annual labor budget would that imply at current physician wages (say, 118.01 dollars per hour)?
+If feeling comfortable with medical AI meant asking some share of the world's physicians (say, 1 percent of physicians) out of a global pool of roughly 13.92 million physicians to each spend about 40 hours per physician per year on audits, review, and oversight, what annual labor budget would that imply at current physician wages (say, 128.46 dollars per hour)?
 
 ## Inputs
 
 - **Estimated physicians worldwide**: 13.92 million physicians
 - **Participating share of physicians**: 1 percent of physicians
 - **Annual oversight time per participating physician**: 40 hours per physician per year
-- **Mean hourly wage for U.S. general internal medicine physicians**: 118.01 dollars per hour
+- **Mean hourly wage for U.S. general internal medicine physicians**: 128.46 dollars per hour
 
 ## Calculation
 
 - Divide: 1 percent of physicians ÷ 100 = [participating_share]
 - Multiply: 13.92 million physicians × [participating_share] = [participating_physicians]
 - Multiply: [participating_physicians] × 40 hours per physician per year = [oversight_hours]
-- Multiply: [oversight_hours] × 118.01 dollars per hour = [result]
+- Multiply: [oversight_hours] × 128.46 dollars per hour = [result]
 
 ## Result
 

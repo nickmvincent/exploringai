@@ -50,18 +50,18 @@ type: ScenarioCalculation
 
 ## Description
 
-How much would it cost to fund a domain-specific eval effort using a panel of physicians (say, 262 physicians) for some review time each (say, 8 hours per physician) at current physician wages (say, 118.01 dollars per hour)?
+How much would it cost to fund a domain-specific eval effort using a panel of physicians (say, 262 physicians) for some review time each (say, 8 hours per physician) at current physician wages (say, 128.46 dollars per hour)?
 
 ## Inputs
 
 - **Physician experts in HealthBench**: 262 physicians
 - **Planning time per physician reviewer**: 8 hours per physician
-- **Mean hourly wage for U.S. general internal medicine physicians**: 118.01 dollars per hour
+- **Mean hourly wage for U.S. general internal medicine physicians**: 128.46 dollars per hour
 
 ## Calculation
 
 - Multiply: 262 physicians × 8 hours per physician = [total_hours]
-- Multiply: [total_hours] × 118.01 dollars per hour = [result]
+- Multiply: [total_hours] × 128.46 dollars per hour = [result]
 
 ## Result
 

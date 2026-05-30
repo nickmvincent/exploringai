@@ -7,15 +7,15 @@ variable_name: inference_price__gpt_4_1_mini__output_dollars_per_1m_tokens
 variable_type: inference_price
 entity: gpt_4_1_mini
 units: dollars_per_1m_output_tokens
-source_url: 'https://platform.openai.com/docs/pricing'
+source_url: 'https://platform.openai.com/docs/models/gpt-4.1-mini'
 summary: "Public API price benchmark for GPT-4.1 mini output tokens."
-sourceName: "OpenAI pricing page"
+sourceName: "OpenAI model page"
 sourceNote: "GPT-4.1 mini output pricing is listed at $1.60 per 1M tokens."
-sourceLocator: "Pricing table entry for GPT-4.1 mini output tokens"
-sourceLocatorUrl: 'https://platform.openai.com/docs/pricing'
-sourceExcerpt: "The pricing page lists GPT-4.1 mini output tokens at $1.60 per 1M tokens."
+sourceLocator: "GPT-4.1 mini model page pricing section"
+sourceLocatorUrl: 'https://platform.openai.com/docs/models/gpt-4.1-mini'
+sourceExcerpt: "The GPT-4.1 mini model page lists output tokens at $1.60 per 1M tokens."
 sourceQuality: "first-party-report"
-lastReviewed: "2026-03-10"
+lastReviewed: "2026-05-28"
 min: 0
 step: 0.01
 date_added: '2026-03-10T00:00:00.000Z'
@@ -41,5 +41,5 @@ Public API pricing is a price-to-user benchmark, not OpenAI's internal marginal 
 
 ## Source
 
-- [https://platform.openai.com/docs/pricing](https://platform.openai.com/docs/pricing)
+- [https://platform.openai.com/docs/models/gpt-4.1-mini](https://platform.openai.com/docs/models/gpt-4.1-mini)
 - OpenAI lists GPT-4.1 mini output pricing at $1.60 per 1 million tokens.
