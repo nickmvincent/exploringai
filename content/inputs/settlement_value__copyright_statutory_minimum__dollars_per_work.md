@@ -10,13 +10,13 @@ units: dollars_per_work
 source_url: 'https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title17-section504&num=0&edition=prelim'
 summary: "The ordinary minimum statutory damages amount for copyright infringement under 17 U.S.C. 504(c)."
 sourceName: "17 U.S.C. 504(c)"
-sourceNote: "The statute sets ordinary statutory damages at not less than $750 and not more than $30,000 per work, before willfulness or innocent-infringer adjustments."
+sourceNote: "The statute sets ordinary statutory damages at $750–$30,000 per legally distinct work when statutory damages are available and elected, before willfulness or innocent-infringer adjustments."
 sourceLocator: "17 U.S.C. 504(c)(1)"
 sourceLocatorUrl: 'https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title17-section504&num=0&edition=prelim'
 sourceExcerpt: "The ordinary statutory range starts at $750 per work."
 derivationNote: "No derivation; this stores the lower bound of the ordinary statutory damages range."
 sourceQuality: "first-party-report"
-lastReviewed: "2026-05-02"
+lastReviewed: "2026-07-09"
 mainExampleForCategory: false
 min: 0
 step: 50
@@ -41,7 +41,7 @@ The ordinary minimum statutory damages amount for copyright infringement under 1
 
 ## Key Assumption
 
-This is a legal damages benchmark, not a settlement amount or a market price for a license.
+This is a legal damages benchmark, not a settlement amount or market price. Registration timing under 17 U.S.C. 412 can bar statutory damages; liability, ownership, the number of legally distinct works, and innocent- or willful-infringement findings remain separate questions.
 
 ## Source
 

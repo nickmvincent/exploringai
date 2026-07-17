@@ -1,7 +1,6 @@
 ---
 title: Copyright Act statutory damages
 anchor: 17 U.S.C. 504(c)
-year: 2026
 kind: legal
 source_url: 'https://uscode.house.gov/view.xhtml?req=granuleid:USC-prelim-title17-section504&num=0&edition=prelim'
 relevance: Primary legal benchmark for comparing settlement-style per-work payments against ordinary statutory copyright damages.
@@ -19,7 +18,7 @@ type: KeyPaper
 
 ## Relevance
 
-The statutory range gives the copied-library scenario a legal-damages comparison point beside the Anthropic settlement benchmark.
+The statutory range provides a legal-damages comparison point when statutory damages are available and elected. Registration timing, liability, ownership, and the legally distinct number of works remain separate questions.
 
 ## Key inputs
 

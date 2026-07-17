@@ -1,9 +1,9 @@
 ---
-title: "Win-win: How to Remove Copyright Obstacles to AI Training While Ensuring Author Remuneration"
-anchor: Martin Senftleben, 2024
+title: "Win-win: How to Remove Copyright Obstacles to AI Training While Ensuring Author Remuneration (and Why the European AI Act Fails to Do the Magic)"
+anchor: Martin Senftleben, Chicago-Kent Law Review, 2025
 authors:
   - Martin Senftleben
-year: 2024
+year: 2025
 kind: policy
 source_url: 'https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4964460'
 relevance: Clear legal-policy proposal for paying authors without making ex ante licensing the only path for model training.

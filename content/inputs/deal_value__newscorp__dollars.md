@@ -1,5 +1,5 @@
 ---
-title: Estimated total value of the News Corp deal
+title: Reported potential five-year value floor of the News Corp deal
 value: 250000000
 scale: 1000000
 display_units: millions of dollars
@@ -9,14 +9,14 @@ entity: newscorp
 units: dollars
 source_url: >-
   https://www.investing.com/news/stock-market-news/sam-altmans-openai-signs-content-agreement-with-news-corp-3453039
-summary: "Estimated total value of the OpenAI-News Corp content licensing agreement."
+summary: "Illustrative floor for a deal reported as potentially worth more than $250M over five years; the companies did not disclose financial terms."
 sourceName: "Reuters citing WSJ reporting"
-sourceNote: "Reported as worth more than $250M over five years; stored here as a round-number benchmark."
+sourceNote: "Reuters reported that the agreement could be worth more than $250M over five years and may include cash and service credits; the companies did not disclose terms."
 sourceLocator: "Reported deal-value summary in Reuters coverage"
 sourceLocatorUrl: 'https://www.investing.com/news/stock-market-news/sam-altmans-openai-signs-content-agreement-with-news-corp-3453039'
 sourceExcerpt: "Reuters reported the OpenAI-News Corp agreement as worth more than $250M over five years."
 sourceQuality: "news"
-lastReviewed: "2026-03-10"
+lastReviewed: "2026-07-09"
 mainExampleForCategory: false
 min: 0
 step: 1
@@ -29,17 +29,17 @@ visibility: public
 type: InputVariable
 ---
 
-# Estimated total value of the News Corp deal
+# Reported potential five-year value floor of the News Corp deal
 
 **Value:** 250 millions of dollars
 
 ## Description
 
-Estimated total value of the OpenAI-News Corp content licensing agreement.
+Illustrative floor for the reported potential five-year value of the OpenAI-News Corp content licensing agreement.
 
 ## Key Assumption
 
-Stores the widely reported total contract value over five years rather than an annualized figure.
+Stores $250 million as an illustrative floor for a deal reported as potentially worth more than $250 million over five years. The companies did not disclose financial terms, and reporting said the value could include both cash and service credits.
 
 ## Source
 

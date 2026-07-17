@@ -1,13 +1,24 @@
 ---
 title: Fantastic Copyrighted Beasts and How (Not) to Generate Them
 anchor: 2024 empirical paper on copyrighted-character generation
+authors:
+  - Luxi He
+  - Yangsibo Huang
+  - Weijia Shi
+  - Tinghao Xie
+  - Haotian Liu
+  - Yue Wang
+  - Luke Zettlemoyer
+  - Chiyuan Zhang
+  - Danqi Chen
+  - Peter Henderson
 year: 2024
 kind: empirical
 source_url: 'https://arxiv.org/abs/2406.14526'
-relevance: Strong evidence that generative models can reproduce protected characters or recognizable copyrighted elements even without direct prompt copies.
+relevance: Empirical evidence that image and video generators can produce recognizable character depictions from indirect prompts, and an evaluation of mitigation techniques; the paper does not itself decide infringement.
 key_inputs:
-  - Rate of recognizable copyrighted-character generation
-  - Prompt sensitivity for protected-character outputs
+  - Rate of recognizable character generation under the paper's metrics
+  - Prompt sensitivity for character-related outputs
   - Effect of mitigation methods on copyrighted-content generation
 sourceQuality: "third-party-report"
 sort_order: 80
@@ -17,10 +28,10 @@ type: KeyPaper
 
 ## Relevance
 
-Useful for showing that downstream infringement concerns are not limited to literal prompt-copying scenarios.
+Useful for studying recognizable character generation and mitigation under indirect prompting. Whether any particular output infringes is a separate, fact-specific legal question.
 
 ## Key inputs
 
 - Character-generation rate
-- Prompt sensitivity for protected outputs
+- Prompt sensitivity for character-related outputs
 - Mitigation effectiveness

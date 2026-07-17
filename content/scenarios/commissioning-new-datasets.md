@@ -1,37 +1,20 @@
 ---
-title: Commissioning New Datasets
+title: Pricing an English-Text-Equivalent Dataset at Frontier Scale
 description: >-
-  How much would it cost to pay for a brand new LLM-scale pre-training dataset
-  (say, {dataset_size__llama3__tokens}) assuming moderate freelance writing
-  wages (say, {wage_data__generic_freelance_higher__dollars_per_word})?
+  What replacement-cost thought experiment results if a frontier-scale token
+  exposure (say, {dataset_size__llama3__tokens}) is treated as English text
+  using {training_detail__openai__words_per_token} and priced at a professional
+  work-for-hire writing benchmark (say,
+  {wage_data__generic_freelance_higher__dollars_per_word})?
 formula: >-
   {dataset_size__llama3__tokens} * {training_detail__openai__words_per_token} *
   {wage_data__generic_freelance_higher__dollars_per_word}
 presets:
-  - id: olmo3-at-lower-rate
-    label: OLMo 3 scale -> lower freelance rate
+  - id: lower-writing-rate
+    label: Same token scale -> lower work-for-hire rate
     fills:
-      - input: dataset_size__llama3__tokens
-        variant: dataset_size__olmo3__tokens
       - input: wage_data__generic_freelance_higher__dollars_per_word
         variant: wage_data__generic_freelance_lower__dollars_per_word
-  - id: qwen3-at-higher-rate
-    label: Qwen 3 scale -> higher freelance rate
-    fills:
-      - input: dataset_size__llama3__tokens
-        variant: dataset_size__qwen3__tokens
-  - id: deepseek-at-lower-rate
-    label: DeepSeek V3 scale -> lower freelance rate
-    fills:
-      - input: dataset_size__llama3__tokens
-        variant: dataset_size__deepseek_v3__tokens
-      - input: wage_data__generic_freelance_higher__dollars_per_word
-        variant: wage_data__generic_freelance_lower__dollars_per_word
-  - id: llama4-maverick-at-higher-rate
-    label: Llama 4 Maverick scale -> higher freelance rate
-    fills:
-      - input: dataset_size__llama3__tokens
-        variant: dataset_size__llama4_maverick__tokens
 result_label: Dataset Cost
 result_units: dollars
 category: Paying for new labour
@@ -44,26 +27,26 @@ visibility: public
 type: ScenarioCalculation
 ---
 
-# Commissioning New Datasets
+# Pricing an English-Text-Equivalent Dataset at Frontier Scale
 
 ## Description
 
-How much would it cost to pay for a brand new LLM-scale pre-training dataset (say, 15,000 billions of tokens) assuming moderate freelance writing wages (say, 0.09 dollars per word)?
+What replacement-cost thought experiment results if 15 trillion tokenizer tokens are treated as English text using a 0.75-word-per-token rule of thumb and priced at a professional work-for-hire writing benchmark?
 
 ## Inputs
 
 - **Total pre-training tokens (Llama 3)**: 15,000 billions of tokens
 - **Average words per token**: 0.75 words per token
-- **Paid writing rate per word (higher benchmark)**: 0.09 dollars per word
+- **Work-for-hire article or essay rate (upper benchmark)**: 0.45 dollars per word
 
 ## Calculation
 
 - Multiply: 15,000 billions of tokens × 0.75 words per token = [total_words]
-- Multiply: [total_words] x 0.09 dollars per word = [result]
+- Multiply: [total_words] × 0.45 dollars per word = [result]
 
 ## Result
 
-The Dataset Cost is calculated in dollars.
+The dataset cost is an English-text-equivalent replacement-cost thought experiment. It is not a forecast of actual model-development spending or a measured cost of producing a unique training corpus.
 
 ## Category
 

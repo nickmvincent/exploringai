@@ -2,28 +2,29 @@
 title: Funding Expert Evaluation Questions from Data Deals
 description: >-
   How many expert-eval questions could one data deal (say,
-  {deal_value__reddit_google__dollars}) fund at current expert rates (say,
+  {deal_value__reddit_google__dollars}) represent at an HLE prize-budget
+  benchmark (say,
   {wage_data__phd__dollars_per_question})?
 formula: >-
   {deal_value__reddit_google__dollars} /
   {wage_data__phd__dollars_per_question}
 presets:
   - id: news-corp-at-current-rate
-    label: News Corp deal -> current expert rate
+    label: News Corp deal -> HLE prize-budget ratio
     fills:
       - input: deal_value__reddit_google__dollars
         variant: deal_value__newscorp__dollars
   - id: taylor-francis-at-current-rate
-    label: Taylor & Francis floor -> current expert rate
+    label: Taylor & Francis floor -> HLE prize-budget ratio
     fills:
       - input: deal_value__reddit_google__dollars
         variant: deal_value__taylorandfrancis_microsoft__dollars
   - id: reddit-at-premium-rate
-    label: Reddit deal -> premium expert rate
+    label: Reddit deal -> $500 HLE prize tier
     fills:
       - input: wage_data__phd__dollars_per_question
         variant: wage_data__hle_runner_up_prize__dollars_per_question
-result_label: Questions Funded
+result_label: Prize-Equivalent Question Count
 result_units: questions
 category: Paying for new labour
 sort_order: 40
@@ -39,12 +40,12 @@ type: ScenarioCalculation
 
 ## Description
 
-How many expert-eval questions could one data deal (say, 60 millions of dollars) fund at current expert rates (say, 200 dollars per question)?
+How many final-question equivalents does a data-deal value represent when divided by the HLE prize-budget ratio or a selected HLE prize tier?
 
 ## Inputs
 
 - **Payment made to Reddit by Google**: 60 millions of dollars
-- **Expert benchmark rate per question**: 200 dollars per question
+- **HLE prize-budget per final public question**: 200 dollars per question
 
 ## Calculation
 
@@ -52,7 +53,7 @@ How many expert-eval questions could one data deal (say, 60 millions of dollars)
 
 ## Result
 
-The Questions Funded is calculated in questions.
+The result is a prize-equivalent question count, not an estimate of questions that could actually be produced. Full production costs are not represented.
 
 ## Category
 

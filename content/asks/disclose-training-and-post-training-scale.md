@@ -1,8 +1,8 @@
 ---
-title: Disclose pretraining size, post-training size, and mix composition as first-class metrics.
+title: Standardize voluntary reporting of pretraining scale, post-training scale, and data mix.
 sort_order: 30
 visibility: public
 type: Ask
 ---
 
-Treat corpus size, data mix, and post-training volume as standard disclosures rather than occasional exceptions in model cards or lawsuits.
+Model developers could make corpus scale, data mix, and post-training volume easier to compare by defining tokenization, modality, deduplication, repetition, and stage boundaries. Disclosures should be aggregated enough to protect personal data, security, and legitimate trade secrets.

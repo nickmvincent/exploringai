@@ -1,21 +1,21 @@
 ---
-title: Paid writing rate per word (higher benchmark)
-value: 0.09
+title: Work-for-hire article or essay rate (upper benchmark)
+value: 0.45
 scale: 1
 display_units: dollars per word
 variable_name: wage_data__generic_freelance_higher__dollars_per_word
 variable_type: wage_data
 entity: generic_freelance_higher
 units: dollars_per_word
-source_url: 'https://www.the-efa.org/rates/'
-summary: "A higher-end professional benchmark for commissioned writing labor."
-sourceName: "Editorial Freelancers Association 2024 rate chart"
-sourceNote: "Uses the high end of EFA's book-proposal per-word rate range as a conservative paid-writing proxy."
-sourceLocator: "EFA rate chart range for book-proposal writing"
-sourceLocatorUrl: 'https://www.the-efa.org/rates/'
-sourceExcerpt: "This benchmark uses the high end of the EFA's professional per-word writing range."
+source_url: 'https://www.the-efa.org/wp-content/uploads/2026/03/2026-Rate-Chart_Landscape.pdf'
+summary: "Upper end of the EFA's 2026 work-for-hire article and essay writing range."
+sourceName: "Editorial Freelancers Association 2026 rate chart"
+sourceNote: "Uses the upper end of EFA's work-for-hire article and essay range as a proxy for commissioned English-language writing."
+sourceLocator: "Writing → Work-for-Hire → Articles/essays"
+sourceLocatorUrl: 'https://www.the-efa.org/wp-content/uploads/2026/03/2026-Rate-Chart_Landscape.pdf'
+sourceExcerpt: "The 2026 EFA survey chart reports 25.0–45.0 cents per word for work-for-hire articles and essays."
 sourceQuality: "third-party-report"
-lastReviewed: "2026-05-02"
+lastReviewed: "2026-07-09"
 mainExampleForCategory: false
 min: 0
 step: 0.0001
@@ -28,19 +28,19 @@ visibility: public
 type: InputVariable
 ---
 
-# Paid writing rate per word (higher benchmark)
+# Work-for-hire article or essay rate (upper benchmark)
 
-**Value:** 0.09 dollars per word
+**Value:** 0.45 dollars per word
 
 ## Description
 
-A higher-end professional benchmark for commissioned writing labor.
+Upper end of the EFA's surveyed range for work-for-hire articles and essays.
 
 ## Key Assumption
 
-Uses the high end of the Editorial Freelancers Association's book-proposal per-word benchmark as a conservative proxy for paid long-form writing.
+Uses a professional English-language writing benchmark as a proxy. It is not a measured cost of producing model-training data.
 
 ## Source
 
-- [https://www.the-efa.org/rates/](https://www.the-efa.org/rates/)
-- The Editorial Freelancers Association publishes professional benchmark ranges for editorial and writing-adjacent work.
+- [2026 EFA rate chart](https://www.the-efa.org/wp-content/uploads/2026/03/2026-Rate-Chart_Landscape.pdf)
+- The chart reports 25.0–45.0 cents per word for work-for-hire articles and essays.

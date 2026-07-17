@@ -1,17 +1,16 @@
 ---
-title: The Most Expensive Part of an LLM Should be its Training Data
-anchor: Urvashi Kandpal and Colin Raffel, ICML 2025 position paper
+title: "Position: The Most Expensive Part of an LLM Should be its Training Data"
+anchor: Nikhil Kandpal and Colin Raffel, ICML 2025 position paper
 authors:
-  - Urvashi Kandpal
+  - Nikhil Kandpal
   - Colin Raffel
 year: 2025
 kind: position
-source_url: 'https://openreview.net/forum?id=L6RpQ1h4Nx'
-relevance: Strong anchor for the claim that scarce, high-quality data should be treated as the costly input in the AI stack rather than an effectively free byproduct.
+source_url: 'https://proceedings.mlr.press/v267/kandpal25a.html'
+relevance: Position paper estimating the hypothetical cost of compensating people to recreate training corpora from scratch and comparing that replacement-cost estimate with model-training cost.
 key_inputs:
-  - Share of total model-development cost attributable to training data
-  - Cost of replacing high-quality corpora with commissioned data
-  - Public count of high-value data suppliers versus model builders
+  - Hypothetical cost of recreating training corpora
+  - Comparison between replacement-cost estimates and model-training cost
 sourceQuality: "third-party-report"
 sort_order: 20
 visibility: public
@@ -26,4 +25,4 @@ This is the cleanest statement of the position that data scarcity, not just comp
 
 - Training-data cost share
 - Replacement-cost estimates for high-quality corpora
-- Relative market power of data suppliers and model developers
+- Comparison with model-training cost under the paper's assumptions

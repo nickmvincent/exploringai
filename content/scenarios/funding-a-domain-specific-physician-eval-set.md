@@ -3,18 +3,14 @@ title: Funding a Domain-Specific Physician Eval Set
 description: >-
   How much would it cost to fund a domain-specific eval effort using a panel of
   physicians (say, {group_size__healthbench__physicians}) for some review time
-  each (say, {training_detail__medical_eval__hours_per_physician}) at current
-  physician wages (say, {wage_data__physician__dollars_per_hour})?
+  each (say, {training_detail__medical_eval__hours_per_physician}) using a May
+  2025 U.S. general-internal-medicine mean employee-wage proxy (say,
+  {wage_data__physician__dollars_per_hour})?
 formula: >-
   {group_size__healthbench__physicians} *
   {training_detail__medical_eval__hours_per_physician} *
   {wage_data__physician__dollars_per_hour}
 presets:
-  - id: healthbench-one-day
-    label: HealthBench-style panel -> one workday each
-    values:
-      - input: training_detail__medical_eval__hours_per_physician
-        value: 8
   - id: healthbench-two-days
     label: HealthBench-style panel -> two workdays each
     values:
@@ -50,7 +46,7 @@ type: ScenarioCalculation
 
 ## Description
 
-How much would it cost to fund a domain-specific eval effort using a panel of physicians (say, 262 physicians) for some review time each (say, 8 hours per physician) at current physician wages (say, 128.46 dollars per hour)?
+How much reviewer labor would a domain-specific eval effort imply using a 262-physician panel, eight hours each, and a May 2025 U.S. general-internal-medicine mean employee-wage proxy?
 
 ## Inputs
 
@@ -65,7 +61,7 @@ How much would it cost to fund a domain-specific eval effort using a panel of ph
 
 ## Result
 
-The Evaluation Cost is calculated in dollars.
+The result estimates reviewer labor only. Consulting rates, employer costs, recruitment, coordination, adjudication, dataset engineering, benefits, and overhead are excluded.
 
 ## Category
 

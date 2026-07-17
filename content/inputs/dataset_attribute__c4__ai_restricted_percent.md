@@ -1,22 +1,22 @@
 ---
-title: Share of C4 URLs with AI-restrictive terms
+title: Share of C4 tokens covered by restrictive Terms of Service
 value: 45
 scale: 1
-display_units: percent of URLs
+display_units: percent of C4 tokens
 variable_name: dataset_attribute__c4__ai_restricted_percent
 variable_type: dataset_attribute
 entity: c4
 units: percent
 source_url: 'https://arxiv.org/abs/2407.14933'
-summary: "Estimated share of C4 URLs carrying AI-restrictive terms or robots exclusions."
+summary: "Estimated share of C4 tokens whose source domains' Terms of Service contained at least one data-use restriction as of April 2024."
 sourceName: "Consent in Crisis"
-sourceNote: "Longpre et al. estimate that about 45% of C4 URLs are restricted for AI use by terms or robots exclusions."
-sourceLocator: "Paper abstract and C4 restriction-share analysis"
-sourceExcerpt: "The paper estimates that about 45% of C4 URLs are restricted for AI use by terms or robots exclusions."
+sourceNote: "Longpre et al. estimate that nearly 45% of C4 tokens come from domains whose Terms of Service contain some form of data-use restriction. This is distinct from their robots.txt estimates."
+sourceLocator: "C4 Terms of Service restriction analysis"
+sourceExcerpt: "The paper estimates that nearly 45% of C4 tokens carry some form of restriction in source-domain Terms of Service."
 source_key_papers:
   - empirical/consent-in-crisis
 sourceQuality: "third-party-report"
-lastReviewed: "2026-03-11"
+lastReviewed: "2026-07-09"
 mainExampleForCategory: false
 min: 0
 max: 100
@@ -30,19 +30,19 @@ visibility: public
 type: InputVariable
 ---
 
-# Share of C4 URLs with AI-restrictive terms
+# Share of C4 tokens covered by restrictive Terms of Service
 
-**Value:** 45 percent of URLs
+**Value:** 45 percent of C4 tokens
 
 ## Description
 
-Estimated share of C4 URLs carrying AI-restrictive terms or robots exclusions.
+Estimated share of C4 tokens whose source domains' Terms of Service contained at least one data-use restriction as of April 2024.
 
 ## Key Assumption
 
-This uses the headline estimate from Longpre et al. as a rough current anchor rather than a daily-updating crawl measurement.
+This Terms-of-Service measure is distinct from the paper's robots.txt estimates, which are roughly 5% of all C4 tokens fully restricted and more than 28% in the actively maintained head.
 
 ## Source
 
 - [https://arxiv.org/abs/2407.14933](https://arxiv.org/abs/2407.14933)
-- Consent in Crisis gives a practical benchmark for how much of the web is becoming harder to use for AI training.
+- Consent in Crisis estimates that nearly 45% of C4 tokens come from domains with some form of data-use restriction in their Terms of Service.

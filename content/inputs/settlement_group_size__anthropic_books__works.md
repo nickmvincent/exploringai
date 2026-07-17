@@ -8,14 +8,14 @@ variable_type: settlement_group_size
 entity: anthropic_books
 units: works
 source_url: 'https://docs.justia.com/cases/federal/district-courts/california/candce/3%3A2024cv05417/434709/437'
-summary: "Number of identified works referenced in the Anthropic books settlement papers."
-sourceName: "Bartz v. Anthropic settlement order"
-sourceNote: "The October 2025 order says the parties identified 482,460 works for settlement administration."
+summary: "Number of works on the settlement Works List at preliminary approval, subject to the settlement's ownership, identifier, and registration-timing requirements."
+sourceName: "Bartz v. Anthropic preliminary-approval opinion"
+sourceNote: "The October 2025 preliminary-approval opinion says 482,460 works were finally identified for settlement administration."
 sourceLocator: "Settlement papers discussion of identified works and average recovery"
 sourceLocatorUrl: 'https://docs.justia.com/cases/federal/district-courts/california/candce/3%3A2024cv05417/434709/437'
 sourceExcerpt: "The filing states that the parties identified 482,460 works for settlement administration."
 sourceQuality: "third-party-report"
-lastReviewed: "2026-03-11"
+lastReviewed: "2026-07-09"
 mainExampleForCategory: false
 min: 0
 step: 100
@@ -34,11 +34,11 @@ type: InputVariable
 
 ## Description
 
-Number of identified works referenced in the Anthropic books settlement papers.
+Number of works on the settlement Works List at preliminary approval.
 
 ## Key Assumption
 
-This stores the identified-work count used for settlement administration, not a count of every book Anthropic may ever have copied.
+This stores the identified-work count used at preliminary approval. The settlement class is limited by the Works List, ownership of the reproduction right, identifier requirements, and copyright-registration timing.
 
 ## Source
 

@@ -1,22 +1,21 @@
 ---
-title: Number of Taylor and Francis Articles
-value: 5291000
+title: Articles displayed on Taylor & Francis Online
+value: 5615000
 scale: 1000000
 display_units: millions of articles
 variable_name: deal_group_size__taylorandfrancis__articles
 variable_type: deal_group_size
 entity: taylorandfrancis
 units: articles
-source_url: >-
-  https://www.tandfonline.com/#:~:text=Advanced%20search.%205%2C291%2C000+%20articles.%20Find%20a%20journal.
-summary: "Number of Taylor and Francis Articles"
+source_url: 'https://www.tandfonline.com/'
+summary: "Current article-count banner displayed on Taylor & Francis Online; not an author or beneficiary count."
 sourceName: "Taylor & Francis Online"
 sourceNote: "Uses the article count publicly shown on the Taylor & Francis platform homepage."
 sourceLocator: "Homepage article-count banner"
-sourceLocatorUrl: 'https://www.tandfonline.com/#:~:text=Advanced%20search.%205%2C291%2C000+%20articles.%20Find%20a%20journal.'
-sourceExcerpt: "Taylor & Francis Online displays a corpus count of 5,291,000+ articles."
+sourceLocatorUrl: 'https://www.tandfonline.com/'
+sourceExcerpt: "Taylor & Francis Online displays a platform count of 5,615,000+ articles."
 sourceQuality: "first-party-report"
-lastReviewed: "2026-03-10"
+lastReviewed: "2026-07-09"
 mainExampleForCategory: false
 min: 0
 step: 0.01
@@ -29,19 +28,19 @@ visibility: public
 type: InputVariable
 ---
 
-# Number of Taylor and Francis Articles
+# Articles displayed on Taylor & Francis Online
 
-**Value:** 5.29 millions of articles
+**Value:** 5.62 millions of articles
 
 ## Description
 
-Number of Taylor and Francis Articles
+Current article-count banner displayed on Taylor & Francis Online.
 
 ## Key Assumption
 
-assuming each article has 1 unique author
+This counts platform articles, not unique authors, contributors, beneficiaries, or the exact content covered by any licensing agreement.
 
 ## Source
 
-- [https://www.tandfonline.com/#:~:text=Advanced%20search.%205%2C291%2C000+%20articles.%20Find%20a%20journal.](https://www.tandfonline.com/#:~:text=Advanced%20search.%205%2C291%2C000+%20articles.%20Find%20a%20journal.)
-- T&F search engine
+- [https://www.tandfonline.com/](https://www.tandfonline.com/)
+- Taylor & Francis Online displayed 5,615,000+ articles when reviewed on July 9, 2026.

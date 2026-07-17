@@ -8,14 +8,14 @@ variable_type: dataset_size
 entity: llama3
 units: tokens
 source_url: 'https://github.com/meta-llama/llama3/blob/main/MODEL_CARD.md'
-summary: "Total tokens used to pre-training a model"
+summary: "Conservative lower-bound benchmark from Meta's disclosure that Llama 3 was pretrained on more than 15 trillion tokens."
 sourceName: "Meta Llama 3 model card"
-sourceNote: "Meta reports that Llama 3 was pretrained on about 15 trillion multilingual tokens."
+sourceNote: "Meta reports that Llama 3 was pretrained on more than 15 trillion tokens; this input stores 15T as a conservative floor."
 sourceLocator: "Model card training-data overview"
 sourceLocatorUrl: 'https://github.com/meta-llama/llama3/blob/main/MODEL_CARD.md'
-sourceExcerpt: "The Llama 3 model card says the model was pretrained on about 15T multilingual tokens."
+sourceExcerpt: "The Llama 3 model card says the model was pretrained on over 15T tokens."
 sourceQuality: "first-party-report"
-lastReviewed: "2026-03-10"
+lastReviewed: "2026-07-09"
 mainExampleForCategory: true
 min: 0
 step: 100
@@ -56,11 +56,11 @@ type: InputVariable
 
 ## Description
 
-Total tokens used to pre-training a model
+Conservative lower-bound benchmark from Meta's Llama 3 disclosure.
 
 ## Key Assumption
 
-We can use 15 trillion as a default value based on the assumption that most frontier models use roughly same pre-training size. 15T is the number cited in Llama3 model card and close to the FineWeb size.
+Meta says Llama 3 was pretrained on more than 15 trillion tokens. This stores 15T as a conservative floor and does not assume that other model families use the same tokenizer, modalities, languages, or training scale.
 
 ## Source
 

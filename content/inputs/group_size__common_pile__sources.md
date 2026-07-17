@@ -14,8 +14,8 @@ sourceNote: "The paper describes Common Pile as drawing from 30 sources."
 sourceLocator: "Paper abstract and corpus overview"
 sourceLocatorUrl: 'https://arxiv.org/html/2506.05209'
 sourceExcerpt: "The paper describes Common Pile as combining material from 30 source collections."
-sourceQuality: "third-party-report"
-lastReviewed: "2026-03-11"
+sourceQuality: "first-party-report"
+lastReviewed: "2026-07-09"
 mainExampleForCategory: false
 min: 0
 step: 1

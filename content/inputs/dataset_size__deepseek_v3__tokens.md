@@ -1,5 +1,5 @@
 ---
-title: Total training tokens (DeepSeek-V3)
+title: Pretraining tokens (DeepSeek-V3)
 value: 14800000000000
 scale: 1000000000
 display_units: billions of tokens
@@ -8,14 +8,14 @@ variable_type: dataset_size
 entity: deepseek_v3
 units: tokens
 source_url: 'https://github.com/deepseek-ai/DeepSeek-V3'
-summary: "Total tokens DeepSeek reports for DeepSeek-V3 training."
+summary: "Tokens DeepSeek reports for DeepSeek-V3 pretraining, before separate SFT and reinforcement-learning stages."
 sourceName: "DeepSeek-V3 repository"
 sourceNote: "DeepSeek reports that DeepSeek-V3 was pretrained on 14.8 trillion high-quality and diverse tokens."
 sourceLocator: "README overview bullets and pre-training section"
 sourceLocatorUrl: 'https://github.com/deepseek-ai/DeepSeek-V3#readme'
 sourceExcerpt: "The repository says DeepSeek-V3 was pretrained on 14.8T high-quality and diverse tokens."
 sourceQuality: "first-party-report"
-lastReviewed: "2026-03-11"
+lastReviewed: "2026-07-09"
 mainExampleForCategory: true
 min: 0
 step: 100
@@ -28,13 +28,13 @@ visibility: public
 type: InputVariable
 ---
 
-# Total training tokens (DeepSeek-V3)
+# Pretraining tokens (DeepSeek-V3)
 
 **Value:** 14,800 billions of tokens
 
 ## Description
 
-Total tokens DeepSeek reports for DeepSeek-V3 training.
+Tokens DeepSeek reports for DeepSeek-V3 pretraining.
 
 ## Key Assumption
 

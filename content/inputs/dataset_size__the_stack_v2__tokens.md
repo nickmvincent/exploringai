@@ -1,5 +1,5 @@
 ---
-title: Total tokens (The Stack v2)
+title: Approximate tokens in The Stack v2 full training split
 value: 900000000000
 scale: 1000000000
 display_units: billions of tokens
@@ -8,14 +8,14 @@ variable_type: dataset_size
 entity: the_stack_v2
 units: tokens
 source_url: 'https://huggingface.co/datasets/bigcode/the-stack-v2'
-summary: "Approximate code-token count for The Stack v2."
+summary: "Approximate code-token count for The Stack v2 filtered full training split, not the entire 67.53TB source layer."
 sourceName: "The Stack v2 dataset card"
-sourceNote: "The dataset card describes The Stack v2 as a roughly 900B-token code corpus."
+sourceNote: "The dataset card describes the filtered full training split as roughly 900B tokens."
 sourceLocator: "Dataset card summary and source-data collection sections"
 sourceLocatorUrl: 'https://huggingface.co/datasets/bigcode/the-stack-v2'
-sourceExcerpt: "The dataset card describes The Stack v2 as a roughly 900B-token corpus with 67.53TB total size and 3.28B unique files."
+sourceExcerpt: "The dataset card describes the full training split as approximately 900B tokens."
 sourceQuality: "first-party-report"
-lastReviewed: "2026-03-11"
+lastReviewed: "2026-07-09"
 mainExampleForCategory: true
 min: 0
 step: 10
@@ -28,17 +28,17 @@ visibility: public
 type: InputVariable
 ---
 
-# Total tokens (The Stack v2)
+# Approximate tokens in The Stack v2 full training split
 
 **Value:** 900 billions of tokens
 
 ## Description
 
-Approximate code-token count for The Stack v2.
+Approximate code-token count for the filtered full training split.
 
 ## Key Assumption
 
-The dataset card gives a rounded corpus-size figure, so this stores the approximate total rather than a falsely precise count.
+The 900B-token figure describes the filtered full training split, not the entire 67.53TB source layer.
 
 ## Source
 

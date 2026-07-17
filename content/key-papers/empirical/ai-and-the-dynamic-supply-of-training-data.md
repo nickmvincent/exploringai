@@ -1,16 +1,21 @@
 ---
 title: AI and the Dynamic Supply of Training Data
-anchor: Alexander Peukert et al., 2025
+anchor: Christian Peukert et al., 2025
 authors:
-  - Alexander Peukert
+  - Christian Peukert
+  - Florian Abeillon
+  - Jérémie Haese
+  - Franziska Kaiser
+  - Alexander Staub
 year: 2025
 kind: empirical
 source_url: 'https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4807979'
-relevance: Important economics paper arguing that training-data rules feed back into future creator incentives and therefore into the long-run supply of high-quality data.
+relevance: Empirical study using an Unsplash natural experiment to examine contributor exit, upload rates, and changes in contribution variety and novelty after inclusion in a commercial-AI dataset.
 key_inputs:
-  - Elasticity of creator participation under different compensation rules
-  - Change in data supply under opt-out, licensing, or royalty regimes
-  - Time lag between policy changes and observable corpus shrinkage
+  - Contributor exit after dataset inclusion
+  - Change in upload rate
+  - Heterogeneity by professional status and exposure
+  - Change in contribution variety and novelty
 sourceQuality: "third-party-report"
 sort_order: 50
 visibility: public
@@ -23,6 +28,7 @@ This is useful when static stock-of-data arguments miss the fact that policy cha
 
 ## Key inputs
 
-- Creator-supply elasticity
-- Data-supply change under alternative regimes
-- Lag between policy and corpus effects
+- Contributor exit after dataset inclusion
+- Change in upload rate
+- Variation by professional status and exposure
+- Change in contribution variety and novelty

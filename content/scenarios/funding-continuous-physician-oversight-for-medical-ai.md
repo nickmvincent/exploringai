@@ -7,7 +7,8 @@ description: >-
   a global pool of roughly {group_size__world__physicians} to each spend about
   {training_detail__medical_ai_oversight__hours_per_physician_per_year} on
   audits, review, and oversight, what annual labor budget would that imply at
-  current physician wages (say, {wage_data__physician__dollars_per_hour})?
+  a May 2025 U.S. general-internal-medicine mean employee-wage proxy (say,
+  {wage_data__physician__dollars_per_hour})?
 formula: >-
   {group_size__world__physicians} *
   ({training_detail__medical_ai_oversight__share_of_physicians_percent} / 100) *
@@ -34,7 +35,7 @@ presets:
     values:
       - input: training_detail__medical_ai_oversight__share_of_physicians_percent
         value: 5
-result_label: Annual Oversight Cost
+result_label: Illustrative Annual Labor Budget
 result_units: dollars
 category: Paying for new labour
 sort_order: 50
@@ -50,7 +51,7 @@ type: ScenarioCalculation
 
 ## Description
 
-If feeling comfortable with medical AI meant asking some share of the world's physicians (say, 1 percent of physicians) out of a global pool of roughly 13.92 million physicians to each spend about 40 hours per physician per year on audits, review, and oversight, what annual labor budget would that imply at current physician wages (say, 128.46 dollars per hour)?
+If a hypothetical share of a rough global physician headcount spent 40 hours per year on medical-AI oversight, what annual labor-budget envelope would result using a May 2025 U.S. general-internal-medicine mean employee-wage proxy?
 
 ## Inputs
 
@@ -68,7 +69,7 @@ If feeling comfortable with medical AI meant asking some share of the world's ph
 
 ## Result
 
-The Annual Oversight Cost is calculated in dollars.
+The result is an illustrative annual labor-budget envelope, not a forecast or evidence-backed policy cost. Participation and hours are planning assumptions, and the model mixes a global headcount estimate with a U.S. employee-wage proxy.
 
 ## Category
 

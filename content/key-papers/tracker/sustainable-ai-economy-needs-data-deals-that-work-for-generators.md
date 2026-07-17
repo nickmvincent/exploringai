@@ -3,6 +3,12 @@ title: A Sustainable AI Economy Needs Data Deals That Work for Generators
 anchor: Ruoxi Jia et al., NeurIPS 2025 position paper
 authors:
   - Ruoxi Jia
+  - Luis Oala
+  - Wenjie Xiong
+  - Suqin Ge
+  - Jiachen (Tianhao) Wang
+  - Feiyang Kang
+  - Dawn Song
 year: 2025
 kind: tracker
 source_url: 'https://neurips.cc/virtual/2025/loc/san-diego/poster/121926'

@@ -1,5 +1,5 @@
 ---
-title: Training compute (Llama 4 Scout)
+title: Pretraining compute (Llama 4 Scout)
 value: 5000000
 scale: 1000000
 display_units: millions of H100-80GB GPU hours
@@ -8,14 +8,14 @@ variable_type: training_compute
 entity: llama4_scout
 units: h100_80gb_gpu_hours
 source_url: 'https://github.com/meta-llama/llama-models/blob/main/models/llama4/MODEL_CARD.md'
-summary: "Public training-compute benchmark for Llama 4 Scout."
+summary: "Public pretraining-compute benchmark for Llama 4 Scout."
 sourceName: "Meta Llama 4 model card"
-sourceNote: "Meta reports 5.0 million H100-80GB GPU hours for Llama 4 Scout training."
-sourceLocator: "Training Data section in MODEL_CARD.md"
-sourceLocatorUrl: 'https://github.com/meta-llama/llama-models/blob/main/models/llama4/MODEL_CARD.md#L267-L275'
+sourceNote: "Meta reports 5.0 million H100-80GB GPU hours for Llama 4 Scout pretraining."
+sourceLocator: "Hardware and Software section in MODEL_CARD.md"
+sourceLocatorUrl: 'https://github.com/meta-llama/llama-models/blob/main/models/llama4/MODEL_CARD.md#hardware-and-software'
 sourceExcerpt: "The model card's compute disclosure lists Scout at 5.0M H100-80GB GPU hours."
 sourceQuality: "first-party-report"
-lastReviewed: "2026-03-11"
+lastReviewed: "2026-07-09"
 mainExampleForCategory: true
 min: 0
 step: 0.01
@@ -28,13 +28,13 @@ visibility: public
 type: InputVariable
 ---
 
-# Training compute (Llama 4 Scout)
+# Pretraining compute (Llama 4 Scout)
 
 **Value:** 5 millions of H100-80GB GPU hours
 
 ## Description
 
-Public training-compute benchmark for Llama 4 Scout.
+Public pretraining-compute benchmark for Llama 4 Scout.
 
 ## Key Assumption
 

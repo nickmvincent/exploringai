@@ -36,4 +36,4 @@ Planning assumption for the share of physicians who would participate in an ongo
 
 ## Key Assumption
 
-This is the dial that turns a small pilot into a civilization-scale oversight story. A value like 0.01 percent approximates a thin specialty network; 1 percent starts to imply real institutional buy-in.
+This planning dial moves the exercise from a small specialty network toward broad institutional participation. Neither 0.01 percent nor 1 percent is an observed adoption rate.

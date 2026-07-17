@@ -1,5 +1,5 @@
 ---
-title: Shadow-library data from Z-Library and LibGen
+title: Z-Library and LibGen subset of alleged Anna's Archive torrent
 value: 35.7
 scale: 1
 display_units: terabytes
@@ -8,14 +8,14 @@ variable_type: dataset_size
 entity: zlibrary_libgen
 units: terabytes
 source_url: 'https://cdn.arstechnica.net/wp-content/uploads/2025/02/Kadrey-v-Meta-Motion-for-Relief-Appendix-A-2-5-25.pdf'
-summary: "Plaintiffs' estimate of the Z-Library and LibGen portion of Meta's alleged shadow-library downloads."
+summary: "Plaintiffs alleged that at least 35.7TB of the 81.7TB Anna's Archive acquisition came from Z-Library and LibGen."
 sourceName: "Kadrey v. Meta unsealed filing appendix"
-sourceNote: "An unsealed appendix filed in February 2025 says 35.7TB of the downloads came from Z-Library and LibGen."
+sourceNote: "Plaintiffs' Appendix A alleges that at least 35.7TB of the 81.7TB Anna's Archive acquisition came from Z-Library and LibGen."
 sourceLocator: "Appendix A table summarizing alleged download sizes from shadow libraries"
 sourceLocatorUrl: 'https://cdn.arstechnica.net/wp-content/uploads/2025/02/Kadrey-v-Meta-Motion-for-Relief-Appendix-A-2-5-25.pdf'
-sourceExcerpt: "The appendix attributes 35.7TB of the alleged downloads to Z-Library and LibGen."
+sourceExcerpt: "Plaintiffs' appendix attributes at least 35.7TB of the alleged Anna's Archive acquisition to Z-Library and LibGen."
 sourceQuality: "third-party-report"
-lastReviewed: "2026-03-11"
+lastReviewed: "2026-07-09"
 mainExampleForCategory: false
 min: 0
 step: 0.1
@@ -28,7 +28,7 @@ visibility: public
 type: InputVariable
 ---
 
-# Shadow-library data from Z-Library and LibGen
+# Z-Library and LibGen subset of alleged Anna's Archive torrent
 
 **Value:** 35.7 terabytes
 
@@ -38,9 +38,9 @@ Plaintiffs' estimate of the Z-Library and LibGen portion of Meta's alleged shado
 
 ## Key Assumption
 
-This is an allegation drawn from an unsealed court filing appendix, not an adjudicated fact or Meta admission.
+This is an allegation in a party filing, not a judicial finding or Meta admission. It is a download-volume lower bound, not a deduplicated corpus size or proof that every byte entered training.
 
 ## Source
 
 - [https://cdn.arstechnica.net/wp-content/uploads/2025/02/Kadrey-v-Meta-Motion-for-Relief-Appendix-A-2-5-25.pdf](https://cdn.arstechnica.net/wp-content/uploads/2025/02/Kadrey-v-Meta-Motion-for-Relief-Appendix-A-2-5-25.pdf)
-- The appendix says 35.7TB came from Z-Library and LibGen.
+- Plaintiffs' appendix alleges that at least 35.7TB came from Z-Library and LibGen.

@@ -1,8 +1,8 @@
 ---
-title: Treat data access, licensing, and opt-out infrastructure as measurable public-interest indicators.
+title: Develop measurable indicators for data access, licensing, and opt-out infrastructure.
 sort_order: 50
 visibility: public
 type: Ask
 ---
 
-Data access rules shape both model performance and creator leverage, so they should be tracked like other core AI governance metrics.
+Researchers and institutions could track how data access, licensing, provenance, consent, and opt-out mechanisms work in practice. Any indicator should distinguish legal rights, technical controls, response times, coverage, and observed outcomes rather than collapsing them into a single score.

@@ -10,13 +10,13 @@ units: people
 source_url: 'https://data.who.int/indicators/i/217795A'
 summary: "Estimated global physician headcount, derived from WHO's worldwide doctor-density benchmark."
 sourceName: "WHO Global Health Observatory"
-sourceNote: "WHO reports a global density of 17.2 doctors per 10,000 people in 2022. This input turns that density into a rough headcount by multiplying it by the repo's January 1, 2025 world-population benchmark."
+sourceNote: "WHO's latest downloadable series reports a 2022 global density estimate of 17.2 doctors per 10,000 people. This input turns that mixed-year benchmark into a rough headcount using the repo's January 1, 2025 population benchmark; it is not a contemporaneous global census."
 sourceLocator: "World row for 2022 in the WHO density-of-doctors dataset export"
 sourceLocatorUrl: 'https://srhdpeuwpubsa.blob.core.windows.net/whdh/DATADOT/INDICATOR/217795A_ALL_LATEST.csv'
 sourceExcerpt: "WHO's global row reports a 2022 density of 17.2 doctors per 10,000 people."
 derivationNote: "13,918,300 physicians = 8,092,034,511 people × 17.2 doctors per 10,000 people."
 sourceQuality: "first-party-report"
-lastReviewed: "2026-04-06"
+lastReviewed: "2026-07-09"
 mainExampleForCategory: false
 min: 0
 step: 0.01

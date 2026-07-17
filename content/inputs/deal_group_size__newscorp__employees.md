@@ -1,6 +1,6 @@
 ---
 title: Number of News Corp employees
-value: 23900
+value: 22300
 scale: 1
 display_units: people
 variable_name: deal_group_size__newscorp__employees
@@ -8,15 +8,15 @@ variable_type: deal_group_size
 entity: newscorp
 units: employees
 source_url: >-
-  https://newscorp.com/wp-content/uploads/2024/10/News-Corp-2024-Annual-Report_Bookmarked_sm-updated.pdf
+  https://newscorp.com/app/uploads/2025/10/News-Corp-2025-Annual-Report.pdf
 summary: "Approximate total employee count for News Corp."
 sourceName: "News Corp annual report"
-sourceNote: "News Corp reported about 23,900 employees as of June 30, 2024."
+sourceNote: "News Corp reported about 22,300 employees as of June 30, 2025."
 sourceLocator: "Annual report workforce disclosure"
-sourceLocatorUrl: 'https://newscorp.com/wp-content/uploads/2024/10/News-Corp-2024-Annual-Report_Bookmarked_sm-updated.pdf'
-sourceExcerpt: "News Corp reports about 23,900 employees as of June 30, 2024."
+sourceLocatorUrl: 'https://newscorp.com/app/uploads/2025/10/News-Corp-2025-Annual-Report.pdf'
+sourceExcerpt: "News Corp reports approximately 22,300 employees as of June 30, 2025."
 sourceQuality: "first-party-report"
-lastReviewed: "2026-03-10"
+lastReviewed: "2026-07-09"
 mainExampleForCategory: false
 min: 0
 step: 100
@@ -31,7 +31,7 @@ type: InputVariable
 
 # Number of News Corp employees
 
-**Value:** 23,900 people
+**Value:** 22,300 people
 
 ## Description
 
@@ -39,9 +39,9 @@ Approximate total employee count for News Corp.
 
 ## Key Assumption
 
-Uses the company's reported employee count as of June 30, 2024.
+Uses the company's reported employee count as of June 30, 2025.
 
 ## Source
 
-- [https://newscorp.com/wp-content/uploads/2024/10/News-Corp-2024-Annual-Report_Bookmarked_sm-updated.pdf](https://newscorp.com/wp-content/uploads/2024/10/News-Corp-2024-Annual-Report_Bookmarked_sm-updated.pdf)
-- News Corp reported roughly 23,900 employees in its 2024 annual report.
+- [https://newscorp.com/app/uploads/2025/10/News-Corp-2025-Annual-Report.pdf](https://newscorp.com/app/uploads/2025/10/News-Corp-2025-Annual-Report.pdf)
+- News Corp reported approximately 22,300 employees in its 2025 annual report.

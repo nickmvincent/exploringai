@@ -1,9 +1,10 @@
 ---
 title: Distributing Money from Data Deals
 description: >-
-  If we distribute the payments from recent data deal (say,
-  {deal_value__reddit_google__dollars}) to some group of people (say,
-  {deal_group_size__reddit__daily_active_users}), how much will each person get?
+  What ratio results if a reported data-deal value (say,
+  {deal_value__reddit_google__dollars}) is divided by an activity, workforce,
+  or article-count benchmark (say,
+  {deal_group_size__reddit__daily_active_users})?
 formula: >-
   {deal_value__reddit_google__dollars} / {deal_group_size__reddit__daily_active_users}
 presets:
@@ -28,7 +29,7 @@ presets:
         variant: deal_value__taylorandfrancis_microsoft__dollars
       - input: deal_group_size__reddit__daily_active_users
         variant: deal_group_size__taylorandfrancis__articles
-result_label: Per Person Revenue
+result_label: Deal Value per Denominator Unit
 result_units: dollars
 category: Distributing money
 sort_order: 30
@@ -44,7 +45,7 @@ type: ScenarioCalculation
 
 ## Description
 
-If we distribute the payments from recent data deal (say, 60 millions of dollars) to some group of people (say, 121.40 millions of daily active users), how much will each person get?
+What ratio results if a reported data-deal value is divided by an activity, workforce, or article-count benchmark?
 
 ## Inputs
 
@@ -57,7 +58,7 @@ If we distribute the payments from recent data deal (say, 60 millions of dollars
 
 ## Result
 
-The Per Person Revenue is calculated in dollars.
+The result is an illustrative ratio, not a beneficiary model. The denominator may count activity, employees, journalists, or articles rather than rights-holders.
 
 ## Category
 

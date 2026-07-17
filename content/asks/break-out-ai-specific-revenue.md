@@ -1,8 +1,8 @@
 ---
-title: Break out AI-specific revenue from total company revenue whenever possible.
+title: Where feasible, separate AI-specific revenue from total company revenue.
 sort_order: 20
 visibility: public
 type: Ask
 ---
 
-Separate AI revenue from broader cloud, subscription, or advertising lines so public comparisons are not forced to rely on rough estimates.
+When commercial sensitivity and accounting rules allow, separate AI revenue from broader cloud, subscription, or advertising lines so public comparisons rely less on rough estimates. Any disclosure should define which products and intercompany allocations are included.

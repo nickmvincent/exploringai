@@ -2,15 +2,9 @@
 title: Humanity's Last Exam
 anchor: Phan et al. / CAIS and Scale AI, 2025-2026
 authors:
-  - Long Phan
-  - Alice Gatti
-  - Ziwen Han
-  - Nathaniel Li
-  - Josephina Hu
-  - Hugh Zhang
-  - Chen Bo Calvin Zhang
-  - Mohamed Shaaban
-  - Dan Hendrycks
+  - Center for AI Safety
+  - Scale AI
+  - HLE Contributors Consortium
 year: 2026
 kind: empirical
 source_url: 'https://scale.com/leaderboard/humanitys_last_exam'
@@ -19,7 +13,7 @@ links:
     href: 'https://www.nature.com/articles/s41586-025-09962-4'
   - label: arXiv paper
     href: 'https://arxiv.org/abs/2501.14249'
-relevance: Central benchmark source for the calculator's expert-question size and prize-pool-derived per-question compensation assumptions.
+relevance: Central benchmark source for the calculator's expert-question count, prize tiers, and prize-pool-per-final-question comparison ratio.
 related_input_ids:
   - dataset_size__hle__questions
   - wage_data__phd__dollars_per_question
@@ -36,7 +30,7 @@ type: KeyPaper
 
 ## Relevance
 
-HLE is the calculator's most important benchmark for expert-question production at the frontier-evaluation scale.
+HLE provides a public benchmark size, prize pool, and prize tiers for a frontier evaluation. Those figures do not measure the full cost of producing, reviewing, or maintaining the benchmark.
 
 ## Key inputs
 

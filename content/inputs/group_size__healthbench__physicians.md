@@ -44,5 +44,5 @@ This is a breadth-of-expert-participation benchmark, not a direct measure of tot
 
 - [https://openai.com/index/healthbench/](https://openai.com/index/healthbench/)
 - OpenAI says HealthBench was built in partnership with 262 physicians who practiced in 60 countries.
-- [https://openai.com/index/openai-for-healthcare//](https://openai.com/index/openai-for-healthcare//)
+- [https://openai.com/index/openai-for-healthcare/](https://openai.com/index/openai-for-healthcare/)
 - OpenAI's January 8, 2026 healthcare announcement describes a global network of more than 260 licensed physicians across 60 countries whose feedback informed model evaluation and product work.

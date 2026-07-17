@@ -36,7 +36,7 @@ presets:
         variant: yearly_revenue__coreweave__dollars
       - input: group_size__world__people
         variant: group_size__usa__people
-result_label: Per Person Revenue
+result_label: Annualized Revenue per Population Benchmark
 result_units: dollars
 category: Distributing money
 sort_order: 90
@@ -65,7 +65,7 @@ If we distribute AI revenue (say, 25.00 billions of dollars) to some group of pe
 
 ## Result
 
-The Per Person Revenue is calculated in dollars.
+The annualized revenue per population benchmark is an illustrative ratio, not a feasible dividend or compensation pool. Revenue is not profit or free cash.
 
 ## Category
 

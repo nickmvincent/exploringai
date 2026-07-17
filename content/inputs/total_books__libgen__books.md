@@ -1,5 +1,5 @@
 ---
-title: Total books in LibGen
+title: Book copies Anthropic downloaded from LibGen
 value: 5000000
 scale: 1000000
 display_units: millions of books
@@ -8,14 +8,14 @@ variable_type: total_books
 entity: libgen
 units: books
 source_url: 'https://docs.justia.com/cases/federal/district-courts/california/candce/3%3A2024cv05417/434709/231'
-summary: "Lower-bound count of books Anthropic was found to have copied from LibGen."
+summary: "At least five million book copies Anthropic downloaded from LibGen; not a count of LibGen's complete catalog or distinct works."
 sourceName: "Bartz v. Anthropic summary-judgment order"
 sourceNote: "Judge Alsup wrote that Anthropic downloaded at least five million books from LibGen."
 sourceLocator: "Summary-judgment order discussion of Anthropic's central library"
 sourceLocatorUrl: 'https://docs.justia.com/cases/federal/district-courts/california/candce/3%3A2024cv05417/434709/231'
-sourceExcerpt: "The order says Anthropic downloaded at least five million books from LibGen."
+sourceExcerpt: "The order says Anthropic downloaded at least five million book copies from LibGen."
 sourceQuality: "third-party-report"
-lastReviewed: "2026-03-11"
+lastReviewed: "2026-07-09"
 mainExampleForCategory: false
 min: 0
 step: 0.1
@@ -28,7 +28,7 @@ visibility: public
 type: InputVariable
 ---
 
-# Total books in LibGen
+# Book copies Anthropic downloaded from LibGen
 
 **Value:** 5 millions of books
 
@@ -38,7 +38,7 @@ Lower-bound count of books Anthropic was found to have copied from LibGen.
 
 ## Key Assumption
 
-This stores the court's lower-bound figure rather than attempting a more speculative estimate of LibGen's full catalog size.
+This stores the court's lower-bound copy count; it is not LibGen's full catalog size or a count of unique copyrighted works.
 
 ## Source
 

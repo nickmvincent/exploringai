@@ -1,8 +1,8 @@
 ---
-title: Publish deal values and renewal terms in ways researchers and journalists can cite.
+title: Publish comparable summaries of AI data-deal economics where parties can.
 sort_order: 10
 visibility: public
 type: Ask
 ---
 
-Make data-licensing deal terms legible enough that outsiders can compare bargaining power, royalties, and renewal dynamics over time.
+Where confidentiality obligations permit, parties could disclose comparable summaries of cash value, service credits, rights covered, term length, renewal mechanics, exclusivity, and royalty structure. The goal is legibility without implying every contract can be fully public.

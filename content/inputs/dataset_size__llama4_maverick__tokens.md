@@ -1,5 +1,5 @@
 ---
-title: Total pre-training tokens (Llama 4 Maverick)
+title: Multimodal pretraining tokens (Llama 4 Maverick)
 value: 22000000000000
 scale: 1000000000
 display_units: billions of tokens
@@ -8,14 +8,14 @@ variable_type: dataset_size
 entity: llama4_maverick
 units: tokens
 source_url: 'https://github.com/meta-llama/llama-models/blob/main/models/llama4/MODEL_CARD.md'
-summary: "Total tokens Meta reports using to pretrain Llama 4 Maverick."
+summary: "Approximate multimodal tokens Meta reports using to pretrain Llama 4 Maverick."
 sourceName: "Meta Llama 4 model card"
-sourceNote: "Meta reports that Llama 4 Maverick was trained on 22 trillion tokens."
+sourceNote: "Meta reports that Llama 4 Maverick was pretrained on approximately 22 trillion tokens of multimodal data. This count is not directly comparable with a text-only token total."
 sourceLocator: "Training Data section in MODEL_CARD.md"
-sourceLocatorUrl: 'https://github.com/meta-llama/llama-models/blob/main/models/llama4/MODEL_CARD.md#L267-L275'
+sourceLocatorUrl: 'https://github.com/meta-llama/llama-models/blob/main/models/llama4/MODEL_CARD.md#training-data'
 sourceExcerpt: "The model card's training overview lists Maverick at roughly 22T pretraining tokens."
 sourceQuality: "first-party-report"
-lastReviewed: "2026-03-11"
+lastReviewed: "2026-07-09"
 mainExampleForCategory: false
 min: 0
 step: 100
@@ -28,17 +28,17 @@ visibility: public
 type: InputVariable
 ---
 
-# Total pre-training tokens (Llama 4 Maverick)
+# Multimodal pretraining tokens (Llama 4 Maverick)
 
 **Value:** 22,000 billions of tokens
 
 ## Description
 
-Total tokens Meta reports using to pretrain Llama 4 Maverick.
+Approximate multimodal tokens Meta reports using to pretrain Llama 4 Maverick.
 
 ## Key Assumption
 
-This uses the model card's rounded total-token disclosure as the best public benchmark for a current frontier open-weight model.
+This uses the model card's rounded multimodal-token disclosure. It should not be treated as a text-only corpus size or compared across model families without checking tokenization and modality definitions.
 
 ## Source
 

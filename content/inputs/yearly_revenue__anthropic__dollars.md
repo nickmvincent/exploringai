@@ -1,21 +1,21 @@
 ---
 title: Annualized revenue (Anthropic)
-value: 30000000000
+value: 47000000000
 scale: 1000000000
 display_units: billions of dollars
 variable_name: yearly_revenue__anthropic__dollars
 variable_type: yearly_revenue
 entity: anthropic
 units: dollars
-source_url: 'https://www.anthropic.com/news/google-broadcom-partnership-compute'
+source_url: 'https://www.anthropic.com/news/series-h'
 summary: "Reported annualized revenue run rate for Anthropic."
 sourceName: "Anthropic"
-sourceNote: "Anthropic said in April 2026 that its run-rate revenue had surpassed $30B, up from about $9B at the end of 2025."
-sourceLocator: "Google/Broadcom compute partnership announcement"
-sourceLocatorUrl: 'https://www.anthropic.com/news/google-broadcom-partnership-compute'
-sourceExcerpt: "Anthropic says its run-rate revenue has surpassed $30B."
+sourceNote: "Anthropic said on May 28, 2026 that its run-rate revenue had crossed $47B earlier that month."
+sourceLocator: "Series H announcement"
+sourceLocatorUrl: 'https://www.anthropic.com/news/series-h'
+sourceExcerpt: "Anthropic says its run-rate revenue crossed $47B earlier in May 2026."
 sourceQuality: "first-party-report"
-lastReviewed: "2026-05-28"
+lastReviewed: "2026-07-09"
 mainExampleForCategory: false
 min: 0
 step: 0.01
@@ -30,7 +30,7 @@ type: InputVariable
 
 # Annualized revenue (Anthropic)
 
-**Value:** 30.00 billions of dollars
+**Value:** 47.00 billions of dollars
 
 ## Description
 
@@ -42,5 +42,5 @@ This is a reported annual revenue run rate, not audited full-year revenue.
 
 ## Source
 
-- [https://www.anthropic.com/news/google-broadcom-partnership-compute](https://www.anthropic.com/news/google-broadcom-partnership-compute)
-- Anthropic said its run-rate revenue had surpassed $30 billion in April 2026.
+- [https://www.anthropic.com/news/series-h](https://www.anthropic.com/news/series-h)
+- Anthropic said its run-rate revenue had crossed $47 billion earlier in May 2026.
