@@ -1,0 +1,78 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+
+const publicOnly = (entry) => !entry.data.visibility || entry.data.visibility === 'public';
+const entries = (await getCollection('keyPapers'))
+  .filter(publicOnly)
+  .sort((a, b) => (a.data.year ?? 0) === (b.data.year ?? 0)
+    ? a.data.title.localeCompare(b.data.title)
+    : (b.data.year ?? 0) - (a.data.year ?? 0));
+const labels = {
+  tracker: 'Tracker',
+  position: 'Position paper',
+  policy: 'Policy and legal analysis',
+  empirical: 'Empirical work',
+  legal: 'Legal record',
+};
+---
+
+<Layout title="Source library - Exploring AI" description="Search the papers, trackers, policy analysis, and legal records behind Exploring AI estimates.">
+  <main id="site-main" class="public-page source-library-page">
+    <header class="public-hero public-hero-with-stats">
+      <div>
+        <p class="section-kicker">Source library</p>
+        <h1>Open the research behind the calculator.</h1>
+        <p>Search public sources by title, topic, named author, or the input they help support.</p>
+      </div>
+      <dl class="public-hero-stats"><div><dt>{entries.length}</dt><dd>source records</dd></div></dl>
+    </header>
+
+    <section class="source-toolbar" aria-label="Source filters">
+      <label><span>Search sources</span><input id="source-search" type="search" placeholder="Search title, relevance, author, or useful metric" /></label>
+      <label><span>Source type</span><select id="source-kind"><option value="all">All source types</option>{Object.entries(labels).map(([value, label]) => <option value={value}>{label}</option>)}</select></label>
+      <p id="source-count" aria-live="polite">Showing {entries.length} sources</p>
+    </section>
+
+    <section id="source-list" class="source-record-list" aria-label="Source records">
+      {entries.map((entry) => (
+        <article
+          class="source-record"
+          data-kind={entry.data.kind}
+          data-search={[entry.data.title, entry.data.anchor, entry.data.relevance, ...(entry.data.authors ?? []), ...(entry.data.key_inputs ?? [])].join(' ').toLowerCase()}
+        >
+          <div class="source-record-topline"><span class="quality-pill">{labels[entry.data.kind] || entry.data.kind}</span>{entry.data.year && <span>{entry.data.year}</span>}</div>
+          <h2>{entry.data.source_url ? <a href={entry.data.source_url} target="_blank" rel="noreferrer">{entry.data.title} ↗</a> : entry.data.title}</h2>
+          <p class="source-anchor">{entry.data.anchor}</p>
+          <p>{entry.data.relevance}</p>
+          {entry.data.key_inputs?.length ? <div class="source-useful-for"><strong>Useful for</strong><ul>{entry.data.key_inputs.map((item) => <li>{item}</li>)}</ul></div> : null}
+          {entry.data.links?.length ? <div class="source-extra-links">{entry.data.links.map((link) => <a href={link.href} target="_blank" rel="noreferrer">{link.label} ↗</a>)}</div> : null}
+        </article>
+      ))}
+    </section>
+
+    <div id="source-empty" class="public-empty-state" hidden><h2>No matching sources</h2><p>Try a broader search or show all source types.</p></div>
+  </main>
+</Layout>
+
+<script>
+  const search = document.querySelector('#source-search');
+  const kind = document.querySelector('#source-kind');
+  const records = [...document.querySelectorAll('.source-record')];
+  const count = document.querySelector('#source-count');
+  const empty = document.querySelector('#source-empty');
+  function filterSources() {
+    const query = search.value.trim().toLowerCase();
+    const selectedKind = kind.value;
+    let visible = 0;
+    records.forEach((record) => {
+      const matches = (!query || record.dataset.search.includes(query)) && (selectedKind === 'all' || record.dataset.kind === selectedKind);
+      record.hidden = !matches;
+      if (matches) visible += 1;
+    });
+    count.textContent = `Showing ${visible} ${visible === 1 ? 'source' : 'sources'}`;
+    empty.hidden = visible !== 0;
+  }
+  search.addEventListener('input', filterSources);
+  kind.addEventListener('change', filterSources);
+</script>

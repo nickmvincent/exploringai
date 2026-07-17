@@ -1,21 +1,129 @@
 ---
-import NapkinApp from '../components/NapkinApp.vue';
 import Layout from '../layouts/Layout.astro';
 import { loadNapkinData } from '../lib/napkin-data';
+import {
+  evaluateScenario,
+  formatEstimate,
+  getDefaultScenarioValues,
+  getScenarioContext,
+} from '../lib/public-estimates';
 
 const { inputs, scenarios } = await loadNapkinData();
+const prepared = scenarios.map((scenario) => ({
+  scenario,
+  context: getScenarioContext(scenario),
+  result: evaluateScenario(scenario, getDefaultScenarioValues(scenario, inputs)),
+}));
+const featured = prepared.filter((entry) => entry.context.featured).slice(0, 3);
+const hero = prepared.find((entry) => entry.scenario.id === 'commissioning-new-datasets') ?? prepared[0];
+const citedInputs = Object.values(inputs).filter((input) => input.source_url || input.sourceLocatorUrl).length;
 ---
 
 <Layout
-  title="Calculator - Exploring AI: Data Napkin Math"
-  description="Estimate AI payouts, dataset costs, and benchmark expenses with editable, source-backed inputs."
+  title="Exploring AI: Defensible estimates for AI data questions"
+  description="Source-backed, editable estimates for questions about AI training data, labor, compensation, and scale."
 >
-  <NapkinApp
-    client:load
-    initialInputs={inputs}
-    initialScenarios={scenarios}
-    showInputLibrary={false}
-    pageTitle="Data Napkin Math"
-    pageDescription="Editable scenarios for asking what AI revenue, copied libraries, data deals, and training-data mixes might cost, fund, or imply."
-  />
+  <main id="site-main" class="public-page home-page">
+    <section class="home-hero">
+      <div class="home-hero-copy">
+        <p class="section-kicker">Source-backed public-interest math</p>
+        <h1>Make AI data debates calculable.</h1>
+        <p class="home-hero-lede">
+          Explore defensible, editable estimates for questions about training data, expert labor,
+          compensation, and scale—then inspect every assumption behind the answer.
+        </p>
+        <div class="home-hero-actions">
+          <a class="btn btn-primary" href="/scenarios">Explore the estimates</a>
+          <a class="btn btn-outline-primary" href="/build">Build your own case</a>
+        </div>
+        <dl class="trust-strip" aria-label="Project coverage">
+          <div><dt>{scenarios.length}</dt><dd>curated estimates</dd></div>
+          <div><dt>{Object.keys(inputs).length}</dt><dd>public assumptions</dd></div>
+          <div><dt>{citedInputs}</dt><dd>linked citations</dd></div>
+        </dl>
+      </div>
+
+      <a class="hero-estimate-card" href={`/scenarios/${hero.scenario.id}`}>
+        <span class="hero-estimate-label">Featured estimate</span>
+        <h2>{hero.context.question}</h2>
+        <div class="hero-estimate-result">
+          <span>{hero.scenario.result_label}</span>
+          <strong>{formatEstimate(hero.result, hero.scenario.result_units)}</strong>
+        </div>
+        <p>{hero.context.caveat}</p>
+        <span class="hero-estimate-link">Audit the estimate →</span>
+      </a>
+    </section>
+
+    <section class="home-question-section" aria-labelledby="question-heading">
+      <div class="section-heading-row">
+        <div>
+          <p class="section-kicker">Start with a question</p>
+          <h2 id="question-heading">What are you trying to understand?</h2>
+        </div>
+        <p>Choose a public question first. The formulas and datasets come second.</p>
+      </div>
+      <div class="question-path-grid">
+        <a href="/scenarios?category=Distributing+money">
+          <span>01</span>
+          <h3>What could fair compensation look like?</h3>
+          <p>Translate deal values, revenue, and per-work benchmarks into distributive outcomes.</p>
+          <strong>Explore compensation →</strong>
+        </a>
+        <a href="/scenarios?category=Paying+for+new+labour">
+          <span>02</span>
+          <h3>What could a budget fund?</h3>
+          <p>Price expert evaluations, commissioned datasets, and continuous oversight.</p>
+          <strong>Explore labor budgets →</strong>
+        </a>
+        <a href="/scenarios?category=Making+data+scale+vivid">
+          <span>03</span>
+          <h3>How large is training data in concrete terms?</h3>
+          <p>Turn percentages, token counts, and corpus sizes into quantities people can reason about.</p>
+          <strong>Explore scale →</strong>
+        </a>
+      </div>
+    </section>
+
+    <section class="home-featured-section" aria-labelledby="featured-heading">
+      <div class="section-heading-row">
+        <div>
+          <p class="section-kicker">Recommended starting points</p>
+          <h2 id="featured-heading">Three estimates worth opening</h2>
+        </div>
+        <a class="text-link" href="/scenarios">Browse all {scenarios.length} estimates →</a>
+      </div>
+      <div class="featured-estimate-grid">
+        {featured.map(({ scenario, context, result }) => (
+          <article class="featured-estimate-card">
+            <span class="quality-pill">Illustrative estimate</span>
+            <h3><a href={`/scenarios/${scenario.id}`}>{context.question}</a></h3>
+            <p class="featured-estimate-value">{formatEstimate(result, scenario.result_units)}</p>
+            <p>{context.takeaway}</p>
+            <a href={`/scenarios/${scenario.id}`}>Change assumptions and inspect sources →</a>
+          </article>
+        ))}
+      </div>
+    </section>
+
+    <section class="home-method-section" aria-labelledby="method-heading">
+      <div class="home-method-copy">
+        <p class="section-kicker">Designed to be challenged</p>
+        <h2 id="method-heading">A result is only as useful as its audit trail.</h2>
+        <p>
+          Every estimate connects its formula to reusable public assumptions. Each assumption records
+          its source type, locator, review date, alternatives, and every estimate that depends on it.
+        </p>
+        <div class="home-method-actions">
+          <a class="btn btn-primary" href="/inputs">Search the evidence</a>
+          <a class="btn btn-outline-primary" href="/methodology">Read the methodology</a>
+        </div>
+      </div>
+      <ol class="method-step-list">
+        <li><span>1</span><div><strong>Start with a public question</strong><p>Lead with the claim a reader wants to test.</p></div></li>
+        <li><span>2</span><div><strong>Change the important assumptions</strong><p>Use curated cases or enter your own value.</p></div></li>
+        <li><span>3</span><div><strong>Inspect and cite the evidence</strong><p>Open the original source and copy a reproducible link.</p></div></li>
+      </ol>
+    </section>
+  </main>
 </Layout>

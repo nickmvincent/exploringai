@@ -1,23 +1,34 @@
 ---
-import NapkinApp from '../components/NapkinApp.vue';
+import EvidenceExplorer from '../components/EvidenceExplorer.vue';
 import Layout from '../layouts/Layout.astro';
 import { loadNapkinData } from '../lib/napkin-data';
 
-const { inputs, scenarios } = await loadNapkinData();
+const { inputs } = await loadNapkinData();
+const linked = Object.values(inputs).filter((input) => input.source_url || input.sourceLocatorUrl).length;
+const reviewed = Object.values(inputs).filter((input) => input.lastReviewed).length;
 ---
 
 <Layout
-  title="Inputs Library - Exploring AI: Data Napkin Math"
-  description="Browse the inputs behind each scenario, including source quality, citations, and linked usage."
+  title="Evidence and assumptions - Exploring AI"
+  description="Search, compare, and audit the public benchmarks behind every Exploring AI estimate."
 >
-  <NapkinApp
-    client:load
-    initialInputs={inputs}
-    initialScenarios={scenarios}
-    initialView="inputs"
-    showScenarioLibrary={false}
-    showAbout={false}
-    pageTitle="Inputs Library"
-    pageDescription="Browse and edit the inputs behind the scenarios."
-  />
+  <main id="site-main" class="public-page evidence-page">
+    <header class="public-hero public-hero-with-stats">
+      <div>
+        <p class="section-kicker">Evidence & assumptions</p>
+        <h1>Inspect the numbers behind the claims.</h1>
+        <p>
+          Search the public benchmarks used across the estimate library. Every record shows what the
+          number means, where it came from, when it was reviewed, and which calculations depend on it.
+        </p>
+      </div>
+      <dl class="public-hero-stats">
+        <div><dt>{Object.keys(inputs).length}</dt><dd>assumptions</dd></div>
+        <div><dt>{linked}</dt><dd>linked sources</dd></div>
+        <div><dt>{reviewed}</dt><dd>review records</dd></div>
+      </dl>
+    </header>
+
+    <EvidenceExplorer client:load inputs={inputs} />
+  </main>
 </Layout>

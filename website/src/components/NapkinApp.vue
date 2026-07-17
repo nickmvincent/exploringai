@@ -103,6 +103,7 @@ const props = withDefaults(defineProps<{
   initialView?: ViewMode;
   showScenarioLibrary?: boolean;
   showInputLibrary?: boolean;
+  showCustomBuilder?: boolean;
   showHeader?: boolean;
   showAbout?: boolean;
   pageEyebrow?: string;
@@ -112,6 +113,7 @@ const props = withDefaults(defineProps<{
   initialView: 'scenarios',
   showScenarioLibrary: true,
   showInputLibrary: true,
+  showCustomBuilder: true,
   showHeader: true,
   showAbout: true,
   pageTitle: 'Exploring AI: Data Napkin Math',
@@ -1937,7 +1939,7 @@ onBeforeUnmount(() => {
           </p>
 
           <div class="scenarios-container">
-            <article id="scenario-freeform" class="scenario-card free-scenario-card">
+            <article v-if="props.showCustomBuilder" id="scenario-freeform" class="scenario-card free-scenario-card">
               <template v-if="freeScenarioOpen || freeScenarioHasDraft">
                 <div class="scenario-card-header free-scenario-header">
                   <div class="scenario-intro">
@@ -2242,7 +2244,9 @@ onBeforeUnmount(() => {
               <div class="scenario-card-header scenario-card-header-curated">
                 <div class="scenario-intro">
                   <div class="scenario-category-label">{{ scenario.category }}</div>
-                  <h3 :id="getScenarioHeadingId(scenario.id)">{{ scenario.title }}</h3>
+                  <h3 :id="getScenarioHeadingId(scenario.id)">
+                    <a class="scenario-title-link" :href="`/scenarios/${scenario.id}`">{{ scenario.title }}</a>
+                  </h3>
                   <p class="scenario-description-text">
                     <template v-for="(segment, idx) in parseDescription(scenario.description)" :key="idx">
                       <template v-if="segment.type === 'text'">{{ segment.text }}</template>
@@ -2281,12 +2285,12 @@ onBeforeUnmount(() => {
                     class="scenario-preset-label"
                     :for="getScenarioPresetFieldId(scenario.id)"
                   >
-                    Load combo
+                    Try another case
                   </label>
                   <select
                     :id="getScenarioPresetFieldId(scenario.id)"
                     class="form-select form-select-sm scenario-preset-select"
-                    :aria-label="`Load a preset input combination for ${scenario.title}`"
+                  :aria-label="`Try another benchmark case for ${scenario.title}`"
                     :value="getScenarioPresetValue(scenario)"
                     @change="onScenarioPresetChange(scenario, ($event.target as HTMLSelectElement).value)"
                   >
@@ -2307,7 +2311,7 @@ onBeforeUnmount(() => {
                   type="button"
                   @click="toggleScenarioExplore(scenario)"
                 >
-                  {{ scenario.showExplore ? 'Close notes' : 'Open notes' }}
+                  {{ scenario.showExplore ? 'Close assumptions' : 'Edit assumptions' }}
                 </button>
               </div>
 

@@ -1,0 +1,79 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout
+  title="Methodology - Exploring AI"
+  description="How Exploring AI selects, reviews, calculates, presents, and limits its public estimates."
+>
+  <main id="site-main" class="public-page prose-page">
+    <header class="prose-hero">
+      <p class="section-kicker">Methodology</p>
+      <h1>How to read—and challenge—the estimates.</h1>
+      <p>
+        Data Napkin Math is built for transparent order-of-magnitude reasoning. It makes assumptions
+        editable and traceable; it does not turn uncertain public information into forecasts.
+      </p>
+    </header>
+
+    <div class="prose-layout">
+      <nav class="prose-toc" aria-label="Methodology sections">
+        <strong>On this page</strong>
+        <a href="#objects">Three objects</a>
+        <a href="#sources">Source labels</a>
+        <a href="#cases">Cases and sensitivity</a>
+        <a href="#rounding">Rounding</a>
+        <a href="#review">Review dates</a>
+        <a href="#limits">Interpretation limits</a>
+      </nav>
+
+      <article class="prose-content">
+        <section id="objects">
+          <h2>Three objects make each estimate reproducible</h2>
+          <p><strong>Inputs</strong> are reusable numeric assumptions: a dataset size, wage, deal value, population, or composition share. Each input records units and provenance separately from its current editable value.</p>
+          <p><strong>Scenarios</strong> are short formulas that combine inputs to answer one public question. Reusing the same input across scenarios makes updates and disagreements visible.</p>
+          <p><strong>Cases</strong> are curated combinations of alternative inputs or values. They help readers compare plausible interpretations without implying a statistical probability.</p>
+        </section>
+
+        <section id="sources">
+          <h2>Source labels describe provenance, not certainty</h2>
+          <dl class="method-definition-list">
+            <div><dt>Primary or first-party source</dt><dd>A model card, company publication, government record, dataset card, statute, or other material from the entity closest to the claim.</dd></div>
+            <div><dt>Research, external report, or filed record</dt><dd>A paper, analysis, third-party report, or party-filed legal record that documents, alleges, or derives the value. A filed allegation is not a judicial finding.</dd></div>
+            <div><dt>News coverage</dt><dd>A reported figure that may depend on unnamed sources, secondary reporting, or an estimate that is not independently auditable.</dd></div>
+            <div><dt>Project benchmark</dt><dd>An explicit planning assumption or conversion rule used by this project rather than a claim directly reported by an outside source.</dd></div>
+          </dl>
+          <p>A first-party source can still be incomplete, promotional, or difficult to compare. These are broad provenance labels, not reliability grades: they do not encode peer-review status, litigation posture, finality, or whether a legal record is an order or a party filing. The source note and caveat tell you how each claim should be used.</p>
+        </section>
+
+        <section id="cases">
+          <h2>Curated cases are not confidence intervals</h2>
+          <p>The low and high values shown on a scenario page are the smallest and largest results among named, curated benchmark combinations. They should be read as comparative cases, not as estimates of statistical uncertainty.</p>
+          <p>The sensitivity display changes one active assumption by 20% in each direction while holding everything else fixed. It answers “which input mechanically moves this formula most?” It does not claim that a 20% change is equally likely for every input.</p>
+        </section>
+
+        <section id="rounding">
+          <h2>Results are rounded to match the exercise</h2>
+          <p>Public result cards emphasize readable magnitudes instead of displaying every decimal produced by the arithmetic. Downloaded data retains the underlying numeric values for reproduction.</p>
+        </section>
+
+        <section id="review">
+          <h2>A review date is a maintenance record</h2>
+          <p>“Reviewed” means the project checked the input record and its cited source on that date. It is not a guarantee that the underlying figure remains current, complete, or uncontested.</p>
+        </section>
+
+        <section id="limits">
+          <h2>Interpret the arithmetic within its boundary</h2>
+          <ul>
+            <li>Replacement-cost exercises are not predictions of actual development spending.</li>
+            <li>Revenue is not equivalent to profit, available cash, or a recommended payout pool.</li>
+            <li>Per-work legal benchmarks do not establish liability, ownership, or eligibility.</li>
+            <li>Court orders are record- and use-specific, may be appealed, and should not be generalized into a categorical rule about all model training. Party filings state a litigant's position, not a judicial finding.</li>
+            <li>Labor-only budgets omit coordination, infrastructure, benefits, overhead, and failed work unless a scenario explicitly includes them.</li>
+            <li>Moving a data-mix share between model families is a visualization choice, not evidence that their mixtures are identical.</li>
+          </ul>
+        </section>
+      </article>
+    </div>
+  </main>
+</Layout>

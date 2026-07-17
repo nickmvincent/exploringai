@@ -1,0 +1,107 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { isReasonableVariant } from '../../lib/input-variants';
+import { loadNapkinData } from '../../lib/napkin-data';
+import { formatInputBenchmark, formatQualityLabel } from '../../lib/public-estimates';
+
+export async function getStaticPaths() {
+  const { inputs } = await loadNapkinData();
+  return Object.values(inputs).map((input) => ({
+    params: { id: input.variable_name },
+    props: { input, inputs },
+  }));
+}
+
+const { input, inputs } = Astro.props;
+const alternatives = Object.values(inputs)
+  .filter((candidate) => candidate.variable_name !== input.variable_name && isReasonableVariant(input, candidate))
+  .sort((a, b) => a.title.localeCompare(b.title));
+---
+
+<Layout
+  title={`${input.title} - Evidence - Exploring AI`}
+  description={input.summary || input.sourceNote || `Source and review details for ${input.title}.`}
+>
+  <main id="site-main" class="public-page input-detail-page">
+    <nav class="breadcrumb-nav" aria-label="Breadcrumb">
+      <a href="/inputs">Evidence</a>
+      <span aria-hidden="true">/</span>
+      <span>{input.title}</span>
+    </nav>
+
+    <header class="input-detail-hero">
+      <div>
+        <p class="section-kicker">Public assumption</p>
+        <h1>{input.title}</h1>
+        <p>{input.summary || input.sourceNote}</p>
+        <div class="input-detail-tags">
+          <span class="quality-pill">{formatQualityLabel(input.sourceQuality)}</span>
+          {input.lastReviewed && <span>Reviewed {input.lastReviewed}</span>}
+          {input.mainExampleForCategory && <span>Primary project benchmark</span>}
+        </div>
+      </div>
+      <aside class="input-value-panel">
+        <span>Current project benchmark</span>
+        <strong>{formatInputBenchmark(input)}</strong>
+        <p>The editable calculators can replace this value without changing the source record.</p>
+      </aside>
+    </header>
+
+    <div class="input-detail-layout">
+      <section class="input-audit-card" aria-labelledby="evidence-record-heading">
+        <p class="section-kicker">Evidence record</p>
+        <h2 id="evidence-record-heading">What supports this number?</h2>
+        <dl class="audit-definition-list">
+          <div><dt>Source</dt><dd>{input.sourceName || 'Documented project benchmark'}</dd></div>
+          {input.sourcePublished && <div><dt>Published</dt><dd>{input.sourcePublished}</dd></div>}
+          {input.sourceLocator && <div><dt>Where to look</dt><dd>{input.sourceLocator}</dd></div>}
+          {input.sourceExcerpt && <div><dt>Verification note</dt><dd>{input.sourceExcerpt}</dd></div>}
+          {input.derivationNote && <div><dt>Derivation</dt><dd>{input.derivationNote}</dd></div>}
+          <div><dt>Evidence type</dt><dd>{formatQualityLabel(input.sourceQuality)}</dd></div>
+          <div><dt>Variable ID</dt><dd><code>{input.variable_name}</code></dd></div>
+        </dl>
+        {(input.sourceLocatorUrl || input.source_url) && (
+          <a class="btn btn-primary" href={input.sourceLocatorUrl || input.source_url} target="_blank" rel="noreferrer">
+            Open the cited source ↗
+          </a>
+        )}
+      </section>
+
+      <aside class="input-usage-card">
+        <p class="section-kicker">Used downstream</p>
+        <h2>Estimates that depend on it</h2>
+        {input.usedIn?.length ? (
+          <ul>
+            {input.usedIn.map((scenario) => (
+              <li><a href={`/scenarios/${scenario.id}`}>{scenario.title}</a><span>{scenario.category}</span></li>
+            ))}
+          </ul>
+        ) : (
+          <p>This evidence record is available to the builder but is not used by a curated estimate yet.</p>
+        )}
+      </aside>
+    </div>
+
+    {alternatives.length ? (
+      <section class="input-alternatives-section" aria-labelledby="alternatives-heading">
+        <div class="section-heading-row">
+          <div>
+            <p class="section-kicker">Comparable benchmarks</p>
+            <h2 id="alternatives-heading">Alternatives you can substitute</h2>
+          </div>
+          <p>Comparable means the records share the same variable type and compatible units.</p>
+        </div>
+        <div class="alternative-list">
+          {alternatives.map((candidate) => (
+            <a href={`/inputs/${candidate.variable_name}`}>
+              <span>{formatQualityLabel(candidate.sourceQuality)}</span>
+              <strong>{candidate.title}</strong>
+              <p>{formatInputBenchmark(candidate)}</p>
+              <small>{candidate.sourceName || 'Documented project benchmark'}</small>
+            </a>
+          ))}
+        </div>
+      </section>
+    ) : null}
+  </main>
+</Layout>

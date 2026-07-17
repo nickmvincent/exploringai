@@ -1,0 +1,32 @@
+---
+import GuidedBuilder from '../components/GuidedBuilder.vue';
+import Layout from '../layouts/Layout.astro';
+import { loadNapkinData } from '../lib/napkin-data';
+
+const { inputs } = await loadNapkinData();
+---
+
+<Layout
+  title="Build an estimate - Exploring AI"
+  description="Build a source-backed AI data estimate from a guided template and share the resulting case."
+>
+  <main id="site-main" class="public-page build-page">
+    <header class="public-hero build-hero">
+      <div>
+        <p class="section-kicker">Guided builder</p>
+        <h1>Build a case without writing a formula.</h1>
+        <p>
+          Start from a common public-interest question, choose source-backed benchmarks, and adjust the
+          values. The result stays shareable and every selected input keeps its audit trail.
+        </p>
+      </div>
+      <aside>
+        <strong>Need a starting point?</strong>
+        <p>Curated estimates include reviewed combinations, interpretation, and caveats.</p>
+        <a href="/scenarios">Browse curated estimates →</a>
+      </aside>
+    </header>
+
+    <GuidedBuilder client:load inputs={inputs} />
+  </main>
+</Layout>

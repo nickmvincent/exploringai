@@ -1,0 +1,66 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+
+const publicOnly = (entry) => !entry.data.visibility || entry.data.visibility === 'public';
+const blogs = (await getCollection('blogs')).filter(publicOnly).filter((entry) => entry.data.status === 'published');
+const asks = (await getCollection('asks')).filter(publicOnly);
+const sources = (await getCollection('keyPapers')).filter(publicOnly);
+---
+
+<Layout
+  title="Research - Exploring AI"
+  description="Methodology, finished insights, public asks, and the source library behind Exploring AI estimates."
+>
+  <main id="site-main" class="public-page research-hub-page">
+    <header class="public-hero">
+      <div>
+        <p class="section-kicker">Research</p>
+        <h1>Read the argument. Audit the method. Open the sources.</h1>
+        <p>
+          The public calculator is one layer of the project. This section separates finished analysis,
+          methodology, evidence records, and concrete disclosure asks so each can be used on its own.
+        </p>
+      </div>
+    </header>
+
+    <section class="research-path-grid" aria-label="Research sections">
+      <a href="/methodology">
+        <span>Method</span>
+        <h2>How the estimates work</h2>
+        <p>Definitions, review standards, sensitivity tests, rounding, and interpretation boundaries.</p>
+        <strong>Read the methodology →</strong>
+      </a>
+      <a href="/sources">
+        <span>{sources.length} records</span>
+        <h2>Source library</h2>
+        <p>Papers, public trackers, primary legal materials, and policy analysis behind the evidence base.</p>
+        <strong>Search the sources →</strong>
+      </a>
+      <a href="/asks">
+        <span>{asks.length} public asks</span>
+        <h2>What should be made legible</h2>
+        <p>Concrete disclosures that would make public estimates more comparable and defensible.</p>
+        <strong>Read the asks →</strong>
+      </a>
+      <a href="/insights">
+        <span>{blogs.length} finished essays</span>
+        <h2>Insights</h2>
+        <p>Finished interpretive writing that connects individual calculations to broader policy questions.</p>
+        <strong>Read finished analysis →</strong>
+      </a>
+    </section>
+
+    <section class="research-principles" aria-labelledby="principles-heading">
+      <div>
+        <p class="section-kicker">Editorial standard</p>
+        <h2 id="principles-heading">Useful estimates should reveal their weak points.</h2>
+      </div>
+      <div class="principle-grid">
+        <article><strong>Reproducible</strong><p>The formula and selected values remain visible and shareable.</p></article>
+        <article><strong>Source-aware</strong><p>Reported figures, primary documents, and project benchmarks are labeled differently.</p></article>
+        <article><strong>Bounded</strong><p>Every scenario explains what its arithmetic does—and does not—establish.</p></article>
+      </div>
+    </section>
+  </main>
+</Layout>

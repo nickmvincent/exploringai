@@ -1,0 +1,29 @@
+---
+import { getCollection, render } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+
+const entries = (await getCollection('asks'))
+  .filter((entry) => !entry.data.visibility || entry.data.visibility === 'public')
+  .sort((a, b) => (a.data.sort_order ?? 999) - (b.data.sort_order ?? 999));
+const asks = await Promise.all(entries.map(async (entry) => ({ entry, Content: (await render(entry)).Content })));
+---
+
+<Layout title="Public asks - Exploring AI" description="Concrete disclosure asks that would make AI data, compensation, and revenue estimates easier to ground in public evidence.">
+  <main id="site-main" class="public-page asks-page">
+    <header class="public-hero">
+      <div>
+        <p class="section-kicker">Public asks</p>
+        <h1>What should be made legible.</h1>
+        <p>These disclosures would make public comparisons less dependent on rumor, incompatible definitions, and one-off litigation records.</p>
+      </div>
+    </header>
+    <ol class="ask-list">
+      {asks.map(({ entry, Content }, index) => (
+        <li>
+          <span>{String(index + 1).padStart(2, '0')}</span>
+          <article><h2>{entry.data.title}</h2>{entry.data.summary && <p class="ask-summary">{entry.data.summary}</p>}<div class="ask-body"><Content /></div></article>
+        </li>
+      ))}
+    </ol>
+  </main>
+</Layout>

@@ -1,0 +1,24 @@
+---
+import { getCollection, render } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+
+const entries = (await getCollection('blogs'))
+  .filter((entry) => (!entry.data.visibility || entry.data.visibility === 'public') && entry.data.status === 'published')
+  .sort((a, b) => (a.data.sort_order ?? 999) - (b.data.sort_order ?? 999));
+const essays = await Promise.all(entries.map(async (entry) => ({ entry, Content: (await render(entry)).Content })));
+---
+
+<Layout title="Insights - Exploring AI" description="Finished essays and analysis connected to Exploring AI estimates and evidence.">
+  <main id="site-main" class="public-page insights-page">
+    <header class="public-hero"><div><p class="section-kicker">Insights</p><h1>Finished analysis, separated from the workbench.</h1><p>Interpretive essays appear here only after they are ready to be read as finished public work.</p></div></header>
+    {essays.length ? (
+      <section class="insight-list">
+        {essays.map(({ entry, Content }) => (
+          <article><h2>{entry.data.title}</h2><p class="insight-excerpt">{entry.data.excerpt}</p><div class="insight-body"><Content /></div>{entry.data.related_scenario_ids?.[0] && <a href={`/scenarios/${entry.data.related_scenario_ids[0]}`}>Open the related estimate →</a>}</article>
+        ))}
+      </section>
+    ) : (
+      <section class="public-empty-state editorial-empty"><h2>No finished essays are published yet.</h2><p>The calculator, evidence library, methodology, and source records remain available while longer analysis is still in progress.</p><div><a class="btn btn-primary" href="/scenarios">Explore estimates</a><a class="btn btn-outline-primary" href="/sources">Open source library</a></div></section>
+    )}
+  </main>
+</Layout>

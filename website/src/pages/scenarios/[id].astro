@@ -1,0 +1,58 @@
+---
+import ScenarioDetail from '../../components/ScenarioDetail.vue';
+import Layout from '../../layouts/Layout.astro';
+import { loadNapkinData } from '../../lib/napkin-data';
+import { getScenarioContext } from '../../lib/public-estimates';
+
+export async function getStaticPaths() {
+  const { inputs, scenarios } = await loadNapkinData();
+  return scenarios.map((scenario) => ({
+    params: { id: scenario.id },
+    props: { scenario, inputs, scenarios },
+  }));
+}
+
+const { scenario, inputs, scenarios } = Astro.props;
+const context = getScenarioContext(scenario);
+const related = scenarios
+  .filter((entry) => entry.id !== scenario.id && getScenarioContext(entry).task === context.task)
+  .slice(0, 3);
+---
+
+<Layout
+  title={`${context.question} - Exploring AI`}
+  description={`${context.takeaway} Edit the assumptions and inspect every source.`}
+>
+  <main id="site-main" class="public-page scenario-public-page">
+    <nav class="breadcrumb-nav" aria-label="Breadcrumb">
+      <a href="/scenarios">All estimates</a>
+      <span aria-hidden="true">/</span>
+      <span>{context.shortTitle}</span>
+    </nav>
+
+    <ScenarioDetail client:load scenario={scenario} inputs={inputs} />
+
+    {related.length ? (
+      <section class="related-section" aria-labelledby="related-estimates-heading">
+        <div class="section-heading-row">
+          <div>
+            <p class="section-kicker">Keep exploring</p>
+            <h2 id="related-estimates-heading">Related estimates</h2>
+          </div>
+        </div>
+        <div class="related-card-grid">
+          {related.map((entry) => {
+            const relatedContext = getScenarioContext(entry);
+            return (
+              <a href={`/scenarios/${entry.id}`}>
+                <span>{entry.category}</span>
+                <strong>{relatedContext.question}</strong>
+                <p>{relatedContext.takeaway}</p>
+              </a>
+            );
+          })}
+        </div>
+      </section>
+    ) : null}
+  </main>
+</Layout>
